@@ -17,6 +17,8 @@ class ProjectsApp:
         # Make full screen
         self.root.state('zoomed')  # Windows full screen
         # For other platforms, use: self.root.attributes('-zoomed', True)
+        # Make fullscreen the default but keep window controls
+        self.root.attributes('-fullscreen', True)
         
         # Set minimum size
         self.root.minsize(1200, 800)
@@ -33,6 +35,10 @@ class ProjectsApp:
         
         self.create_widgets()
         self.load_projects()
+        
+        # Add keyboard shortcuts for fullscreen toggle
+        self.root.bind('<F11>', lambda e: self.toggle_fullscreen())
+        self.root.bind('<Escape>', lambda e: self.exit_fullscreen() if self.root.attributes('-fullscreen') else None)
         
         # Bind window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -1796,6 +1802,17 @@ class ProjectsApp:
         self.load_projects()
         self.load_dropdown_data()
         messagebox.showinfo("Success", "Data imported from JSON successfully!")
+    
+    def toggle_fullscreen(self):
+        """Toggle fullscreen mode"""
+        if self.root.attributes('-fullscreen'):
+            self.root.attributes('-fullscreen', False)
+        else:
+            self.root.attributes('-fullscreen', True)
+    
+    def exit_fullscreen(self):
+        """Exit fullscreen mode"""
+        self.root.attributes('-fullscreen', False)
     
     def on_closing(self):
         """Handle application closing"""

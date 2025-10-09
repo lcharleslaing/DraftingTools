@@ -1,304 +1,352 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import sqlite3
 import subprocess
-import sys
 import os
-from database_setup import DatabaseManager
+import sys
+import psutil
 
 class DashboardApp:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self):
+        self.root = tk.Tk()
         self.root.title("Drafting Tools Dashboard")
-        self.root.geometry("1000x700")
+        self.root.state('zoomed')  # Full screen
+        self.root.minsize(1200, 800)
+        # Make fullscreen the default but keep window controls
+        self.root.attributes('-fullscreen', True)
         
-        # Initialize database
-        self.db_manager = DatabaseManager()
+        # Track child processes
+        self.child_processes = []
         
-        # Create main frame
-        self.main_frame = ttk.Frame(root, padding="20")
-        self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Configure style
+        self.setup_styles()
         
-        # Configure grid weights
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
-        self.main_frame.columnconfigure(0, weight=1)
-        self.main_frame.rowconfigure(1, weight=1)
-        
+        # Create main interface
         self.create_widgets()
-        self.load_apps()
         
-        # Bind window close event
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # Handle window close event
+        self.root.protocol("WM_DELETE_WINDOW", self.exit_application)
+        
+        # Schedule periodic cleanup of finished processes
+        self.schedule_cleanup()
+        
+        # Center the window
+        self.center_window()
+    
+    def setup_styles(self):
+        """Setup custom styles for the dashboard"""
+        style = ttk.Style()
+        
+        # Configure button styles
+        style.configure('Dashboard.TButton', 
+                       font=('Arial', 12, 'bold'),
+                       padding=(20, 15))
+        
+        style.configure('App.TButton',
+                       font=('Arial', 14, 'bold'),
+                       padding=(30, 20))
+        
+        # Configure frame styles
+        style.configure('Title.TLabel',
+                       font=('Arial', 24, 'bold'),
+                       foreground='darkblue')
+        
+        style.configure('Subtitle.TLabel',
+                       font=('Arial', 16),
+                       foreground='darkgray')
     
     def create_widgets(self):
-        """Create all GUI widgets"""
-        # Header frame
-        header_frame = ttk.Frame(self.main_frame)
-        header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 20))
-        header_frame.columnconfigure(1, weight=1)
+        """Create the main dashboard widgets"""
+        # Main container
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Title
-        title_label = ttk.Label(header_frame, text="Drafting Tools Dashboard", 
-                               font=('Arial', 24, 'bold'))
-        title_label.grid(row=0, column=0, sticky=tk.W)
+        # Title section
+        title_frame = ttk.Frame(main_frame)
+        title_frame.pack(fill=tk.X, pady=(0, 30))
         
-        # Status frame
-        status_frame = ttk.Frame(header_frame)
-        status_frame.grid(row=0, column=1, sticky=tk.E)
+        title_label = ttk.Label(title_frame, text="Drafting Tools Dashboard", 
+                               style='Title.TLabel')
+        title_label.pack()
         
-        self.status_var = tk.StringVar(value="Ready")
-        status_label = ttk.Label(status_frame, textvariable=self.status_var, 
-                                foreground="green", font=('Arial', 10))
-        status_label.grid(row=0, column=0)
+        subtitle_label = ttk.Label(title_frame, text="Project Management & Product Configuration Suite", 
+                                  style='Subtitle.TLabel')
+        subtitle_label.pack(pady=(5, 0))
         
-        # Apps grid frame
-        self.apps_frame = ttk.Frame(self.main_frame)
-        self.apps_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.apps_frame.columnconfigure(0, weight=1)
-        self.apps_frame.rowconfigure(0, weight=1)
+        # Applications grid
+        apps_frame = ttk.Frame(main_frame)
+        apps_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Create scrollable frame for apps
-        self.create_scrollable_apps()
+        # Configure grid weights
+        apps_frame.columnconfigure(0, weight=1)
+        apps_frame.columnconfigure(1, weight=1)
+        apps_frame.rowconfigure(0, weight=1)
+        apps_frame.rowconfigure(1, weight=1)
         
-        # Control frame
-        control_frame = ttk.Frame(self.main_frame)
-        control_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(20, 0))
+        # Application buttons
+        self.create_app_buttons(apps_frame)
         
-        # Database info
-        info_frame = ttk.LabelFrame(control_frame, text="Database Status", padding="10")
-        info_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 10))
-        
-        self.db_status_var = tk.StringVar()
-        ttk.Label(info_frame, textvariable=self.db_status_var).grid(row=0, column=0, sticky=tk.W)
-        
-        # Action buttons
-        button_frame = ttk.Frame(control_frame)
-        button_frame.grid(row=0, column=1, sticky=tk.E)
-        
-        ttk.Button(button_frame, text="Refresh Apps", command=self.load_apps).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Manage App Order", command=self.open_app_order).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Backup Database", command=self.backup_database).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Export JSON", command=self.export_data).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Import JSON", command=self.import_data).pack(side=tk.LEFT, padx=(0, 5))
+        # Control buttons
+        self.create_control_buttons(main_frame)
     
-    def create_scrollable_apps(self):
-        """Create scrollable frame for apps"""
-        # Create canvas and scrollbar
-        canvas = tk.Canvas(self.apps_frame, bg='white')
-        scrollbar = ttk.Scrollbar(self.apps_frame, orient="vertical", command=canvas.yview)
-        self.scrollable_frame = ttk.Frame(canvas)
+    def create_app_buttons(self, parent):
+        """Create application launch buttons"""
+        # Projects Management
+        projects_btn = ttk.Button(parent, text="📋 Projects Management\n\nTrack project workflows,\njob numbers, and\ncustomer details", 
+                                 command=self.launch_projects, style='App.TButton')
+        projects_btn.grid(row=0, column=0, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
+        # Product Configurations
+        config_btn = ttk.Button(parent, text="⚙️ Product Configurations\n\nHeater, Tank & Pump\nconfiguration management\nand specifications", 
+                               command=self.launch_configurations, style='App.TButton')
+        config_btn.grid(row=0, column=1, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        # Placeholder for future apps
+        future_btn = ttk.Button(parent, text="🔧 Additional Tools\n\nMore drafting tools\ncoming soon...", 
+                               command=self.show_coming_soon, style='App.TButton')
+        future_btn.grid(row=1, column=0, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        
-        # Bind mousewheel to canvas
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        # Database Management
+        db_btn = ttk.Button(parent, text="🗄️ Database Management\n\nBackup, restore, and\nmaintain database", 
+                           command=self.launch_db_management, style='App.TButton')
+        db_btn.grid(row=1, column=1, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
     
-    def load_apps(self):
-        """Load and display apps from database"""
-        # Clear existing app buttons
-        for widget in self.scrollable_frame.winfo_children():
-            widget.destroy()
+    def create_control_buttons(self, parent):
+        """Create control buttons at the bottom"""
+        control_frame = ttk.Frame(parent)
+        control_frame.pack(fill=tk.X, pady=(20, 0))
         
-        conn = sqlite3.connect(self.db_manager.db_path)
-        cursor = conn.cursor()
+        # Exit fullscreen button
+        exit_fullscreen_btn = ttk.Button(control_frame, text="Exit Fullscreen", 
+                                        command=self.toggle_fullscreen, style='Dashboard.TButton')
+        exit_fullscreen_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        cursor.execute("""
-            SELECT app_name, display_order, is_active 
-            FROM app_order 
-            WHERE is_active = 1
-            ORDER BY display_order
-        """)
-        apps = cursor.fetchall()
+        # Exit application button
+        exit_btn = ttk.Button(control_frame, text="Exit Application", 
+                             command=self.exit_application, style='Dashboard.TButton')
+        exit_btn.pack(side=tk.RIGHT)
         
-        # Create app buttons in a grid
-        row = 0
-        col = 0
-        max_cols = 3
+        # Show running apps button
+        running_btn = ttk.Button(control_frame, text="Show Running Apps", 
+                                command=self.show_running_apps, style='Dashboard.TButton')
+        running_btn.pack(side=tk.RIGHT, padx=(0, 10))
         
-        for app in apps:
-            app_name = app[0]
-            self.create_app_button(app_name, row, col)
-            
-            col += 1
-            if col >= max_cols:
-                col = 0
-                row += 1
-        
-        # Update database status
-        self.update_db_status()
-        
-        conn.close()
+        # About button
+        about_btn = ttk.Button(control_frame, text="About", 
+                              command=self.show_about, style='Dashboard.TButton')
+        about_btn.pack(side=tk.RIGHT, padx=(0, 10))
     
-    def create_app_button(self, app_name, row, col):
-        """Create a button for an app"""
-        # Determine app details
-        app_info = self.get_app_info(app_name)
-        
-        # Create button frame
-        button_frame = ttk.LabelFrame(self.scrollable_frame, text=app_info['title'], 
-                                    padding="10", width=250, height=150)
-        button_frame.grid(row=row, column=col, padx=10, pady=10, sticky=(tk.W, tk.E, tk.N, tk.S))
-        button_frame.grid_propagate(False)
-        
-        # App description
-        desc_label = ttk.Label(button_frame, text=app_info['description'], 
-                              wraplength=200, justify='center')
-        desc_label.grid(row=0, column=0, pady=(0, 10))
-        
-        # Launch button
-        launch_button = ttk.Button(button_frame, text=f"Launch {app_name.title()}", 
-                                  command=lambda: self.launch_app(app_name))
-        launch_button.grid(row=1, column=0, pady=(0, 5))
-        
-        # Status indicator
-        status_label = ttk.Label(button_frame, text=app_info['status'], 
-                                foreground=app_info['status_color'])
-        status_label.grid(row=2, column=0)
-    
-    def get_app_info(self, app_name):
-        """Get information about an app"""
-        app_info = {
-            'projects': {
-                'title': 'Project Management',
-                'description': 'Manage drafting projects, track progress, and monitor completion status.',
-                'status': 'Available',
-                'status_color': 'green'
-            },
-            'app_order': {
-                'title': 'App Order Manager',
-                'description': 'Manage the display order and availability of dashboard apps.',
-                'status': 'Available',
-                'status_color': 'green'
-            },
-            'dashboard': {
-                'title': 'Dashboard',
-                'description': 'Main dashboard for accessing all drafting tools and applications.',
-                'status': 'Current App',
-                'status_color': 'blue'
-            }
-        }
-        
-        return app_info.get(app_name, {
-            'title': app_name.title(),
-            'description': f'Launch {app_name} application.',
-            'status': 'Available',
-            'status_color': 'green'
-        })
-    
-    def launch_app(self, app_name):
-        """Launch the selected app"""
+    def launch_projects(self):
+        """Launch the Projects Management application"""
         try:
-            self.status_var.set(f"Launching {app_name}...")
-            self.root.update()
-            
-            # Map app names to their Python files
-            app_files = {
-                'projects': 'projects.py',
-                'app_order': 'app_order.py',
-                'dashboard': 'dashboard.py'
-            }
-            
-            if app_name in app_files:
-                file_path = app_files[app_name]
-                if os.path.exists(file_path):
-                    # Launch the app in a new process
-                    subprocess.Popen([sys.executable, file_path])
-                    self.status_var.set(f"{app_name} launched successfully!")
-                else:
-                    messagebox.showerror("Error", f"App file {file_path} not found!")
-                    self.status_var.set("Ready")
+            # Check if projects.py exists
+            if os.path.exists('projects.py'):
+                process = subprocess.Popen([sys.executable, 'projects.py'])
+                self.child_processes.append(process)
+                # Clean up finished processes
+                self.cleanup_finished_processes()
             else:
-                messagebox.showerror("Error", f"Unknown app: {app_name}")
-                self.status_var.set("Ready")
-                
+                messagebox.showerror("Error", "projects.py not found in current directory")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch {app_name}: {str(e)}")
-            self.status_var.set("Ready")
+            messagebox.showerror("Error", f"Failed to launch Projects Management:\n{str(e)}")
     
-    def open_app_order(self):
-        """Open the app order manager"""
-        self.launch_app('app_order')
-    
-    def backup_database(self):
-        """Backup the database"""
+    def launch_configurations(self):
+        """Launch the Product Configurations application"""
         try:
-            self.db_manager.backup_database()
-            self.db_manager.export_to_json()
-            messagebox.showinfo("Success", "Database backed up successfully!")
-            self.status_var.set("Database backed up")
+            # Check if product_configurations.py exists
+            if os.path.exists('product_configurations.py'):
+                process = subprocess.Popen([sys.executable, 'product_configurations.py'])
+                self.child_processes.append(process)
+                # Clean up finished processes
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "product_configurations.py not found in current directory")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to backup database: {str(e)}")
-            self.status_var.set("Ready")
+            messagebox.showerror("Error", f"Failed to launch Product Configurations:\n{str(e)}")
     
-    def export_data(self):
-        """Export data to JSON"""
-        try:
-            self.db_manager.export_to_json()
-            messagebox.showinfo("Success", "Data exported to JSON successfully!")
-            self.status_var.set("Data exported")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to export data: {str(e)}")
-            self.status_var.set("Ready")
+    def cleanup_finished_processes(self):
+        """Remove finished processes from the tracking list"""
+        self.child_processes = [p for p in self.child_processes if p.poll() is None]
     
-    def import_data(self):
-        """Import data from JSON"""
-        try:
-            self.db_manager.import_from_json()
-            self.load_apps()
-            messagebox.showinfo("Success", "Data imported from JSON successfully!")
-            self.status_var.set("Data imported")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to import data: {str(e)}")
-            self.status_var.set("Ready")
+    def schedule_cleanup(self):
+        """Schedule periodic cleanup of finished processes"""
+        self.cleanup_finished_processes()
+        # Schedule next cleanup in 5 seconds
+        self.root.after(5000, self.schedule_cleanup)
     
-    def update_db_status(self):
-        """Update database status information"""
-        conn = sqlite3.connect(self.db_manager.db_path)
-        cursor = conn.cursor()
+    def launch_db_management(self):
+        """Launch database management (placeholder)"""
+        messagebox.showinfo("Database Management", 
+                           "Database management features:\n\n"
+                           "• Automatic backup on app exit\n"
+                           "• Data export to JSON\n"
+                           "• Database cleanup and maintenance\n"
+                           "• Master database synchronization\n\n"
+                           "These features are built into each application.")
+    
+    def show_coming_soon(self):
+        """Show coming soon message"""
+        messagebox.showinfo("Coming Soon", 
+                           "Additional drafting tools will be added:\n\n"
+                           "• Drawing management\n"
+                           "• Material specifications\n"
+                           "• Cost estimation tools\n"
+                           "• Report generation\n\n"
+                           "Stay tuned for updates!")
+    
+    def show_running_apps(self):
+        """Show currently running applications"""
+        running_processes = self.get_running_related_processes()
         
-        # Get project count
-        cursor.execute("SELECT COUNT(*) FROM projects")
-        project_count = cursor.fetchone()[0]
-        
-        # Get app count
-        cursor.execute("SELECT COUNT(*) FROM app_order WHERE is_active = 1")
-        app_count = cursor.fetchone()[0]
-        
-        # Get last backup info
-        backup_exists = os.path.exists(self.db_manager.master_db_path)
-        json_exists = os.path.exists(self.db_manager.master_json_path)
-        
-        status_text = f"Projects: {project_count} | Active Apps: {app_count}"
-        if backup_exists and json_exists:
-            status_text += " | Backup: Available"
+        if running_processes:
+            process_list = []
+            for proc in running_processes:
+                cmdline = ' '.join(proc.info['cmdline']) if proc.info['cmdline'] else 'Unknown'
+                process_list.append(f"• {proc.info['name']} (PID: {proc.info['pid']})\n  {cmdline}")
+            
+            message = f"Currently Running Applications:\n\n" + "\n\n".join(process_list)
         else:
-            status_text += " | Backup: Not Available"
+            message = "No Drafting Tools applications are currently running.\n\nOnly the Dashboard is active."
         
-        self.db_status_var.set(status_text)
-        conn.close()
+        messagebox.showinfo("Running Applications", message)
     
-    def on_closing(self):
-        """Handle application closing"""
-        self.db_manager.backup_database()
-        self.db_manager.export_to_json()
-        self.root.destroy()
+    def show_about(self):
+        """Show about dialog"""
+        about_text = """
+Drafting Tools Suite v1.0
 
-def main():
-    root = tk.Tk()
-    app = DashboardApp(root)
-    root.mainloop()
+A comprehensive project management and product configuration system for drafting workflows.
+
+Features:
+• Project workflow tracking
+• Job number management
+• Customer information management
+• Product configuration (Heater, Tank, Pump)
+• Database integration
+• Full-screen applications
+• Export/Import capabilities
+• Process management - closes all apps when exiting
+
+Developed for CECO Environmental Corp
+        """
+        messagebox.showinfo("About Drafting Tools Suite", about_text)
+    
+    def toggle_fullscreen(self):
+        """Toggle fullscreen mode"""
+        if self.root.attributes('-fullscreen'):
+            self.root.attributes('-fullscreen', False)
+        else:
+            self.root.attributes('-fullscreen', True)
+    
+    def exit_application(self):
+        """Exit the application and close all related windows"""
+        # Get list of currently running related processes
+        running_processes = self.get_running_related_processes()
+        
+        if running_processes:
+            process_list = "\n".join([f"• {proc.info['name']} (PID: {proc.info['pid']})" for proc in running_processes])
+            message = f"Are you sure you want to exit the Drafting Tools Suite?\n\nThis will close all open applications:\n\n{process_list}\n\nContinue?"
+        else:
+            message = "Are you sure you want to exit the Drafting Tools Suite?"
+        
+        if messagebox.askyesno("Exit Application", message):
+            # Find and close all related processes
+            self.close_all_related_processes()
+            
+            # Close the main window
+            self.root.quit()
+    
+    def get_running_related_processes(self):
+        """Get list of currently running related processes"""
+        try:
+            current_pid = os.getpid()
+            related_processes = []
+            
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    if proc.info['name'] and 'python' in proc.info['name'].lower():
+                        cmdline = proc.info['cmdline']
+                        if cmdline:
+                            cmdline_str = ' '.join(cmdline).lower()
+                            # More flexible matching - look for our script names anywhere in the command line
+                            if any(script in cmdline_str for script in ['projects.py', 'product_configurations.py', 'dashboard.py']):
+                                if proc.info['pid'] != current_pid:  # Don't include ourselves
+                                    related_processes.append(proc)
+                                    print(f"Found related process: PID {proc.info['pid']} - {cmdline_str}")
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    continue
+            
+            return related_processes
+        except Exception as e:
+            print(f"Error getting running processes: {e}")
+            return []
+    
+    def close_all_related_processes(self):
+        """Find and close all related drafting tools processes"""
+        try:
+            # Get current process ID to avoid closing ourselves
+            current_pid = os.getpid()
+            
+            # Find all Python processes running our scripts
+            related_processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    if proc.info['name'] and 'python' in proc.info['name'].lower():
+                        cmdline = proc.info['cmdline']
+                        if cmdline:
+                            cmdline_str = ' '.join(cmdline).lower()
+                            # More flexible matching - look for our script names anywhere in the command line
+                            if any(script in cmdline_str for script in ['projects.py', 'product_configurations.py', 'dashboard.py']):
+                                if proc.info['pid'] != current_pid:  # Don't close ourselves
+                                    related_processes.append(proc)
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    continue
+            
+            # Close all related processes
+            for proc in related_processes:
+                try:
+                    print(f"Closing process: {proc.info['pid']} - {' '.join(proc.info['cmdline'])}")
+                    proc.terminate()
+                    # Give it a moment to close gracefully
+                    try:
+                        proc.wait(timeout=3)
+                    except psutil.TimeoutExpired:
+                        # Force kill if it doesn't close gracefully
+                        print(f"Force killing process: {proc.info['pid']}")
+                        proc.kill()
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+                    print(f"Error closing process {proc.info['pid']}: {e}")
+            
+            print(f"Closed {len(related_processes)} related processes")
+            
+        except Exception as e:
+            print(f"Error finding related processes: {e}")
+            # Fallback: try to close tracked processes
+            for process in self.child_processes:
+                try:
+                    if process.poll() is None:  # Process is still running
+                        process.terminate()
+                        try:
+                            process.wait(timeout=2)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                except Exception as e:
+                    print(f"Error closing tracked process: {e}")
+            
+            self.child_processes.clear()
+    
+    def center_window(self):
+        """Center the window on screen"""
+        self.root.update_idletasks()
+        width = self.root.winfo_width()
+        height = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.root.winfo_screenheight() // 2) - (height // 2)
+        self.root.geometry(f'{width}x{height}+{x}+{y}')
+    
+    def run(self):
+        """Run the dashboard application"""
+        self.root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    app = DashboardApp()
+    app.run()

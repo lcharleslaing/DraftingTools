@@ -20,19 +20,91 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 432
+      "seq": 460
     },
     {
       "name": "engineers",
-      "seq": 324
+      "seq": 345
     },
     {
       "name": "app_order",
-      "seq": 216
+      "seq": 230
     },
     {
       "name": "projects",
       "seq": 317
+    },
+    {
+      "name": "heater_models",
+      "seq": 16
+    },
+    {
+      "name": "locations",
+      "seq": 8
+    },
+    {
+      "name": "heater_diameters",
+      "seq": 16
+    },
+    {
+      "name": "heater_heights",
+      "seq": 44
+    },
+    {
+      "name": "heater_stack_diameters",
+      "seq": 12
+    },
+    {
+      "name": "applications",
+      "seq": 8
+    },
+    {
+      "name": "materials",
+      "seq": 8
+    },
+    {
+      "name": "burner_models",
+      "seq": 24
+    },
+    {
+      "name": "gas_train_positions",
+      "seq": 8
+    },
+    {
+      "name": "heater_mounting_types",
+      "seq": 8
+    },
+    {
+      "name": "gauge_cocks_types",
+      "seq": 8
+    },
+    {
+      "name": "temperature_switch_types",
+      "seq": 8
+    },
+    {
+      "name": "packaging_types",
+      "seq": 8
+    },
+    {
+      "name": "mod_piping_transducer_materials",
+      "seq": 8
+    },
+    {
+      "name": "hose_materials",
+      "seq": 8
+    },
+    {
+      "name": "media_frame_heights",
+      "seq": 12
+    },
+    {
+      "name": "gas_types",
+      "seq": 8
+    },
+    {
+      "name": "heater_configurations",
+      "seq": 1
     }
   ],
   "engineers": [
@@ -189,5 +261,291 @@
       "is_active": 1
     }
   ],
-  "initial_redline": []
+  "initial_redline": [],
+  "heater_configurations": [
+    {
+      "id": 1,
+      "job_number": "35359",
+      "heater_model": "RM",
+      "location": "",
+      "heater_diameter": "",
+      "heater_height": "",
+      "heater_stack_diameter": "",
+      "application": "",
+      "material": "",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-09 16:21:59",
+      "updated_date": "2025-10-09 16:21:59"
+    }
+  ],
+  "heater_models": [
+    {
+      "id": 1,
+      "name": "GP"
+    },
+    {
+      "id": 2,
+      "name": "RM"
+    },
+    {
+      "id": 3,
+      "name": "TE-100"
+    },
+    {
+      "id": 4,
+      "name": "TE-NSF"
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "name": "CANADA"
+    },
+    {
+      "id": 2,
+      "name": "US"
+    }
+  ],
+  "heater_diameters": [
+    {
+      "id": 1,
+      "value": "30"
+    },
+    {
+      "id": 2,
+      "value": "42"
+    },
+    {
+      "id": 3,
+      "value": "54"
+    },
+    {
+      "id": 4,
+      "value": "60"
+    }
+  ],
+  "heater_heights": [
+    {
+      "id": 1,
+      "value": "8"
+    },
+    {
+      "id": 2,
+      "value": "9"
+    },
+    {
+      "id": 3,
+      "value": "10"
+    },
+    {
+      "id": 4,
+      "value": "11"
+    },
+    {
+      "id": 5,
+      "value": "12"
+    },
+    {
+      "id": 6,
+      "value": "13"
+    },
+    {
+      "id": 7,
+      "value": "14"
+    },
+    {
+      "id": 8,
+      "value": "15"
+    },
+    {
+      "id": 9,
+      "value": "16"
+    },
+    {
+      "id": 10,
+      "value": "17"
+    },
+    {
+      "id": 11,
+      "value": "18"
+    }
+  ],
+  "heater_stack_diameters": [
+    {
+      "id": 1,
+      "value": "18"
+    },
+    {
+      "id": 2,
+      "value": "24"
+    },
+    {
+      "id": 3,
+      "value": "36"
+    }
+  ],
+  "applications": [
+    {
+      "id": 1,
+      "name": "FOOD GRADE"
+    },
+    {
+      "id": 2,
+      "name": "STANDARD"
+    }
+  ],
+  "materials": [
+    {
+      "id": 1,
+      "name": "304"
+    },
+    {
+      "id": 2,
+      "name": "316"
+    }
+  ],
+  "burner_models": [
+    {
+      "id": 1,
+      "name": "MAXON # 415"
+    },
+    {
+      "id": 2,
+      "name": "MAXON # 425"
+    },
+    {
+      "id": 3,
+      "name": "MAXON # 442M"
+    },
+    {
+      "id": 4,
+      "name": "MAXON # 456M"
+    },
+    {
+      "id": 5,
+      "name": "MAXON # 487M"
+    },
+    {
+      "id": 6,
+      "name": "MAXON # EB-7"
+    }
+  ],
+  "gas_train_positions": [
+    {
+      "id": 1,
+      "name": "LEFT SIDE"
+    },
+    {
+      "id": 2,
+      "name": "RIGHT SIDE"
+    }
+  ],
+  "heater_mounting_types": [
+    {
+      "id": 1,
+      "name": "GRAVITY"
+    },
+    {
+      "id": 2,
+      "name": "PUMPED"
+    }
+  ],
+  "gauge_cocks_types": [
+    {
+      "id": 1,
+      "name": "NSF"
+    },
+    {
+      "id": 2,
+      "name": "STANDARD"
+    }
+  ],
+  "temperature_switch_types": [
+    {
+      "id": 1,
+      "name": "BRASS"
+    },
+    {
+      "id": 2,
+      "name": "STAINLESS"
+    }
+  ],
+  "packaging_types": [
+    {
+      "id": 1,
+      "name": "MODULAR PIPING"
+    },
+    {
+      "id": 2,
+      "name": "STANDARD"
+    }
+  ],
+  "mod_piping_transducer_materials": [
+    {
+      "id": 1,
+      "name": "NSF"
+    },
+    {
+      "id": 2,
+      "name": "316"
+    }
+  ],
+  "hose_materials": [
+    {
+      "id": 1,
+      "name": "BRASS ENDS"
+    },
+    {
+      "id": 2,
+      "name": "SS316 ENDS"
+    }
+  ],
+  "media_frame_heights": [
+    {
+      "id": 1,
+      "value": "42"
+    },
+    {
+      "id": 2,
+      "value": "48"
+    },
+    {
+      "id": 3,
+      "value": "54"
+    }
+  ],
+  "gas_types": [
+    {
+      "id": 1,
+      "name": "NATURAL GAS"
+    },
+    {
+      "id": 2,
+      "name": "PROPANE"
+    }
+  ]
 }
