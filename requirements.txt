@@ -1,0 +1,12 @@
+# Drafting Tools - Python Requirements
+# This project uses only Python standard library modules
+# No external dependencies required
+
+# Standard library modules used:
+# - tkinter (GUI framework)
+# - sqlite3 (database)
+# - json (data export/import)
+# - datetime (date handling)
+# - subprocess (app launching)
+# - os (file operations)
+# - sys (system operations)
