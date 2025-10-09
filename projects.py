@@ -2,25 +2,34 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
 import sqlite3
+import os
+import subprocess
+import sys
 from database_setup import DatabaseManager
+from date_picker import DateEntry
+from directory_picker import DirectoryPicker, FilePicker
 
 class ProjectsApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Project Management - Drafting Tools")
-        self.root.geometry("1200x800")
+        
+        # Make full screen
+        self.root.state('zoomed')  # Windows full screen
+        # For other platforms, use: self.root.attributes('-zoomed', True)
+        
+        # Set minimum size
+        self.root.minsize(1200, 800)
         
         # Initialize database
         self.db_manager = DatabaseManager()
         
-        # Create main frame
-        self.main_frame = ttk.Frame(root, padding="10")
-        self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Create main frame with scrollbar
+        self.create_scrollable_main_frame()
         
         # Configure grid weights
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
-        self.main_frame.columnconfigure(1, weight=1)
         
         self.create_widgets()
         self.load_projects()
@@ -28,259 +37,1122 @@ class ProjectsApp:
         # Bind window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
     
+    def create_scrollable_main_frame(self):
+        """Create scrollable main frame"""
+        # Create canvas and scrollbar
+        self.canvas = tk.Canvas(self.root, bg='white')
+        self.scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+        
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        self.canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Bind mousewheel to canvas
+        def _on_mousewheel(event):
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        self.canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    
     def create_widgets(self):
         """Create all GUI widgets"""
+        # Initialize redline update BooleanVars FIRST
+        for cycle in range(1, 5):
+            setattr(self, f"redline_update_{cycle}_var", tk.BooleanVar())
+        
         # Title
-        title_label = ttk.Label(self.main_frame, text="Project Management", 
-                               font=('Arial', 16, 'bold'))
-        title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
+        title_label = ttk.Label(self.scrollable_frame, text="Project Management - Complete Workflow", 
+                               font=('Arial', 18, 'bold'))
+        title_label.grid(row=0, column=0, columnspan=4, pady=(0, 20), sticky=(tk.W, tk.E))
         
-        # Left panel - Project details
-        self.create_project_form()
+        # Left panel - Project list
+        self.create_project_list_panel()
         
-        # Right panel - Project list
-        self.create_project_list()
+        # Middle panel - Project details
+        self.create_project_details_panel()
+        
+        # Right panel - Workflow tracking
+        self.create_workflow_panel()
+        
+        # Far right panel - Quick access
+        self.create_quick_access_panel()
+        
+        # Configure grid weights for better layout
+        self.scrollable_frame.columnconfigure(0, weight=1)  # Project list
+        self.scrollable_frame.columnconfigure(1, weight=1)  # Project details
+        self.scrollable_frame.columnconfigure(2, weight=1)  # Workflow
+        self.scrollable_frame.columnconfigure(3, weight=1)  # Quick access
         
         # Bottom panel - Action buttons
         self.create_action_buttons()
-    
-    def create_project_form(self):
-        """Create the project form panel"""
-        form_frame = ttk.LabelFrame(self.main_frame, text="Project Details", padding="10")
-        form_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
         
-        # Job Number
-        ttk.Label(form_frame, text="Job Number:").grid(row=0, column=0, sticky=tk.W, pady=2)
-        self.job_number_var = tk.StringVar()
-        self.job_number_entry = ttk.Entry(form_frame, textvariable=self.job_number_var, width=20)
-        self.job_number_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Assigned To
-        ttk.Label(form_frame, text="Assigned To:").grid(row=1, column=0, sticky=tk.W, pady=2)
-        self.assigned_to_var = tk.StringVar()
-        self.assigned_to_combo = ttk.Combobox(form_frame, textvariable=self.assigned_to_var, 
-                                            state="readonly", width=17)
-        self.assigned_to_combo.grid(row=1, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Assignment Date
-        ttk.Label(form_frame, text="Assignment Date:").grid(row=2, column=0, sticky=tk.W, pady=2)
-        self.assignment_date_var = tk.StringVar()
-        self.assignment_date_entry = ttk.Entry(form_frame, textvariable=self.assignment_date_var, width=20)
-        self.assignment_date_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Start Date
-        ttk.Label(form_frame, text="Start Date:").grid(row=3, column=0, sticky=tk.W, pady=2)
-        self.start_date_var = tk.StringVar()
-        self.start_date_entry = ttk.Entry(form_frame, textvariable=self.start_date_var, width=20)
-        self.start_date_entry.grid(row=3, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Completion Date
-        ttk.Label(form_frame, text="Completion Date:").grid(row=4, column=0, sticky=tk.W, pady=2)
-        self.completion_date_var = tk.StringVar()
-        self.completion_date_entry = ttk.Entry(form_frame, textvariable=self.completion_date_var, width=20)
-        self.completion_date_entry.grid(row=4, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Total Duration
-        ttk.Label(form_frame, text="Total Duration:").grid(row=5, column=0, sticky=tk.W, pady=2)
-        self.duration_var = tk.StringVar()
-        self.duration_label = ttk.Label(form_frame, textvariable=self.duration_var, 
-                                       foreground="blue", font=('Arial', 10, 'bold'))
-        self.duration_label.grid(row=5, column=1, sticky=tk.W, pady=2, padx=(5, 0))
-        
-        # Released to Dee
-        ttk.Label(form_frame, text="Released to Dee:").grid(row=6, column=0, sticky=tk.W, pady=2)
-        self.released_to_dee_var = tk.StringVar()
-        self.released_to_dee_entry = ttk.Entry(form_frame, textvariable=self.released_to_dee_var, width=20)
-        self.released_to_dee_entry.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Redline Updates Section
-        redline_frame = ttk.LabelFrame(form_frame, text="Redline Updates", padding="5")
-        redline_frame.grid(row=7, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 0))
-        
-        # Initial Redline
-        self.initial_redline_var = tk.BooleanVar()
-        ttk.Checkbutton(redline_frame, text="Initial Redline", 
-                       variable=self.initial_redline_var).grid(row=0, column=0, sticky=tk.W)
-        
-        ttk.Label(redline_frame, text="Engineer:").grid(row=1, column=0, sticky=tk.W)
-        self.initial_engineer_var = tk.StringVar()
-        self.initial_engineer_combo = ttk.Combobox(redline_frame, textvariable=self.initial_engineer_var, 
-                                                 state="readonly", width=15)
-        self.initial_engineer_combo.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
-        
-        ttk.Label(redline_frame, text="Date:").grid(row=2, column=0, sticky=tk.W)
-        self.initial_date_var = tk.StringVar()
-        self.initial_date_entry = ttk.Entry(redline_frame, textvariable=self.initial_date_var, width=15)
-        self.initial_date_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
-        
-        # Load dropdown data
+        # Load dropdown data after all widgets are created
         self.load_dropdown_data()
-        
-        # Bind events
-        self.start_date_var.trace('w', self.calculate_duration)
-        self.completion_date_var.trace('w', self.calculate_duration)
-        self.assignment_date_var.trace('w', self.set_start_date)
     
-    def create_project_list(self):
+    def create_project_list_panel(self):
         """Create the project list panel"""
-        list_frame = ttk.LabelFrame(self.main_frame, text="Projects", padding="10")
-        list_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+        list_frame = ttk.LabelFrame(self.scrollable_frame, text="Projects", padding="10")
+        list_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(1, weight=1)
         
-        # Search frame
-        search_frame = ttk.Frame(list_frame)
-        search_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        search_frame.columnconfigure(1, weight=1)
+        # Search and sort frame - combined for compact layout
+        search_sort_frame = ttk.Frame(list_frame)
+        search_sort_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+        search_sort_frame.columnconfigure(1, weight=1)
         
-        ttk.Label(search_frame, text="Search:").grid(row=0, column=0, sticky=tk.W)
+        # Search row
+        ttk.Label(search_sort_frame, text="Search:").grid(row=0, column=0, sticky=tk.W, padx=(0, 5))
         self.search_var = tk.StringVar()
-        self.search_entry = ttk.Entry(search_frame, textvariable=self.search_var)
-        self.search_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        self.search_entry = ttk.Entry(search_sort_frame, textvariable=self.search_var, width=25)
+        self.search_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 0))
         self.search_var.trace('w', self.filter_projects)
         
-        # Treeview for projects
-        columns = ('Job Number', 'Assigned To', 'Start Date', 'Duration', 'Status')
-        self.tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=15)
+        # Sort buttons row - directly under search (toggle functionality)
+        self.job_sort_ascending = True  # Track sort direction for job numbers
+        self.customer_sort_ascending = True  # Track sort direction for customers
         
-        for col in columns:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=120)
+        self.sort_job_btn = ttk.Button(search_sort_frame, text="Job # ↑", command=self.sort_by_job_number, width=10)
+        self.sort_job_btn.grid(row=1, column=0, padx=(0, 3), sticky=tk.W, pady=(3, 0))
         
-        # Scrollbar
-        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.tree.yview)
-        self.tree.configure(yscrollcommand=scrollbar.set)
+        self.sort_customer_btn = ttk.Button(search_sort_frame, text="Customer ↑", command=self.sort_by_customer, width=12)
+        self.sort_customer_btn.grid(row=1, column=1, padx=(3, 0), sticky=tk.W, pady=(3, 0))
+        
+        # Treeview for projects - simplified columns
+        columns = ('Job Number', 'Customer', 'Status')
+        self.tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=18)
+        
+        # Set column widths - make job number narrow, customer wider, status narrow
+        self.tree.heading('Job Number', text='Job Number')
+        self.tree.column('Job Number', width=80, minwidth=80)
+        
+        self.tree.heading('Customer', text='Customer')
+        self.tree.column('Customer', width=200, minwidth=150)
+        
+        self.tree.heading('Status', text='Status')
+        self.tree.column('Status', width=100, minwidth=80)
+        
+        # Scrollbar for treeview
+        tree_scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        self.tree.configure(yscrollcommand=tree_scrollbar.set)
         
         self.tree.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        scrollbar.grid(row=1, column=1, sticky=(tk.N, tk.S))
+        tree_scrollbar.grid(row=1, column=1, sticky=(tk.N, tk.S))
         
         # Bind selection event
         self.tree.bind('<<TreeviewSelect>>', self.on_project_select)
     
+    def create_project_details_panel(self):
+        """Create the project details panel"""
+        details_frame = ttk.LabelFrame(self.scrollable_frame, text="Project Details", padding="10")
+        details_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        details_frame.columnconfigure(1, weight=1)
+        
+        # Job Number
+        ttk.Label(details_frame, text="Job Number:").grid(row=0, column=0, sticky=tk.W, pady=2)
+        self.job_number_var = tk.StringVar()
+        self.job_number_entry = ttk.Entry(details_frame, textvariable=self.job_number_var, width=25)
+        self.job_number_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Job Directory
+        ttk.Label(details_frame, text="Job Directory:").grid(row=1, column=0, sticky=tk.W, pady=2)
+        self.job_directory_picker = DirectoryPicker(details_frame, width=25)
+        self.job_directory_picker.grid(row=1, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Customer Name
+        ttk.Label(details_frame, text="Customer Name:").grid(row=2, column=0, sticky=tk.W, pady=2)
+        self.customer_name_var = tk.StringVar()
+        self.customer_name_entry = ttk.Entry(details_frame, textvariable=self.customer_name_var, width=25)
+        self.customer_name_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.customer_name_picker = DirectoryPicker(details_frame, width=25)
+        self.customer_name_picker.grid(row=2, column=2, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Customer Location
+        ttk.Label(details_frame, text="Customer Location:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        self.customer_location_var = tk.StringVar()
+        self.customer_location_entry = ttk.Entry(details_frame, textvariable=self.customer_location_var, width=25)
+        self.customer_location_entry.grid(row=3, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.customer_location_picker = DirectoryPicker(details_frame, width=25)
+        self.customer_location_picker.grid(row=3, column=2, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Assigned To
+        ttk.Label(details_frame, text="Assigned to:").grid(row=4, column=0, sticky=tk.W, pady=2)
+        self.assigned_to_var = tk.StringVar()
+        self.assigned_to_combo = ttk.Combobox(details_frame, textvariable=self.assigned_to_var, 
+                                            state="readonly", width=22)
+        self.assigned_to_combo.grid(row=4, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Assignment Date
+        ttk.Label(details_frame, text="Assignment Date:").grid(row=5, column=0, sticky=tk.W, pady=2)
+        self.assignment_date_entry = DateEntry(details_frame, width=25)
+        self.assignment_date_entry.grid(row=5, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Start Date
+        ttk.Label(details_frame, text="Start Date:").grid(row=6, column=0, sticky=tk.W, pady=2)
+        self.start_date_entry = DateEntry(details_frame, width=25)
+        self.start_date_entry.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Completion Date
+        ttk.Label(details_frame, text="Completion Date:").grid(row=7, column=0, sticky=tk.W, pady=2)
+        self.completion_date_entry = DateEntry(details_frame, width=25)
+        self.completion_date_entry.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Total Duration
+        ttk.Label(details_frame, text="Total Project Duration:").grid(row=8, column=0, sticky=tk.W, pady=2)
+        self.duration_var = tk.StringVar()
+        self.duration_label = ttk.Label(details_frame, textvariable=self.duration_var, 
+                                       foreground="blue", font=('Arial', 10, 'bold'))
+        self.duration_label.grid(row=8, column=1, sticky=tk.W, pady=2, padx=(5, 0))
+        
+        # Released to Dee
+        ttk.Label(details_frame, text="Released to Dee:").grid(row=9, column=0, sticky=tk.W, pady=2)
+        self.released_to_dee_entry = DateEntry(details_frame, width=25)
+        self.released_to_dee_entry.grid(row=9, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Bind events
+        self.start_date_entry.var.trace('w', self.calculate_duration)
+        self.completion_date_entry.var.trace('w', self.calculate_duration)
+        self.assignment_date_entry.var.trace('w', self.set_start_date)
+        
+        # Auto-save on any field change
+        self.job_number_var.trace('w', self.auto_save)
+        self.customer_name_var.trace('w', self.auto_save)
+        self.customer_location_var.trace('w', self.auto_save)
+        self.assigned_to_var.trace('w', self.auto_save)
+        self.released_to_dee_entry.var.trace('w', self.auto_save)
+        
+        # Auto-save for directory pickers
+        self.job_directory_picker.var.trace('w', self.auto_extract_and_save)
+        self.customer_name_picker.var.trace('w', self.auto_save)
+        self.customer_location_picker.var.trace('w', self.auto_save)
+    
+    def create_workflow_panel(self):
+        """Create the workflow tracking panel"""
+        workflow_frame = ttk.LabelFrame(self.scrollable_frame, text="Project Workflow", padding="10")
+        workflow_frame.grid(row=1, column=2, sticky=(tk.W, tk.E, tk.N, tk.S))
+        workflow_frame.columnconfigure(0, weight=1)
+        
+        # 1. Initial Redline
+        self.create_initial_redline_section(workflow_frame, 0)
+        
+        # 2. Redline Updates (multiple cycles)
+        self.create_redline_updates_section(workflow_frame, 1)
+        
+        # 3. OPS Review
+        self.create_ops_review_section(workflow_frame, 2)
+        
+        # 4. Peter Weck Review
+        self.create_peter_weck_section(workflow_frame, 3)
+        
+        # 5. Release to Dee
+        self.create_release_to_dee_section(workflow_frame, 4)
+    
+    def create_initial_redline_section(self, parent, row):
+        """Create initial redline section"""
+        section_frame = ttk.LabelFrame(parent, text="1. Drafting Drawing Package to Engineering for Initial Review", padding="5")
+        section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        section_frame.columnconfigure(1, weight=1)
+        
+        # Initial Redline checkbox
+        self.initial_redline_var = tk.BooleanVar()
+        ttk.Checkbutton(section_frame, text="Initial Redline", 
+                       variable=self.initial_redline_var).grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        
+        # Engineer dropdown
+        ttk.Label(section_frame, text="Engineer:").grid(row=1, column=0, sticky=tk.W)
+        self.initial_engineer_var = tk.StringVar()
+        self.initial_engineer_combo = ttk.Combobox(section_frame, textvariable=self.initial_engineer_var, 
+                                                 state="readonly", width=20)
+        self.initial_engineer_combo.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        # Date
+        ttk.Label(section_frame, text="Date:").grid(row=2, column=0, sticky=tk.W)
+        self.initial_date_entry = DateEntry(section_frame, width=20)
+        self.initial_date_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+    
+    def create_redline_updates_section(self, parent, row):
+        """Create redline updates section"""
+        section_frame = ttk.LabelFrame(parent, text="2. Redline Updates", padding="5")
+        section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        section_frame.columnconfigure(1, weight=1)
+        
+        # Update 1
+        self.create_redline_update(section_frame, 0, "Redline Update 1")
+        self.create_redline_update(section_frame, 1, "Redline Update 2")
+        self.create_redline_update(section_frame, 2, "Redline Update 3")
+        self.create_redline_update(section_frame, 3, "Redline Update 4")
+    
+    def create_redline_update(self, parent, row, title):
+        """Create a single redline update"""
+        update_frame = ttk.Frame(parent)
+        update_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+        update_frame.columnconfigure(1, weight=1)
+        
+        # Checkbox
+        var_name = f"redline_update_{row+1}_var"
+        # Don't create BooleanVar here - it's already created in __init__
+        ttk.Checkbutton(update_frame, text=title, 
+                       variable=getattr(self, var_name)).grid(row=0, column=0, sticky=tk.W)
+        
+        # Engineer dropdown
+        ttk.Label(update_frame, text="Engineer:").grid(row=1, column=0, sticky=tk.W)
+        engineer_var_name = f"redline_update_{row+1}_engineer_var"
+        setattr(self, engineer_var_name, tk.StringVar())
+        combo = ttk.Combobox(update_frame, textvariable=getattr(self, engineer_var_name), 
+                           state="readonly", width=15)
+        combo.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        # Store the combo reference for later use
+        combo_name = f"redline_update_{row+1}_engineer_combo"
+        setattr(self, combo_name, combo)
+        
+        # Date
+        ttk.Label(update_frame, text="Date:").grid(row=2, column=0, sticky=tk.W)
+        date_entry_name = f"redline_update_{row+1}_date_entry"
+        date_entry = DateEntry(update_frame, width=15)
+        date_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        setattr(self, date_entry_name, date_entry)
+    
+    def create_ops_review_section(self, parent, row):
+        """Create OPS review section"""
+        section_frame = ttk.LabelFrame(parent, text="3. To Production for OPS Review", padding="5")
+        section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        section_frame.columnconfigure(1, weight=1)
+        
+        # OPS Review checkbox
+        self.ops_review_var = tk.BooleanVar()
+        ttk.Checkbutton(section_frame, text="OPS Review Updates", 
+                       variable=self.ops_review_var).grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        
+        # Date
+        ttk.Label(section_frame, text="Updated:").grid(row=1, column=0, sticky=tk.W)
+        self.ops_review_date_entry = DateEntry(section_frame, width=20)
+        self.ops_review_date_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+    
+    def create_peter_weck_section(self, parent, row):
+        """Create Peter Weck review section"""
+        section_frame = ttk.LabelFrame(parent, text="4. PETER WECK Review", padding="5")
+        section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        section_frame.columnconfigure(1, weight=1)
+        
+        # Fixed Errors checkbox
+        self.peter_weck_var = tk.BooleanVar()
+        ttk.Checkbutton(section_frame, text="Fixed Errors", 
+                       variable=self.peter_weck_var).grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        
+        # Date
+        ttk.Label(section_frame, text="Date:").grid(row=1, column=0, sticky=tk.W)
+        self.peter_weck_date_entry = DateEntry(section_frame, width=20)
+        self.peter_weck_date_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+    
+    def create_release_to_dee_section(self, parent, row):
+        """Create Release to Dee section"""
+        section_frame = ttk.LabelFrame(parent, text="5. Release to Dee", padding="5")
+        section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        section_frame.columnconfigure(1, weight=1)
+        
+        # Fixed Errors checkbox
+        self.release_fixed_errors_var = tk.BooleanVar()
+        ttk.Checkbutton(section_frame, text="Fixed Errors", 
+                       variable=self.release_fixed_errors_var).grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        
+        # Missing Prints
+        ttk.Label(section_frame, text="Missing Prints:").grid(row=1, column=0, sticky=tk.W)
+        self.missing_prints_date_entry = DateEntry(section_frame, width=20)
+        self.missing_prints_date_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        # D365 Updates
+        ttk.Label(section_frame, text="D365 Updates:").grid(row=2, column=0, sticky=tk.W)
+        self.d365_updates_date_entry = DateEntry(section_frame, width=20)
+        self.d365_updates_date_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        # Other
+        ttk.Label(section_frame, text="Other:").grid(row=3, column=0, sticky=tk.W)
+        self.other_notes_var = tk.StringVar()
+        self.other_notes_entry = ttk.Entry(section_frame, textvariable=self.other_notes_var, width=20)
+        self.other_notes_entry.grid(row=3, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        ttk.Label(section_frame, text="Date:").grid(row=4, column=0, sticky=tk.W)
+        self.other_date_entry = DateEntry(section_frame, width=20)
+        self.other_date_entry.grid(row=4, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+    
+    def create_quick_access_panel(self):
+        """Create the quick access panel for files and folders"""
+        self.access_frame = ttk.LabelFrame(self.scrollable_frame, text="Quick Access", padding="10")
+        self.access_frame.grid(row=1, column=3, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(10, 0))
+        self.access_frame.columnconfigure(0, weight=1)
+        
+        # Initialize empty quick access area
+        self.quick_access_buttons = []
+        self.update_quick_access()
+    
+    def update_quick_access(self):
+        """Update the quick access panel based on current project data"""
+        # Clear existing buttons
+        for button in self.quick_access_buttons:
+            button.destroy()
+        self.quick_access_buttons.clear()
+        
+        row = 0
+        
+        # Job Directory button - use job number as button text
+        job_dir = self.job_directory_picker.get()
+        job_number = self.job_number_var.get()
+        if job_dir and job_number:
+            icon = "📁" if os.path.isdir(job_dir) else "📄"
+            button_text = f"{icon} {job_number}"
+            button = ttk.Button(self.access_frame, text=button_text, 
+                              command=self.open_job_directory)
+            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            self.quick_access_buttons.append(button)
+            row += 1
+        
+        # Customer Name button - use directory picker value if available
+        customer_name = self.customer_name_var.get()
+        customer_name_dir = self.customer_name_picker.get()
+        
+        if customer_name_dir:  # Use directory picker value first
+            if os.path.exists(customer_name_dir):
+                icon = "📁" if os.path.isdir(customer_name_dir) else "📄"
+                button_text = f"{icon} {customer_name} ({os.path.basename(customer_name_dir)})"
+            else:
+                icon = "📁"
+                button_text = f"{icon} {customer_name} ({os.path.basename(customer_name_dir)})"
+        elif customer_name:  # Fall back to text field value
+            if os.path.exists(customer_name):
+                icon = "📁" if os.path.isdir(customer_name) else "📄"
+                button_text = f"{icon} {customer_name}"
+            else:
+                icon = "📁"
+                button_text = f"{icon} {customer_name}"
+        else:
+            customer_name_dir = None
+            button_text = None
+        
+        if button_text:
+            button = ttk.Button(self.access_frame, text=button_text, 
+                              command=lambda: self.open_customer_name_path(customer_name_dir or customer_name))
+            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            self.quick_access_buttons.append(button)
+            row += 1
+        
+        # Customer Location button - use directory picker value if available
+        customer_location = self.customer_location_var.get()
+        customer_location_dir = self.customer_location_picker.get()
+        
+        if customer_location_dir:  # Use directory picker value first
+            if os.path.exists(customer_location_dir):
+                icon = "📁" if os.path.isdir(customer_location_dir) else "📄"
+                button_text = f"{icon} {customer_location} ({os.path.basename(customer_location_dir)})"
+            else:
+                icon = "📁"
+                button_text = f"{icon} {customer_location} ({os.path.basename(customer_location_dir)})"
+        elif customer_location:  # Fall back to text field value
+            if os.path.exists(customer_location):
+                icon = "📁" if os.path.isdir(customer_location) else "📄"
+                button_text = f"{icon} {customer_location}"
+            else:
+                icon = "📁"
+                button_text = f"{icon} {customer_location}"
+        else:
+            customer_location_dir = None
+            button_text = None
+        
+        if button_text:
+            button = ttk.Button(self.access_frame, text=button_text, 
+                              command=lambda: self.open_customer_location_path(customer_location_dir or customer_location))
+            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            self.quick_access_buttons.append(button)
+            row += 1
+        
+        # KOM AND OC FORM section - always show if job directory is loaded
+        if hasattr(self, 'job_directory_picker') and self.job_directory_picker.get():
+            if hasattr(self, 'kom_oc_form_path') and self.kom_oc_form_path and os.path.exists(self.kom_oc_form_path):
+                button_text = f"📊 KOM AND OC FORM"
+                button = ttk.Button(self.access_frame, text=button_text, 
+                                  command=self.open_kom_oc_form)
+                button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                self.quick_access_buttons.append(button)
+                row += 1
+            else:
+                # No KOM file found - show placeholder
+                kom_placeholder = ttk.Label(self.access_frame, text="KOM AND OC FORM: NOT FOUND", 
+                                         font=('Arial', 9), foreground="gray")
+                kom_placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                self.quick_access_buttons.append(kom_placeholder)
+                row += 1
+        
+        # Sales documents section - always show if job directory is loaded
+        if hasattr(self, 'job_directory_picker') and self.job_directory_picker.get():
+            # Add SALES divider
+            sales_label = ttk.Label(self.access_frame, text="SALES", font=('Arial', 10, 'bold'), foreground="blue")
+            sales_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(10, 5))
+            self.quick_access_buttons.append(sales_label)
+            row += 1
+            
+            # Check if there are any sales files
+            has_sales_files = (hasattr(self, 'proposal_docs') and self.proposal_docs) or (hasattr(self, 'other_docs') and self.other_docs)
+            
+            if has_sales_files:
+                # Proposal documents buttons - automatically added when job directory is loaded
+                if hasattr(self, 'proposal_docs') and self.proposal_docs:
+                    for doc_path in self.proposal_docs:
+                        # Use actual filename with truncation
+                        filename = os.path.basename(doc_path)
+                        # Remove file extension and truncate if too long
+                        name_without_ext = os.path.splitext(filename)[0]
+                        if len(name_without_ext) > 25:
+                            display_name = name_without_ext[:22] + "..."
+                        else:
+                            display_name = name_without_ext
+                        
+                        button_text = f"📄 {display_name}"
+                        button = ttk.Button(self.access_frame, text=button_text, 
+                                          command=lambda path=doc_path: self.open_proposal_doc(path))
+                        button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(button)
+                        row += 1
+                
+                # Other important documents buttons - automatically added when job directory is loaded
+                if hasattr(self, 'other_docs') and self.other_docs:
+                    for icon, filename, file_path in self.other_docs:
+                        # Create shorter, consistent button labels
+                        button_text = self.create_short_button_text(icon, filename)
+                        button = ttk.Button(self.access_frame, text=button_text, 
+                                          command=lambda path=file_path: self.open_other_doc(path))
+                        button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(button)
+                        row += 1
+            else:
+                # No sales files found - show placeholder
+                placeholder_label = ttk.Label(self.access_frame, text="SALES: NOT PROCESSED", 
+                                           font=('Arial', 9), foreground="gray", style="Placeholder.TLabel")
+                placeholder_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                self.quick_access_buttons.append(placeholder_label)
+                row += 1
+        
+        # Engineering documents section - always show if job directory is loaded
+        if hasattr(self, 'job_directory_picker') and self.job_directory_picker.get():
+            # Add ENGINEERING divider
+            engineering_label = ttk.Label(self.access_frame, text="ENGINEERING", font=('Arial', 10, 'bold'), foreground="green")
+            engineering_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(10, 5))
+            self.quick_access_buttons.append(engineering_label)
+            row += 1
+            
+            # Check if there are any engineering files
+            has_engineering_files = (hasattr(self, 'engineering_general_docs') and self.engineering_general_docs) or (hasattr(self, 'engineering_releases_docs') and self.engineering_releases_docs)
+            
+            if has_engineering_files:
+                # General Design subsection
+                if hasattr(self, 'engineering_general_docs') and self.engineering_general_docs:
+                    general_label = ttk.Label(self.access_frame, text="General Design", font=('Arial', 9, 'bold'), foreground="darkgreen")
+                    general_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(5, 2))
+                    self.quick_access_buttons.append(general_label)
+                    row += 1
+                    
+                    for file_path in self.engineering_general_docs:
+                        filename = os.path.basename(file_path)
+                        button_text = self.create_short_button_text("📊", filename)
+                        button = ttk.Button(self.access_frame, text=button_text, 
+                                          command=lambda path=file_path: self.open_engineering_doc(path))
+                        button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(button)
+                        row += 1
+                else:
+                    # No General Design files - show placeholder
+                    general_placeholder = ttk.Label(self.access_frame, text="General Design: NOT PROCESSED", 
+                                                 font=('Arial', 8), foreground="gray")
+                    general_placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                    self.quick_access_buttons.append(general_placeholder)
+                    row += 1
+                
+                # Releases subsection
+                if hasattr(self, 'engineering_releases_docs') and self.engineering_releases_docs:
+                    releases_label = ttk.Label(self.access_frame, text="Releases", font=('Arial', 9, 'bold'), foreground="darkgreen")
+                    releases_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(5, 2))
+                    self.quick_access_buttons.append(releases_label)
+                    row += 1
+                    
+                    for file_path in self.engineering_releases_docs:
+                        filename = os.path.basename(file_path)
+                        button_text = self.create_short_button_text("📄", filename)
+                        button = ttk.Button(self.access_frame, text=button_text, 
+                                          command=lambda path=file_path: self.open_engineering_doc(path))
+                        button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(button)
+                        row += 1
+                else:
+                    # No Releases files - show placeholder
+                    releases_placeholder = ttk.Label(self.access_frame, text="Releases: NOT PROCESSED", 
+                                                   font=('Arial', 8), foreground="gray")
+                    releases_placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                    self.quick_access_buttons.append(releases_placeholder)
+                    row += 1
+            else:
+                # No engineering files found at all - show main placeholder
+                engineering_placeholder = ttk.Label(self.access_frame, text="ENGINEERING: NOT PROCESSED", 
+                                                 font=('Arial', 9), foreground="gray")
+                engineering_placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                self.quick_access_buttons.append(engineering_placeholder)
+                row += 1
+        
+        # If no quick access items, show a message
+        if not self.quick_access_buttons:
+            label = ttk.Label(self.access_frame, text="No quick access items\navailable for this project", 
+                            foreground="gray", justify="center")
+            label.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=20)
+            self.quick_access_buttons.append(label)
+    
     def create_action_buttons(self):
         """Create action buttons"""
-        button_frame = ttk.Frame(self.main_frame)
-        button_frame.grid(row=2, column=0, columnspan=2, pady=(20, 0))
+        button_frame = ttk.Frame(self.scrollable_frame)
+        button_frame.grid(row=2, column=0, columnspan=4, pady=(20, 0))
         
         ttk.Button(button_frame, text="New Project", command=self.new_project).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(button_frame, text="Save Project", command=self.save_project).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(button_frame, text="Delete Project", command=self.delete_project).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(button_frame, text="Clean & Fix Data", command=self.clean_duplicates).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(button_frame, text="Reset Database", command=self.reset_database).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(button_frame, text="Refresh", command=self.load_projects).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(button_frame, text="Export JSON", command=self.export_data).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(button_frame, text="Import JSON", command=self.import_data).pack(side=tk.LEFT, padx=(0, 5))
     
-    def load_dropdown_data(self):
-        """Load data for dropdown menus"""
-        conn = sqlite3.connect(self.db_manager.db_path)
-        cursor = conn.cursor()
-        
-        # Load designers
-        cursor.execute("SELECT name FROM designers ORDER BY name")
-        designers = [row[0] for row in cursor.fetchall()]
-        self.assigned_to_combo['values'] = designers
-        
-        # Load engineers
-        cursor.execute("SELECT name FROM engineers ORDER BY name")
-        engineers = [row[0] for row in cursor.fetchall()]
-        self.initial_engineer_combo['values'] = engineers
-        
-        conn.close()
+    def open_job_directory(self):
+        """Open the job directory"""
+        directory = self.job_directory_picker.get()
+        if directory and os.path.exists(directory):
+            self.open_path(directory)
+        else:
+            messagebox.showwarning("Warning", "No valid job directory selected!")
     
-    def load_projects(self):
-        """Load projects from database"""
-        conn = sqlite3.connect(self.db_manager.db_path)
-        cursor = conn.cursor()
-        
-        query = """
-        SELECT p.job_number, d.name, p.start_date, p.total_duration_days, 
-               CASE WHEN p.completion_date IS NOT NULL THEN 'Completed' ELSE 'In Progress' END as status
-        FROM projects p
-        LEFT JOIN designers d ON p.assigned_to_id = d.id
-        ORDER BY p.assignment_date DESC
-        """
-        
-        cursor.execute(query)
-        projects = cursor.fetchall()
-        
-        # Clear existing items
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        
-        # Insert projects
-        for project in projects:
-            duration = f"{project[3]} days" if project[3] else "N/A"
-            self.tree.insert('', 'end', values=(
-                project[0], project[1] or "N/A", project[2] or "N/A", 
-                duration, project[4]
-            ))
-        
-        conn.close()
+    def open_customer_name_path(self, path):
+        """Open customer name path (from directory picker or text field)"""
+        print(f"DEBUG: Opening customer name path: '{path}'")
+        if path and os.path.exists(path):
+            print(f"DEBUG: Opening direct path: {path}")
+            self.open_path(path)
+        elif path:
+            print(f"DEBUG: Path doesn't exist, searching for folder: {path}")
+            self.search_and_open_folder(path)
+        else:
+            print("DEBUG: No customer name path provided")
+            messagebox.showwarning("Warning", "No customer name path provided!")
     
-    def filter_projects(self, *args):
-        """Filter projects based on search term"""
-        search_term = self.search_var.get().lower()
-        
-        for item in self.tree.get_children():
-            values = self.tree.item(item)['values']
-            if any(search_term in str(value).lower() for value in values):
-                self.tree.reattach(item, '', 'end')
+    def open_customer_location_path(self, path):
+        """Open customer location path (from directory picker or text field)"""
+        print(f"DEBUG: Opening customer location path: '{path}'")
+        if path and os.path.exists(path):
+            print(f"DEBUG: Opening direct path: {path}")
+            self.open_path(path)
+        elif path:
+            print(f"DEBUG: Path doesn't exist, searching for folder: {path}")
+            self.search_and_open_folder(path)
+        else:
+            print("DEBUG: No customer location path provided")
+            messagebox.showwarning("Warning", "No customer location path provided!")
+    
+    def open_customer_name(self):
+        """Open customer name path (legacy method)"""
+        customer_name = self.customer_name_var.get()
+        print(f"DEBUG: Customer name = '{customer_name}'")
+        if customer_name:
+            if os.path.exists(customer_name):
+                print(f"DEBUG: Opening direct path: {customer_name}")
+                self.open_path(customer_name)
             else:
-                self.tree.detach(item)
+                print(f"DEBUG: Searching for folder: {customer_name}")
+                self.search_and_open_folder(customer_name)
+        else:
+            print("DEBUG: No customer name entered")
+            messagebox.showwarning("Warning", "No customer name entered!")
     
-    def on_project_select(self, event):
-        """Handle project selection"""
-        selection = self.tree.selection()
-        if not selection:
-            return
+    def open_customer_location(self):
+        """Open customer location path (legacy method)"""
+        customer_location = self.customer_location_var.get()
+        print(f"DEBUG: Customer location = '{customer_location}'")
+        if customer_location:
+            if os.path.exists(customer_location):
+                print(f"DEBUG: Opening direct path: {customer_location}")
+                self.open_path(customer_location)
+            else:
+                print(f"DEBUG: Searching for folder: {customer_location}")
+                self.search_and_open_folder(customer_location)
+        else:
+            print("DEBUG: No customer location entered")
+            messagebox.showwarning("Warning", "No customer location entered!")
+    
+    def open_path(self, path):
+        """Open a file or directory path"""
+        try:
+            if sys.platform == "win32":
+                os.startfile(path)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", path])
+            else:
+                subprocess.run(["xdg-open", path])
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open path: {str(e)}")
+    
+    def search_and_open_folder(self, name):
+        """Search for and open a folder by name"""
+        print(f"DEBUG: Searching for folder: '{name}'")
         
-        item = self.tree.item(selection[0])
-        job_number = item['values'][0]
-        self.load_project_details(job_number)
+        # Common search locations
+        search_paths = [
+            os.path.join(os.path.expanduser("~"), "Documents", "Projects", name),
+            os.path.join(os.path.expanduser("~"), "Desktop", name),
+            os.path.join("C:", "Projects", name),
+            os.path.join("C:", "Users", os.getenv("USERNAME", ""), "Documents", name),
+            os.path.join(os.path.expanduser("~"), "Documents", name),
+            os.path.join(os.path.expanduser("~"), "OneDrive", "Documents", name),
+            os.path.join("C:", "Users", os.getenv("USERNAME", ""), "OneDrive", "Documents", name),
+            os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", name),
+            os.path.join("C:", "Users", os.getenv("USERNAME", ""), "OneDrive", "Desktop", name)
+        ]
+        
+        print(f"DEBUG: Checking {len(search_paths)} search paths...")
+        for i, path in enumerate(search_paths):
+            print(f"DEBUG: Checking path {i+1}: {path}")
+            if os.path.exists(path):
+                print(f"DEBUG: Found folder at: {path}")
+                self.open_path(path)
+                return
+        
+        # If not found, try to create a folder and open it
+        print(f"DEBUG: Folder not found, creating new folder...")
+        new_folder = os.path.join(os.path.expanduser("~"), "Documents", "Projects", name)
+        try:
+            os.makedirs(new_folder, exist_ok=True)
+            print(f"DEBUG: Created new folder: {new_folder}")
+            self.open_path(new_folder)
+        except Exception as e:
+            print(f"DEBUG: Failed to create folder: {e}")
+            messagebox.showinfo("Info", f"Folder for '{name}' not found. Please create it manually or use the directory picker to select an existing folder.")
     
-    def load_project_details(self, job_number):
-        """Load details for selected project"""
+    def clean_duplicates(self):
+        """Remove duplicate projects and clean job numbers"""
         conn = sqlite3.connect(self.db_manager.db_path)
         cursor = conn.cursor()
         
-        query = """
-        SELECT p.job_number, d.name, p.assignment_date, p.start_date, 
-               p.completion_date, p.total_duration_days, p.released_to_dee
-        FROM projects p
-        LEFT JOIN designers d ON p.assigned_to_id = d.id
-        WHERE p.job_number = ?
-        """
-        
-        cursor.execute(query, (job_number,))
-        project = cursor.fetchone()
-        
-        if project:
-            self.job_number_var.set(project[0])
-            self.assigned_to_var.set(project[1] or "")
-            self.assignment_date_var.set(project[2] or "")
-            self.start_date_var.set(project[3] or "")
-            self.completion_date_var.set(project[4] or "")
-            self.duration_var.set(f"{project[5]} days" if project[5] else "N/A")
-            self.released_to_dee_var.set(project[6] or "")
-        
-        conn.close()
+        try:
+            print("DEBUG: Starting database cleanup...")
+            
+            # First, get all projects
+            cursor.execute("SELECT id, job_number FROM projects")
+            projects = cursor.fetchall()
+            print(f"DEBUG: Found {len(projects)} projects to check")
+            
+            cleaned_count = 0
+            for project_id, job_number in projects:
+                original = str(job_number)
+                print(f"DEBUG: Processing project {project_id}: '{original}'")
+                
+                # Clean the job number
+                clean_job_number = str(job_number).strip()
+                if ' ' in clean_job_number:
+                    # Extract just the numeric part
+                    parts = clean_job_number.split()
+                    for part in parts:
+                        if part.isdigit() and len(part) == 5:
+                            clean_job_number = part
+                            break
+                
+                print(f"DEBUG: Cleaned '{original}' to '{clean_job_number}'")
+                
+                # Update if different
+                if clean_job_number != original:
+                    print(f"DEBUG: Updating project {project_id} from '{original}' to '{clean_job_number}'")
+                    cursor.execute("UPDATE projects SET job_number = ? WHERE id = ?", 
+                                 (clean_job_number, project_id))
+                    cleaned_count += 1
+                else:
+                    print(f"DEBUG: No change needed for project {project_id}")
+            
+            print(f"DEBUG: Updated {cleaned_count} job numbers")
+            
+            # Find duplicates after cleaning
+            cursor.execute("""
+                SELECT job_number, COUNT(*) as count
+                FROM projects 
+                GROUP BY job_number 
+                HAVING COUNT(*) > 1
+            """)
+            duplicates = cursor.fetchall()
+            print(f"DEBUG: Found {len(duplicates)} duplicate groups")
+            
+            duplicate_count = 0
+            if duplicates:
+                # Remove duplicates, keeping the one with the highest ID (most recent)
+                for job_number, count in duplicates:
+                    print(f"DEBUG: Removing {count-1} duplicates for job {job_number}")
+                    cursor.execute("""
+                        DELETE FROM projects 
+                        WHERE job_number = ? AND id NOT IN (
+                            SELECT MAX(id) FROM projects WHERE job_number = ?
+                        )
+                    """, (job_number, job_number))
+                    duplicate_count += count - 1
+            
+            conn.commit()
+            print(f"DEBUG: Cleanup complete - {cleaned_count} cleaned, {duplicate_count} duplicates removed")
+            messagebox.showinfo("Success", f"Cleaned {cleaned_count} job numbers and removed {duplicate_count} duplicate project(s)!")
+            self.load_projects()
+            
+        except Exception as e:
+            print(f"DEBUG: Error during cleanup: {e}")
+            messagebox.showerror("Error", f"Failed to clean duplicates: {str(e)}")
+        finally:
+            conn.close()
     
-    def new_project(self):
-        """Clear form for new project"""
-        self.job_number_var.set("")
-        self.assigned_to_var.set("")
-        self.assignment_date_var.set(datetime.now().strftime("%Y-%m-%d"))
-        self.start_date_var.set("")
-        self.completion_date_var.set("")
-        self.duration_var.set("")
-        self.released_to_dee_var.set("")
-        self.initial_redline_var.set(False)
-        self.initial_engineer_var.set("")
-        self.initial_date_var.set("")
+    def reset_database(self):
+        """Reset the database by recreating it"""
+        if messagebox.askyesno("Confirm Reset", 
+                              "Are you sure you want to reset the database? This will delete ALL data!"):
+            try:
+                # Close current connection
+                if hasattr(self, 'db_manager'):
+                    self.db_manager.close()
+                
+                # Delete the database file
+                import os
+                if os.path.exists(self.db_manager.db_path):
+                    os.remove(self.db_manager.db_path)
+                    print(f"DEBUG: Deleted database file: {self.db_manager.db_path}")
+                
+                # Recreate the database
+                self.db_manager = DatabaseManager()
+                print("DEBUG: Recreated database")
+                
+                # Reload projects (will be empty)
+                self.load_projects()
+                self.new_project()
+                
+                messagebox.showinfo("Success", "Database reset successfully!")
+                
+            except Exception as e:
+                print(f"DEBUG: Error resetting database: {e}")
+                messagebox.showerror("Error", f"Failed to reset database: {str(e)}")
     
-    def save_project(self):
-        """Save project to database"""
-        if not self.job_number_var.get():
-            messagebox.showerror("Error", "Job number is required!")
+    def auto_extract_and_save(self, *args):
+        """Auto-extract customer info from job directory and save"""
+        job_dir = self.job_directory_picker.get()
+        if job_dir and os.path.exists(job_dir):
+            self.extract_customer_info_from_path(job_dir)
+        
+        # Also auto-save
+        self.auto_save()
+    
+    def extract_customer_info_from_path(self, job_dir):
+        """Extract customer name and location from job directory path"""
+        try:
+            # Normalize the path and split into parts
+            normalized_path = os.path.normpath(job_dir)
+            path_parts = normalized_path.split(os.sep)
+            
+            print(f"DEBUG: Extracting from path: {normalized_path}")
+            print(f"DEBUG: Path parts: {path_parts}")
+            
+            # Find the job number (should be the last part)
+            job_number = path_parts[-1] if path_parts else ""
+            
+            # Customer location is one level up from job number
+            customer_location = path_parts[-2] if len(path_parts) >= 2 else ""
+            
+            # Customer name is two levels up from job number
+            customer_name = path_parts[-3] if len(path_parts) >= 3 else ""
+            
+            print(f"DEBUG: Extracted - Job: {job_number}, Location: {customer_location}, Name: {customer_name}")
+            
+            # Set the extracted values
+            if customer_name:
+                self.customer_name_var.set(customer_name.upper())
+                self.customer_name_picker.set(os.path.dirname(os.path.dirname(job_dir)))
+            
+            if customer_location:
+                self.customer_location_var.set(customer_location.upper())
+                self.customer_location_picker.set(os.path.dirname(job_dir))
+            
+            # Automatically find and add KOM AND OC FORM Excel file
+            self.find_and_add_kom_oc_form(job_dir)
+            
+            # Automatically find and add Proposal Word documents
+            self.find_and_add_proposal_docs(job_dir)
+            
+            # Automatically find and add other important files
+            self.find_and_add_other_docs(job_dir)
+            
+            # Automatically find and add engineering files
+            self.find_and_add_engineering_docs(job_dir)
+            
+            # Update quick access panel
+            self.update_quick_access()
+            
+        except Exception as e:
+            print(f"DEBUG: Error extracting customer info: {e}")
+    
+    def find_and_add_kom_oc_form(self, job_dir):
+        """Find and add KOM AND OC FORM Excel file to quick access"""
+        try:
+            print(f"DEBUG: Looking for KOM AND OC FORM file in: {job_dir}")
+            
+            # Get job number from the directory path
+            job_number = os.path.basename(job_dir)
+            
+            # Look for Excel files with "KOM AND OC FORM" in the filename
+            for file in os.listdir(job_dir):
+                if file.endswith('.xlsx') and 'KOM AND OC FORM' in file.upper():
+                    kom_file_path = os.path.join(job_dir, file)
+                    print(f"DEBUG: Found KOM AND OC FORM file: {kom_file_path}")
+                    
+                    # Store the file path for quick access
+                    self.kom_oc_form_path = kom_file_path
+                    return
+            
+            print(f"DEBUG: No KOM AND OC FORM file found in {job_dir}")
+            self.kom_oc_form_path = None
+            
+        except Exception as e:
+            print(f"DEBUG: Error finding KOM AND OC FORM file: {e}")
+            self.kom_oc_form_path = None
+    
+    def open_kom_oc_form(self):
+        """Open the KOM AND OC FORM Excel file"""
+        if hasattr(self, 'kom_oc_form_path') and self.kom_oc_form_path and os.path.exists(self.kom_oc_form_path):
+            print(f"DEBUG: Opening KOM AND OC FORM file: {self.kom_oc_form_path}")
+            self.open_path(self.kom_oc_form_path)
+        else:
+            messagebox.showwarning("Warning", "KOM AND OC FORM file not found!")
+    
+    def find_and_add_proposal_docs(self, job_dir):
+        """Find and add Proposal Word documents from 1. Sales\\Order folder"""
+        try:
+            print(f"DEBUG: Looking for Proposal documents in: {job_dir}")
+            
+            # Look for 1. Sales\Order folder
+            sales_order_path = os.path.join(job_dir, "1. Sales", "Order")
+            
+            if not os.path.exists(sales_order_path):
+                print(f"DEBUG: Sales\\Order folder not found: {sales_order_path}")
+                self.proposal_docs = []
+                return
+            
+            print(f"DEBUG: Found Sales\\Order folder: {sales_order_path}")
+            
+            # Look for Word documents with "Proposal" in the filename
+            proposal_files = []
+            print(f"DEBUG: Listing all files in {sales_order_path}:")
+            for file in os.listdir(sales_order_path):
+                print(f"DEBUG: Found file: '{file}'")
+                if (file.endswith('.docx') or file.endswith('.doc')):
+                    print(f"DEBUG: File is Word document: {file}")
+                    if 'Proposal' in file.upper():
+                        proposal_file_path = os.path.join(sales_order_path, file)
+                        proposal_files.append(proposal_file_path)
+                        print(f"DEBUG: Found Proposal document: {proposal_file_path}")
+                    else:
+                        print(f"DEBUG: File does not contain 'Proposal': {file}")
+                else:
+                    print(f"DEBUG: File is not Word document: {file}")
+            
+            # Store the proposal files for quick access
+            self.proposal_docs = proposal_files
+            print(f"DEBUG: Found {len(proposal_files)} Proposal documents")
+            
+        except Exception as e:
+            print(f"DEBUG: Error finding Proposal documents: {e}")
+            self.proposal_docs = []
+    
+    def open_proposal_doc(self, doc_path):
+        """Open a specific Proposal Word document"""
+        if doc_path and os.path.exists(doc_path):
+            print(f"DEBUG: Opening Proposal document: {doc_path}")
+            self.open_path(doc_path)
+        else:
+            messagebox.showwarning("Warning", "Proposal document not found!")
+    
+    def find_and_add_other_docs(self, job_dir):
+        """Find and add other important files from 1. Sales\\Order folder"""
+        try:
+            print(f"DEBUG: Looking for other important files in: {job_dir}")
+            
+            # Look for 1. Sales\Order folder
+            sales_order_path = os.path.join(job_dir, "1. Sales", "Order")
+            
+            if not os.path.exists(sales_order_path):
+                print(f"DEBUG: Sales\\Order folder not found: {sales_order_path}")
+                self.other_docs = []
+                return
+            
+            print(f"DEBUG: Found Sales\\Order folder: {sales_order_path}")
+            
+            # Look for other important files
+            other_files = []
+            print(f"DEBUG: Listing all files in {sales_order_path}:")
+            for file in os.listdir(sales_order_path):
+                print(f"DEBUG: Found file: '{file}'")
+                file_path = os.path.join(sales_order_path, file)
+                
+                # Check for Excel files with "Cost" or "Template" in filename
+                if (file.endswith('.xlsx') or file.endswith('.xls')) and ('Cost' in file.upper() or 'Template' in file.upper()):
+                    other_files.append(('📊', file, file_path))
+                    print(f"DEBUG: Found Cost/Template Excel file: {file}")
+                
+                # Check for PDF files
+                elif file.endswith('.pdf'):
+                    other_files.append(('📄', file, file_path))
+                    print(f"DEBUG: Found PDF file: {file}")
+                
+                # Check for any other Word documents (not already captured as proposals)
+                elif (file.endswith('.docx') or file.endswith('.doc')) and 'Proposal' not in file.upper():
+                    # Double-check that this file wasn't already captured as a proposal
+                    is_proposal = False
+                    if hasattr(self, 'proposal_docs') and self.proposal_docs:
+                        for proposal_path in self.proposal_docs:
+                            if os.path.basename(proposal_path) == file:
+                                is_proposal = True
+                                break
+                    
+                    if not is_proposal:
+                        other_files.append(('📄', file, file_path))
+                        print(f"DEBUG: Found other Word document: {file}")
+                    else:
+                        print(f"DEBUG: Skipping {file} - already captured as proposal")
+            
+            # Store the other files for quick access
+            self.other_docs = other_files
+            print(f"DEBUG: Found {len(other_files)} other important files")
+            
+        except Exception as e:
+            print(f"DEBUG: Error finding other files: {e}")
+            self.other_docs = []
+    
+    def open_other_doc(self, doc_path):
+        """Open a specific other document"""
+        if doc_path and os.path.exists(doc_path):
+            print(f"DEBUG: Opening document: {doc_path}")
+            self.open_path(doc_path)
+        else:
+            messagebox.showwarning("Warning", "Document not found!")
+    
+    def find_and_add_engineering_docs(self, job_dir):
+        """Find and add engineering documents from 3. Engineering folders"""
+        try:
+            print(f"DEBUG: Looking for engineering documents in: {job_dir}")
+            
+            # Look for 3. Engineering folder
+            engineering_path = os.path.join(job_dir, "3. Engineering")
+            
+            if not os.path.exists(engineering_path):
+                print(f"DEBUG: Engineering folder not found: {engineering_path}")
+                self.engineering_general_docs = []
+                self.engineering_releases_docs = []
+                return
+            
+            print(f"DEBUG: Found Engineering folder: {engineering_path}")
+            
+            # Find General Design files
+            general_design_path = os.path.join(engineering_path, "General Design")
+            self.engineering_general_docs = []
+            
+            if os.path.exists(general_design_path):
+                print(f"DEBUG: Found General Design folder: {general_design_path}")
+                for file in os.listdir(general_design_path):
+                    if file.endswith('.xlsx') or file.endswith('.xls'):
+                        file_path = os.path.join(general_design_path, file)
+                        self.engineering_general_docs.append(file_path)
+                        print(f"DEBUG: Found General Design file: {file}")
+            
+            # Find Releases files
+            releases_path = os.path.join(engineering_path, "Releases")
+            self.engineering_releases_docs = []
+            
+            if os.path.exists(releases_path):
+                print(f"DEBUG: Found Releases folder: {releases_path}")
+                for file in os.listdir(releases_path):
+                    file_path = os.path.join(releases_path, file)
+                    self.engineering_releases_docs.append(file_path)
+                    print(f"DEBUG: Found Releases file: {file}")
+            
+            print(f"DEBUG: Found {len(self.engineering_general_docs)} General Design files")
+            print(f"DEBUG: Found {len(self.engineering_releases_docs)} Releases files")
+            
+        except Exception as e:
+            print(f"DEBUG: Error finding engineering documents: {e}")
+            self.engineering_general_docs = []
+            self.engineering_releases_docs = []
+    
+    def open_engineering_doc(self, doc_path):
+        """Open a specific engineering document"""
+        if doc_path and os.path.exists(doc_path):
+            print(f"DEBUG: Opening engineering document: {doc_path}")
+            self.open_path(doc_path)
+        else:
+            messagebox.showwarning("Warning", "Engineering document not found!")
+    
+    def create_short_button_text(self, icon, filename):
+        """Create short, consistent button text for files"""
+        # Remove file extension
+        name_without_ext = os.path.splitext(filename)[0]
+        file_ext = os.path.splitext(filename)[1].upper()
+        
+        # Consistent labels for specific file types
+        if 'PROPOSAL' in filename.upper():
+            return f"{icon} Proposal"
+        elif 'ENGINEERING DESIGN' in filename.upper():
+            return f"{icon} Engineering Design"
+        elif 'PRESSURE DROP CALCULATOR' in filename.upper():
+            return f"{icon} Pressure Drop Calculator"
+        elif 'SPRAY NOZZLES' in filename.upper():
+            return f"{icon} Spray Nozzles"
+        elif 'ELECTRICAL RELEASE' in filename.upper():
+            return f"{icon} Electrical Release{file_ext}"
+        elif 'GAS TRAIN RELEASE' in filename.upper():
+            return f"{icon} Gas Train Release{file_ext}"
+        elif 'MECHANICAL RELEASE' in filename.upper():
+            return f"{icon} Mechanical Release{file_ext}"
+        elif 'HEATER RELEASE' in filename.upper():
+            return f"{icon} Heater Release{file_ext}"
+        elif 'TANK RELEASE' in filename.upper():
+            return f"{icon} Tank Release{file_ext}"
+        else:
+            # For all other files, show filename (truncated if too long)
+            if len(name_without_ext) > 25:
+                return f"{icon} {name_without_ext[:22]}..."
+            else:
+                return f"{icon} {name_without_ext}"
+    
+    def auto_save(self, *args):
+        """Auto-save project when any field changes"""
+        # Don't auto-save while loading project details
+        if hasattr(self, '_loading_project') and self._loading_project:
+            return
+            
+        # Only auto-save if we have a valid 5-digit job number
+        job_number = self.job_number_var.get().strip()
+        if self.is_valid_job_number(job_number):
+            try:
+                self.save_project_silent()
+            except Exception as e:
+                print(f"Auto-save failed: {e}")
+    
+    def is_valid_job_number(self, job_number):
+        """Validate that job number is exactly 5 digits"""
+        if not job_number:
+            return False
+        # Remove any whitespace and check if it's exactly 5 digits
+        clean_number = job_number.strip()
+        return clean_number.isdigit() and len(clean_number) == 5
+    
+    def save_project_silent(self):
+        """Save project without showing success message"""
+        job_number = self.job_number_var.get().strip()
+        if not self.is_valid_job_number(job_number):
             return
         
         conn = sqlite3.connect(self.db_manager.db_path)
@@ -297,10 +1169,10 @@ class ProjectsApp:
             
             # Calculate duration
             duration = None
-            if self.start_date_var.get() and self.completion_date_var.get():
+            if self.start_date_entry.get() and self.completion_date_entry.get():
                 try:
-                    start = datetime.strptime(self.start_date_var.get(), "%Y-%m-%d")
-                    end = datetime.strptime(self.completion_date_var.get(), "%Y-%m-%d")
+                    start = datetime.strptime(self.start_date_entry.get(), "%Y-%m-%d")
+                    end = datetime.strptime(self.completion_date_entry.get(), "%Y-%m-%d")
                     duration = (end - start).days
                 except ValueError:
                     pass
@@ -308,27 +1180,518 @@ class ProjectsApp:
             # Insert or update project
             cursor.execute("""
                 INSERT OR REPLACE INTO projects 
-                (job_number, assigned_to_id, assignment_date, start_date, completion_date, 
+                (job_number, job_directory, customer_name, customer_name_directory, 
+                 customer_location, customer_location_directory, assigned_to_id, 
+                 assignment_date, start_date, completion_date, 
                  total_duration_days, released_to_dee)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                self.job_number_var.get(),
+                job_number,
+                self.job_directory_picker.get() or None,
+                self.customer_name_var.get().upper() or None,
+                self.customer_name_picker.get() or None,
+                self.customer_location_var.get().upper() or None,
+                self.customer_location_picker.get() or None,
                 designer_id,
-                self.assignment_date_var.get() or None,
-                self.start_date_var.get() or None,
-                self.completion_date_var.get() or None,
+                self.assignment_date_entry.get() or None,
+                self.start_date_entry.get() or None,
+                self.completion_date_entry.get() or None,
                 duration,
-                self.released_to_dee_var.get() or None
+                self.released_to_dee_entry.get() or None
             ))
+            
+            conn.commit()
+            
+        except Exception as e:
+            print(f"Silent save failed: {e}")
+        finally:
+            conn.close()
+    
+    def load_dropdown_data(self):
+        """Load data for dropdown menus"""
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        
+        # Load designers
+        cursor.execute("SELECT name FROM designers ORDER BY name")
+        designers = [row[0] for row in cursor.fetchall()]
+        if hasattr(self, 'assigned_to_combo'):
+            self.assigned_to_combo['values'] = designers
+        
+        # Load engineers
+        cursor.execute("SELECT name FROM engineers ORDER BY name")
+        engineers = [row[0] for row in cursor.fetchall()]
+        if hasattr(self, 'initial_engineer_combo'):
+            self.initial_engineer_combo['values'] = engineers
+        
+        # Set engineers for all redline update combos
+        for i in range(1, 5):
+            combo_name = f"redline_update_{i}_engineer_combo"
+            if hasattr(self, combo_name):
+                getattr(self, combo_name)['values'] = engineers
+        
+        conn.close()
+    
+    def load_projects(self):
+        """Load projects from database"""
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        
+        query = """
+        SELECT p.job_number, p.customer_name, 
+               CASE WHEN p.completion_date IS NOT NULL THEN 'Completed' ELSE 'In Progress' END as status
+        FROM projects p
+        ORDER BY p.assignment_date DESC
+        """
+        
+        cursor.execute(query)
+        projects = cursor.fetchall()
+        
+        # Clear existing items
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        # Insert projects
+        for project in projects:
+            self.tree.insert('', 'end', values=(
+                project[0], project[1] or "N/A", project[2] or "N/A"
+            ))
+        
+        conn.close()
+    
+    def filter_projects(self, *args):
+        """Filter projects based on search term"""
+        search_term = self.search_var.get().lower()
+        
+        for item in self.tree.get_children():
+            values = self.tree.item(item)['values']
+            if any(search_term in str(value).lower() for value in values):
+                self.tree.reattach(item, '', 'end')
+            else:
+                self.tree.detach(item)
+    
+    def sort_by_job_number(self):
+        """Sort projects by job number (toggle ascending/descending)"""
+        # Get all current items and their values
+        items = []
+        for item in self.tree.get_children():
+            values = self.tree.item(item)['values']
+            items.append(values)
+        
+        # Clear the tree
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        # Sort by job number (convert to int for proper numeric sorting)
+        # Handle both numeric and non-numeric job numbers
+        def job_sort_key(x):
+            job_num = str(x[0]).strip()
+            if job_num.isdigit():
+                return int(job_num)
+            else:
+                # For non-numeric, try to extract first sequence of digits
+                import re
+                digits = re.findall(r'\d+', job_num)
+                if digits:
+                    return int(digits[0])
+                else:
+                    return 0
+        
+        # Sort with current direction
+        sorted_items = sorted(items, key=job_sort_key, reverse=not self.job_sort_ascending)
+        
+        # Toggle direction for next time
+        self.job_sort_ascending = not self.job_sort_ascending
+        
+        # Update button text to show current direction
+        direction = "↑" if self.job_sort_ascending else "↓"
+        self.sort_job_btn.config(text=f"Job # {direction}")
+        
+        # Add sorted items back
+        for item in sorted_items:
+            self.tree.insert('', 'end', values=item)
+    
+    def sort_by_customer(self):
+        """Sort projects by customer name (toggle ascending/descending)"""
+        # Get all current items and their values
+        items = []
+        for item in self.tree.get_children():
+            values = self.tree.item(item)['values']
+            items.append(values)
+        
+        # Clear the tree
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        # Sort by customer name (case-insensitive)
+        sorted_items = sorted(items, key=lambda x: x[1].upper() if x[1] else "", reverse=not self.customer_sort_ascending)
+        
+        # Toggle direction for next time
+        self.customer_sort_ascending = not self.customer_sort_ascending
+        
+        # Update button text to show current direction
+        direction = "↑" if self.customer_sort_ascending else "↓"
+        self.sort_customer_btn.config(text=f"Customer {direction}")
+        
+        # Add sorted items back
+        for item in sorted_items:
+            self.tree.insert('', 'end', values=item)
+    
+    def on_project_select(self, event):
+        """Handle project selection"""
+        selection = self.tree.selection()
+        if not selection:
+            print("DEBUG: No selection")
+            return
+        
+        item = self.tree.item(selection[0])
+        job_number = item['values'][0]
+        print(f"DEBUG: Selected project: {job_number}")
+        self.load_project_details(job_number)
+    
+    def load_project_details(self, job_number):
+        """Load details for selected project"""
+        print(f"DEBUG: Loading project details for: {job_number}")
+        
+        # Clean the job number (remove any extra text)
+        clean_job_number = str(job_number).strip()
+        if ' ' in clean_job_number:
+            # Extract just the numeric part
+            parts = clean_job_number.split()
+            for part in parts:
+                if part.isdigit() and len(part) == 5:
+                    clean_job_number = part
+                    break
+        
+        print(f"DEBUG: Cleaned job number: {clean_job_number}")
+        
+        # Temporarily disable auto-save to prevent interference
+        self._loading_project = True
+        
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        
+        # Load main project data
+        query = """
+        SELECT p.job_number, p.job_directory, p.customer_name, p.customer_name_directory,
+               p.customer_location, p.customer_location_directory, d.name, 
+               p.assignment_date, p.start_date, p.completion_date, 
+               p.total_duration_days, p.released_to_dee
+        FROM projects p
+        LEFT JOIN designers d ON p.assigned_to_id = d.id
+        WHERE p.job_number = ?
+        """
+        
+        cursor.execute(query, (clean_job_number,))
+        project = cursor.fetchone()
+        
+        print(f"DEBUG: Project data loaded: {project}")
+        
+        if project:
+            self.job_number_var.set(project[0])
+            self.job_directory_picker.set(project[1] or "")
+            self.customer_name_var.set(project[2] or "")
+            self.customer_name_picker.set(project[3] or "")
+            self.customer_location_var.set(project[4] or "")
+            self.customer_location_picker.set(project[5] or "")
+            self.assigned_to_var.set(project[6] or "")
+            self.assignment_date_entry.set(project[7] or "")
+            self.start_date_entry.set(project[8] or "")
+            self.completion_date_entry.set(project[9] or "")
+            self.duration_var.set(f"{project[10]} days" if project[10] else "N/A")
+            self.released_to_dee_entry.set(project[11] or "")
+        
+        # Load workflow data
+        self.load_workflow_data(job_number, cursor)
+        
+        # Update quick access panel
+        self.update_quick_access()
+        
+        # Re-enable auto-save
+        self._loading_project = False
+        
+        conn.close()
+    
+    def load_workflow_data(self, job_number, cursor):
+        """Load workflow data for selected project"""
+        # Get project ID
+        cursor.execute("SELECT id FROM projects WHERE job_number = ?", (job_number,))
+        project_result = cursor.fetchone()
+        if not project_result:
+            return
+        
+        project_id = project_result[0]
+        
+        # Load initial redline
+        cursor.execute("""
+            SELECT ir.redline_date, e.name, ir.is_completed
+            FROM initial_redline ir
+            LEFT JOIN engineers e ON ir.engineer_id = e.id
+            WHERE ir.project_id = ?
+        """, (project_id,))
+        initial_redline = cursor.fetchone()
+        
+        if initial_redline:
+            self.initial_redline_var.set(bool(initial_redline[2]))
+            self.initial_engineer_var.set(initial_redline[1] or "")
+            self.initial_date_entry.set(initial_redline[0] or "")
+        
+        # Load redline updates
+        cursor.execute("""
+            SELECT ru.update_cycle, ru.update_date, e.name, ru.is_completed
+            FROM redline_updates ru
+            LEFT JOIN engineers e ON ru.engineer_id = e.id
+            WHERE ru.project_id = ?
+            ORDER BY ru.update_cycle
+        """, (project_id,))
+        redline_updates = cursor.fetchall()
+        
+        for update in redline_updates:
+            cycle = update[0]
+            if 1 <= cycle <= 4:
+                # Only set the values if the widgets exist
+                if hasattr(self, f"redline_update_{cycle}_var"):
+                    getattr(self, f"redline_update_{cycle}_var").set(bool(update[3]))
+                if hasattr(self, f"redline_update_{cycle}_engineer_var"):
+                    getattr(self, f"redline_update_{cycle}_engineer_var").set(update[2] or "")
+                if hasattr(self, f"redline_update_{cycle}_date_entry"):
+                    getattr(self, f"redline_update_{cycle}_date_entry").set(update[1] or "")
+        
+        # Load OPS review
+        cursor.execute("""
+            SELECT review_date, is_completed
+            FROM ops_review
+            WHERE project_id = ?
+        """, (project_id,))
+        ops_review = cursor.fetchone()
+        
+        if ops_review:
+            self.ops_review_var.set(bool(ops_review[1]))
+            self.ops_review_date_entry.set(ops_review[0] or "")
+        
+        # Load Peter Weck review
+        cursor.execute("""
+            SELECT fixed_errors_date, is_completed
+            FROM peter_weck_review
+            WHERE project_id = ?
+        """, (project_id,))
+        peter_weck = cursor.fetchone()
+        
+        if peter_weck:
+            self.peter_weck_var.set(bool(peter_weck[1]))
+            self.peter_weck_date_entry.set(peter_weck[0] or "")
+        
+        # Load release to Dee
+        cursor.execute("""
+            SELECT release_date, missing_prints_date, d365_updates_date, 
+                   other_notes, other_date, is_completed
+            FROM release_to_dee
+            WHERE project_id = ?
+        """, (project_id,))
+        release_data = cursor.fetchone()
+        
+        if release_data:
+            self.release_fixed_errors_var.set(bool(release_data[5]))
+            self.missing_prints_date_entry.set(release_data[1] or "")
+            self.d365_updates_date_entry.set(release_data[2] or "")
+            self.other_notes_var.set(release_data[3] or "")
+            self.other_date_entry.set(release_data[4] or "")
+    
+    def new_project(self):
+        """Clear form for new project"""
+        # Clear main project fields
+        self.job_number_var.set("")
+        self.job_directory_picker.set("")
+        self.customer_name_var.set("")
+        self.customer_name_picker.set("")
+        self.customer_location_var.set("")
+        self.customer_location_picker.set("")
+        self.assigned_to_var.set("")
+        self.assignment_date_entry.set(datetime.now().strftime("%Y-%m-%d"))
+        self.start_date_entry.set("")
+        self.completion_date_entry.set("")
+        self.duration_var.set("")
+        self.released_to_dee_entry.set("")
+        
+        # Clear workflow fields
+        self.initial_redline_var.set(False)
+        self.initial_engineer_var.set("")
+        self.initial_date_entry.set("")
+        
+        for i in range(1, 5):
+            getattr(self, f"redline_update_{i}_var").set(False)
+            setattr(self, f"redline_update_{i}_engineer_var", tk.StringVar(""))
+            if hasattr(self, f"redline_update_{i}_date_entry"):
+                getattr(self, f"redline_update_{i}_date_entry").set("")
+        
+        self.ops_review_var.set(False)
+        self.ops_review_date_entry.set("")
+        self.peter_weck_var.set(False)
+        self.peter_weck_date_entry.set("")
+        self.release_fixed_errors_var.set(False)
+        self.missing_prints_date_entry.set("")
+        self.d365_updates_date_entry.set("")
+        self.other_notes_var.set("")
+        self.other_date_entry.set("")
+        
+        # Clear KOM file path and all document lists
+        if hasattr(self, 'kom_oc_form_path'):
+            self.kom_oc_form_path = None
+        if hasattr(self, 'proposal_docs'):
+            self.proposal_docs = []
+        if hasattr(self, 'other_docs'):
+            self.other_docs = []
+        if hasattr(self, 'engineering_general_docs'):
+            self.engineering_general_docs = []
+        if hasattr(self, 'engineering_releases_docs'):
+            self.engineering_releases_docs = []
+        
+        # Update quick access panel
+        self.update_quick_access()
+    
+    def save_project(self):
+        """Save project to database"""
+        job_number = self.job_number_var.get().strip()
+        if not job_number:
+            messagebox.showerror("Error", "Job number is required!")
+            return
+        
+        if not self.is_valid_job_number(job_number):
+            messagebox.showerror("Error", "Job number must be exactly 5 digits (e.g., 12345)!")
+            return
+        
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        
+        try:
+            # Get designer ID
+            designer_id = None
+            if self.assigned_to_var.get():
+                cursor.execute("SELECT id FROM designers WHERE name = ?", (self.assigned_to_var.get(),))
+                result = cursor.fetchone()
+                if result:
+                    designer_id = result[0]
+            
+            # Calculate duration
+            duration = None
+            if self.start_date_entry.get() and self.completion_date_entry.get():
+                try:
+                    start = datetime.strptime(self.start_date_entry.get(), "%Y-%m-%d")
+                    end = datetime.strptime(self.completion_date_entry.get(), "%Y-%m-%d")
+                    duration = (end - start).days
+                except ValueError:
+                    pass
+            
+            # Insert or update project
+            cursor.execute("""
+                INSERT OR REPLACE INTO projects 
+                (job_number, job_directory, customer_name, customer_name_directory, 
+                 customer_location, customer_location_directory, assigned_to_id, 
+                 assignment_date, start_date, completion_date, 
+                 total_duration_days, released_to_dee)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                job_number,
+                self.job_directory_picker.get() or None,
+                self.customer_name_var.get().upper() or None,
+                self.customer_name_picker.get() or None,
+                self.customer_location_var.get().upper() or None,
+                self.customer_location_picker.get() or None,
+                designer_id,
+                self.assignment_date_entry.get() or None,
+                self.start_date_entry.get() or None,
+                self.completion_date_entry.get() or None,
+                duration,
+                self.released_to_dee_entry.get() or None
+            ))
+            
+            # Get project ID
+            cursor.execute("SELECT id FROM projects WHERE job_number = ?", (self.job_number_var.get(),))
+            project_id = cursor.fetchone()[0]
+            
+            # Save workflow data
+            self.save_workflow_data(cursor, project_id)
             
             conn.commit()
             messagebox.showinfo("Success", "Project saved successfully!")
             self.load_projects()
+            self.update_quick_access()
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save project: {str(e)}")
         finally:
             conn.close()
+    
+    def save_workflow_data(self, cursor, project_id):
+        """Save workflow data for the project"""
+        # Save initial redline
+        if self.initial_redline_var.get():
+            engineer_id = None
+            if self.initial_engineer_var.get():
+                cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.initial_engineer_var.get(),))
+                result = cursor.fetchone()
+                if result:
+                    engineer_id = result[0]
+            
+            cursor.execute("""
+                INSERT OR REPLACE INTO initial_redline 
+                (project_id, engineer_id, redline_date, is_completed)
+                VALUES (?, ?, ?, ?)
+            """, (project_id, engineer_id, self.initial_date_entry.get() or None, True))
+        
+        # Save redline updates
+        for i in range(1, 5):
+            var_name = f"redline_update_{i}_var"
+            if hasattr(self, var_name) and getattr(self, var_name).get():
+                engineer_var_name = f"redline_update_{i}_engineer_var"
+                date_var_name = f"redline_update_{i}_date_var"
+                
+                engineer_id = None
+                if hasattr(self, engineer_var_name) and getattr(self, engineer_var_name).get():
+                    cursor.execute("SELECT id FROM engineers WHERE name = ?", (getattr(self, engineer_var_name).get(),))
+                    result = cursor.fetchone()
+                    if result:
+                        engineer_id = result[0]
+                
+                date_entry_name = f"redline_update_{i}_date_entry"
+                date_value = None
+                if hasattr(self, date_entry_name):
+                    date_value = getattr(self, date_entry_name).get()
+                
+                cursor.execute("""
+                    INSERT OR REPLACE INTO redline_updates 
+                    (project_id, engineer_id, update_date, update_cycle, is_completed)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (project_id, engineer_id, date_value, i, True))
+        
+        # Save OPS review
+        if self.ops_review_var.get():
+            cursor.execute("""
+                INSERT OR REPLACE INTO ops_review 
+                (project_id, review_date, is_completed)
+                VALUES (?, ?, ?)
+            """, (project_id, self.ops_review_date_entry.get() or None, True))
+        
+        # Save Peter Weck review
+        if self.peter_weck_var.get():
+            cursor.execute("""
+                INSERT OR REPLACE INTO peter_weck_review 
+                (project_id, fixed_errors_date, is_completed)
+                VALUES (?, ?, ?)
+            """, (project_id, self.peter_weck_date_entry.get() or None, True))
+        
+        # Save release to Dee
+        if self.release_fixed_errors_var.get():
+            cursor.execute("""
+                INSERT OR REPLACE INTO release_to_dee 
+                (project_id, release_date, missing_prints_date, d365_updates_date, 
+                 other_notes, other_date, is_completed)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (project_id, self.released_to_dee_entry.get() or None,
+                 self.missing_prints_date_entry.get() or None,
+                 self.d365_updates_date_entry.get() or None,
+                 self.other_notes_var.get() or None,
+                 self.other_date_entry.get() or None, True))
     
     def delete_project(self):
         """Delete selected project"""
@@ -341,24 +1704,70 @@ class ProjectsApp:
             item = self.tree.item(selection[0])
             job_number = item['values'][0]
             
+            # Clean the job number (remove any extra text)
+            clean_job_number = str(job_number).strip()
+            if ' ' in clean_job_number:
+                # Extract just the numeric part
+                parts = clean_job_number.split()
+                for part in parts:
+                    if part.isdigit() and len(part) == 5:
+                        clean_job_number = part
+                        break
+            
+            print(f"DEBUG: Deleting project - Original: {job_number}, Cleaned: {clean_job_number}")
+            
             conn = sqlite3.connect(self.db_manager.db_path)
             cursor = conn.cursor()
             
             try:
-                cursor.execute("DELETE FROM projects WHERE job_number = ?", (job_number,))
+                # Get project ID
+                cursor.execute("SELECT id FROM projects WHERE job_number = ?", (clean_job_number,))
+                project_result = cursor.fetchone()
+                if project_result:
+                    project_id = project_result[0]
+                    print(f"DEBUG: Found project ID: {project_id}")
+                    
+                    # Delete all related workflow data
+                    print("DEBUG: Deleting workflow data...")
+                    cursor.execute("DELETE FROM initial_redline WHERE project_id = ?", (project_id,))
+                    cursor.execute("DELETE FROM redline_updates WHERE project_id = ?", (project_id,))
+                    cursor.execute("DELETE FROM ops_review WHERE project_id = ?", (project_id,))
+                    cursor.execute("DELETE FROM peter_weck_review WHERE project_id = ?", (project_id,))
+                    cursor.execute("DELETE FROM release_to_dee WHERE project_id = ?", (project_id,))
+                    print("DEBUG: Workflow data deleted")
+                
+                # Delete project
+                print("DEBUG: Deleting main project...")
+                cursor.execute("DELETE FROM projects WHERE job_number = ?", (clean_job_number,))
+                rows_deleted = cursor.rowcount
+                print(f"DEBUG: Rows deleted: {rows_deleted}")
+                
+                # Commit changes
                 conn.commit()
-                messagebox.showinfo("Success", "Project deleted successfully!")
-                self.load_projects()
-                self.new_project()
+                print("DEBUG: Changes committed")
+                
+                if rows_deleted > 0:
+                    print("DEBUG: Project deleted successfully")
+                    messagebox.showinfo("Success", f"Project {clean_job_number} deleted successfully!")
+                    self.load_projects()
+                    self.new_project()
+                else:
+                    print("DEBUG: No project found to delete")
+                    messagebox.showwarning("Warning", f"No project found with job number: {clean_job_number}")
+                    
             except Exception as e:
+                print(f"DEBUG: Error during deletion: {e}")
+                print(f"DEBUG: Error type: {type(e)}")
+                import traceback
+                traceback.print_exc()
                 messagebox.showerror("Error", f"Failed to delete project: {str(e)}")
             finally:
                 conn.close()
     
     def calculate_duration(self, *args):
         """Calculate project duration"""
-        start_date = self.start_date_var.get()
-        completion_date = self.completion_date_var.get()
+        start_date = self.start_date_entry.get()
+        completion_date = self.completion_date_entry.get()
         
         if start_date and completion_date:
             try:
@@ -373,8 +1782,8 @@ class ProjectsApp:
     
     def set_start_date(self, *args):
         """Set start date to assignment date if not already set"""
-        if not self.start_date_var.get() and self.assignment_date_var.get():
-            self.start_date_var.set(self.assignment_date_var.get())
+        if not self.start_date_entry.get() and self.assignment_date_entry.get():
+            self.start_date_entry.set(self.assignment_date_entry.get())
     
     def export_data(self):
         """Export data to JSON"""

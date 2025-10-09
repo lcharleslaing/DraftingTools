@@ -40,6 +40,11 @@ class DatabaseManager:
             CREATE TABLE IF NOT EXISTS projects (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 job_number TEXT UNIQUE NOT NULL,
+                job_directory TEXT,
+                customer_name TEXT,
+                customer_name_directory TEXT,
+                customer_location TEXT,
+                customer_location_directory TEXT,
                 assigned_to_id INTEGER,
                 assignment_date TEXT,
                 start_date TEXT,
@@ -50,14 +55,28 @@ class DatabaseManager:
             )
         ''')
         
-        # Create redline_updates table
+        # Create initial_redline table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS initial_redline (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id INTEGER,
+                engineer_id INTEGER,
+                redline_date TEXT,
+                is_completed BOOLEAN DEFAULT 0,
+                FOREIGN KEY (project_id) REFERENCES projects (id),
+                FOREIGN KEY (engineer_id) REFERENCES engineers (id)
+            )
+        ''')
+        
+        # Create redline_updates table (for multiple update cycles)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS redline_updates (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 project_id INTEGER,
                 engineer_id INTEGER,
                 update_date TEXT,
-                update_type TEXT CHECK(update_type IN ('initial', 'update')),
+                update_cycle INTEGER,
+                is_completed BOOLEAN DEFAULT 0,
                 FOREIGN KEY (project_id) REFERENCES projects (id),
                 FOREIGN KEY (engineer_id) REFERENCES engineers (id)
             )
@@ -69,6 +88,7 @@ class DatabaseManager:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 project_id INTEGER,
                 review_date TEXT,
+                is_completed BOOLEAN DEFAULT 0,
                 FOREIGN KEY (project_id) REFERENCES projects (id)
             )
         ''')
@@ -79,6 +99,7 @@ class DatabaseManager:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 project_id INTEGER,
                 fixed_errors_date TEXT,
+                is_completed BOOLEAN DEFAULT 0,
                 FOREIGN KEY (project_id) REFERENCES projects (id)
             )
         ''')
@@ -93,6 +114,7 @@ class DatabaseManager:
                 d365_updates_date TEXT,
                 other_notes TEXT,
                 other_date TEXT,
+                is_completed BOOLEAN DEFAULT 0,
                 FOREIGN KEY (project_id) REFERENCES projects (id)
             )
         ''')
@@ -109,6 +131,58 @@ class DatabaseManager:
         
         # Insert default data
         self.insert_default_data(cursor)
+        
+        # Add missing columns if they don't exist (for existing databases)
+        try:
+            cursor.execute("ALTER TABLE redline_updates ADD COLUMN update_cycle INTEGER DEFAULT 1")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE redline_updates ADD COLUMN is_completed BOOLEAN DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE ops_review ADD COLUMN is_completed BOOLEAN DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE peter_weck_review ADD COLUMN is_completed BOOLEAN DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE release_to_dee ADD COLUMN is_completed BOOLEAN DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        # Add new project fields if they don't exist
+        try:
+            cursor.execute("ALTER TABLE projects ADD COLUMN job_directory TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE projects ADD COLUMN customer_name TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE projects ADD COLUMN customer_location TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE projects ADD COLUMN customer_name_directory TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
+        try:
+            cursor.execute("ALTER TABLE projects ADD COLUMN customer_location_directory TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
         
         conn.commit()
         conn.close()

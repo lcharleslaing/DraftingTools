@@ -1,0 +1,193 @@
+{
+  "designers": [
+    {
+      "id": 1,
+      "name": "Lee L."
+    },
+    {
+      "id": 2,
+      "name": "Pete W."
+    },
+    {
+      "id": 3,
+      "name": "Mike K."
+    },
+    {
+      "id": 4,
+      "name": "Rich T."
+    }
+  ],
+  "sqlite_sequence": [
+    {
+      "name": "designers",
+      "seq": 432
+    },
+    {
+      "name": "engineers",
+      "seq": 324
+    },
+    {
+      "name": "app_order",
+      "seq": 216
+    },
+    {
+      "name": "projects",
+      "seq": 317
+    }
+  ],
+  "engineers": [
+    {
+      "id": 1,
+      "name": "B. Pender"
+    },
+    {
+      "id": 2,
+      "name": "T. Stevenson"
+    },
+    {
+      "id": 3,
+      "name": "A. Rzonca"
+    }
+  ],
+  "projects": [
+    {
+      "id": 224,
+      "job_number": "35359",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Pinty's Delicious Foods/Oakville, ON/35359",
+      "customer_name": "PINTY'S DELICIOUS FOODS",
+      "customer_location": "OAKVILLE, ON",
+      "customer_name_directory": "F:/Pinty's Delicious Foods",
+      "customer_location_directory": "F:/Pinty's Delicious Foods/Oakville, ON"
+    },
+    {
+      "id": 234,
+      "job_number": "35371",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Brakebush Brothers/Hartwell, GA/35371",
+      "customer_name": "BRAKEBUSH BROTHERS",
+      "customer_location": "HARTWELL, GA",
+      "customer_name_directory": "F:/Brakebush Brothers",
+      "customer_location_directory": "F:/Brakebush Brothers/Hartwell, GA"
+    },
+    {
+      "id": 235,
+      "job_number": "35256",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Plymate Uniform/Shelbyville, IN/35256",
+      "customer_name": "PLYMATE INC",
+      "customer_location": "SHELBYVILLE, IN",
+      "customer_name_directory": "F:/Plymate Uniform",
+      "customer_location_directory": "F:/Plymate Uniform/Shelbyville, IN"
+    },
+    {
+      "id": 248,
+      "job_number": "35154",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Sunroc/St George, UT/35154",
+      "customer_name": "SUNROC",
+      "customer_location": "ST GEORGE, UT",
+      "customer_name_directory": "F:/Sunroc",
+      "customer_location_directory": "F:/Sunroc/St George, UT"
+    },
+    {
+      "id": 260,
+      "job_number": "35042",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Whitewater Processing/West Harrison, IN/35042",
+      "customer_name": "WHITEWATER PROCESSING",
+      "customer_location": "WEST HARRISON, IN",
+      "customer_name_directory": "F:/Whitewater Processing",
+      "customer_location_directory": "F:/Whitewater Processing/West Harrison, IN"
+    },
+    {
+      "id": 261,
+      "job_number": "35140",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Geneva Rock/Logan, UT/35140",
+      "customer_name": "GENEVA ROCK",
+      "customer_location": "LOGAN, UT",
+      "customer_name_directory": "F:/Geneva Rock",
+      "customer_location_directory": "F:/Geneva Rock/Logan, UT"
+    },
+    {
+      "id": 308,
+      "job_number": "35354",
+      "assigned_to_id": null,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN/35354",
+      "customer_name": "OZINGA CONCRETE PRODUCTS, INC",
+      "customer_location": "PLYMOUTH, IN",
+      "customer_name_directory": "F:/Ozinga Concrete Products, Inc",
+      "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN"
+    },
+    {
+      "id": 317,
+      "job_number": "35332",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/McCurdy's Laundry/Red Wing, MN/35332",
+      "customer_name": "MCCURDY'S LAUNDRY",
+      "customer_location": "RED WING, MN",
+      "customer_name_directory": "F:/McCurdy's Laundry",
+      "customer_location_directory": "F:/McCurdy's Laundry/Red Wing, MN"
+    }
+  ],
+  "redline_updates": [],
+  "ops_review": [],
+  "peter_weck_review": [],
+  "release_to_dee": [],
+  "app_order": [
+    {
+      "id": 1,
+      "app_name": "projects",
+      "display_order": 1,
+      "is_active": 1
+    },
+    {
+      "id": 2,
+      "app_name": "dashboard",
+      "display_order": 2,
+      "is_active": 1
+    }
+  ],
+  "initial_redline": []
+}
