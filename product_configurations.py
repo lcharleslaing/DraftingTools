@@ -25,7 +25,215 @@ class ProductConfigurationsApp:
         
         # Load initial data
         self.load_dropdown_data()
+        self.load_projects()
         
+        # Initialize current project
+        self.current_project = None
+        
+        # Auto-save flag to prevent saving during loading
+        self._loading_configuration = False
+        
+        # Setup auto-save for all fields
+        self.setup_autosave()
+        
+    def create_project_list_panel(self, parent):
+        """Create the project list panel on the left side"""
+        # Project list frame
+        project_frame = ttk.LabelFrame(parent, text="Projects", padding=10)
+        project_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        
+        # Search frame
+        search_frame = ttk.Frame(project_frame)
+        search_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        ttk.Label(search_frame, text="Search:").pack(side=tk.LEFT)
+        self.project_search_var = tk.StringVar()
+        self.project_search_var.trace('w', self.filter_projects)
+        search_entry = ttk.Entry(search_frame, textvariable=self.project_search_var, width=20)
+        search_entry.pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Refresh button
+        refresh_btn = ttk.Button(search_frame, text="Refresh", command=self.load_projects)
+        refresh_btn.pack(side=tk.LEFT, padx=(5, 0))
+        
+        # Project list treeview
+        columns = ('Job Number', 'Customer', 'Config Status')
+        self.project_tree = ttk.Treeview(project_frame, columns=columns, show='headings', height=15)
+        
+        # Configure columns
+        self.project_tree.heading('Job Number', text='Job Number')
+        self.project_tree.heading('Customer', text='Customer')
+        self.project_tree.heading('Config Status', text='Config Status')
+        
+        self.project_tree.column('Job Number', width=100)
+        self.project_tree.column('Customer', width=200)
+        self.project_tree.column('Config Status', width=120)
+        
+        # Scrollbar for project list
+        project_scrollbar = ttk.Scrollbar(project_frame, orient=tk.VERTICAL, command=self.project_tree.yview)
+        self.project_tree.configure(yscrollcommand=project_scrollbar.set)
+        
+        # Pack treeview and scrollbar
+        self.project_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        project_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Bind selection event
+        self.project_tree.bind('<<TreeviewSelect>>', self.on_project_select)
+        
+    def create_configuration_panel(self, parent):
+        """Create the configuration panel on the right side"""
+        # Configuration frame
+        config_frame = ttk.LabelFrame(parent, text="Product Configuration", padding=10)
+        config_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        
+        # Product selection and job number area
+        self.create_product_selection_area(config_frame)
+        
+        # Create notebook for different product types - full width
+        self.notebook = ttk.Notebook(config_frame)
+        self.notebook.pack(fill=tk.BOTH, expand=True, pady=(5, 0))
+        
+    def load_projects(self):
+        """Load all projects from the projects table"""
+        try:
+            conn = sqlite3.connect('drafting_tools.db')
+            cursor = conn.cursor()
+            
+            # Get all projects
+            cursor.execute("""
+                SELECT job_number, customer_name, customer_location
+                FROM projects 
+                ORDER BY job_number
+            """)
+            projects = cursor.fetchall()
+            
+            # Clear existing items
+            for item in self.project_tree.get_children():
+                self.project_tree.delete(item)
+            
+            # Add projects to tree
+            for project in projects:
+                job_number, customer_name, customer_location = project
+                customer = customer_name or "Unknown"
+                
+                # Check if configuration exists for this project
+                config_status = self.check_configuration_status(job_number)
+                
+                # Add to tree
+                self.project_tree.insert('', 'end', values=(
+                    job_number,
+                    customer,
+                    config_status
+                ))
+            
+            conn.close()
+            
+        except Exception as e:
+            print(f"Error loading projects: {e}")
+    
+    def check_configuration_status(self, job_number):
+        """Check if configuration exists for a project"""
+        try:
+            conn = sqlite3.connect('drafting_tools.db')
+            cursor = conn.cursor()
+            
+            # Check if any configuration exists for this job
+            cursor.execute("""
+                SELECT COUNT(*) FROM heater_configurations 
+                WHERE job_number = ?
+            """, (job_number,))
+            
+            count = cursor.fetchone()[0]
+            conn.close()
+            
+            return "Configured" if count > 0 else "Not Configured"
+            
+        except Exception as e:
+            print(f"Error checking configuration status: {e}")
+            return "Unknown"
+    
+    def filter_projects(self, *args):
+        """Filter projects based on search term"""
+        search_term = self.project_search_var.get().lower()
+        
+        # Clear existing items
+        for item in self.project_tree.get_children():
+            self.project_tree.delete(item)
+        
+        # Reload all projects and filter
+        try:
+            conn = sqlite3.connect('drafting_tools.db')
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT job_number, customer_name, customer_location
+                FROM projects 
+                ORDER BY job_number
+            """)
+            projects = cursor.fetchall()
+            
+            for project in projects:
+                job_number, customer_name, customer_location = project
+                customer = customer_name or "Unknown"
+                
+                # Filter based on search term
+                if (search_term in str(job_number).lower() or 
+                    search_term in customer.lower()):
+                    
+                    config_status = self.check_configuration_status(job_number)
+                    
+                    self.project_tree.insert('', 'end', values=(
+                        job_number,
+                        customer,
+                        config_status
+                    ))
+            
+            conn.close()
+            
+        except Exception as e:
+            print(f"Error filtering projects: {e}")
+    
+    def on_project_select(self, event):
+        """Handle project selection"""
+        selection = self.project_tree.selection()
+        if selection:
+            item = self.project_tree.item(selection[0])
+            job_number = item['values'][0]
+            self.current_project = job_number
+            
+            # Update job number field
+            self.job_number_var.set(job_number)
+            
+            # Load configuration for this project
+            self.load_configuration(job_number)
+    
+    def setup_autosave(self):
+        """Setup auto-save for all configuration fields"""
+        # List of all StringVar and BooleanVar fields that should auto-save
+        field_vars = [
+            'heater_model_var', 'location_var', 'heater_diameter_var', 'heater_height_var',
+            'heater_stack_diameter_var', 'application_var', 'material_var', 'flanges_var',
+            'burner_model_var', 'gas_train_position_var', 'heater_mounting_var', 'gaige_cocks_var',
+            'temperature_switch_var', 'packaging_var', 'mod_piping_transducer_material_var',
+            'hose_material_var', 'modulating_valve_var', 'media_frame_height_var',
+            'gas_var', 'side_manway_option_var', 'side_manway_angle_var', 'water_inlet_size_var',
+            'water_inlet_angles_var', 'suction_fitting_size_var', 'suction_fitting_height_var',
+            'suction_fitting_angle_var', 'ballast_packing_rings_var', 'ballast_packing_rings_height_var',
+            'float_chamber_angle_var', 'heater_final_assembly_part_number_var', 'hose_length_var',
+            'hose_part_number_var'
+        ]
+        
+        # Add trace to each field for auto-save
+        for field_name in field_vars:
+            if hasattr(self, field_name):
+                var = getattr(self, field_name)
+                var.trace('w', self.auto_save)
+    
+    def auto_save(self, *args):
+        """Auto-save configuration when fields change"""
+        if not self._loading_configuration and self.job_number_var.get().strip():
+            self.save_configuration_silent()
+    
     def init_database(self):
         """Initialize the database and create tables"""
         conn = sqlite3.connect('drafting_tools.db')
@@ -321,12 +529,15 @@ class ProductConfigurationsApp:
                                font=('Arial', 18, 'bold'))
         title_label.pack(pady=(0, 10))
         
-        # Product selection and configuration area
-        self.create_product_selection_area(main_frame)
+        # Create main content area with project list and configurations
+        content_frame = ttk.Frame(main_frame)
+        content_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Create notebook for different product types - full width
-        self.notebook = ttk.Notebook(main_frame)
-        self.notebook.pack(fill=tk.BOTH, expand=True, pady=(5, 0))
+        # Left side - Project list
+        self.create_project_list_panel(content_frame)
+        
+        # Right side - Product selection and configurations
+        self.create_configuration_panel(content_frame)
         
         # Heater configuration tab
         self.create_heater_tab()
@@ -776,12 +987,16 @@ class ProductConfigurationsApp:
         
         conn.close()
     
-    def load_configuration(self):
+    def load_configuration(self, job_number=None):
         """Load configuration for selected job number"""
-        job_number = self.job_number_var.get().strip()
+        if job_number is None:
+            job_number = self.job_number_var.get().strip()
+        
         if not job_number:
-            messagebox.showwarning("Warning", "Please enter a job number")
             return
+        
+        # Set loading flag to prevent auto-save during loading
+        self._loading_configuration = True
         
         conn = sqlite3.connect('drafting_tools.db')
         cursor = conn.cursor()
@@ -830,10 +1045,9 @@ class ProductConfigurationsApp:
             self.heater_final_assembly_part_number_var.set(config[31] or "")
             self.hose_length_var.set(config[32] or "")
             self.hose_part_number_var.set(config[33] or "")
-            
-            messagebox.showinfo("Success", f"Configuration loaded for job {job_number}")
-        else:
-            messagebox.showinfo("Info", f"No configuration found for job {job_number}")
+        
+        # Reset loading flag
+        self._loading_configuration = False
     
     def new_configuration(self):
         """Clear form for new configuration"""
@@ -872,81 +1086,108 @@ class ProductConfigurationsApp:
         self.hose_length_var.set("")
         self.hose_part_number_var.set("")
     
+    def save_configuration_silent(self):
+        """Save configuration to database without popup"""
+        job_number = self.job_number_var.get().strip()
+        if not job_number:
+            return
+        
+        try:
+            conn = sqlite3.connect('drafting_tools.db')
+            cursor = conn.cursor()
+            
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            cursor.execute('''
+                INSERT OR REPLACE INTO heater_configurations (
+                    job_number, heater_model, location, heater_diameter, heater_height,
+                    heater_stack_diameter, application, material, flanges_316, burner_model,
+                    gas_train_position, heater_mounting, gauge_cocks, temperature_switch,
+                    packaging_type, mod_piping_transducer_material, hose_material,
+                    modulating_valve, media_frame_height, gas_type, side_manway_option,
+                    side_manway_angle, water_inlet_size, water_inlet_angles,
+                    suction_fitting_size, suction_fitting_height, suction_fitting_angle,
+                    ballast_packing_rings, ballast_packing_rings_height, float_chamber_angle,
+                    heater_final_assembly_part_number, hose_length, hose_part_number,
+                    created_date, updated_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                job_number,
+                self.heater_model_var.get(),
+                self.location_var.get(),
+                self.heater_diameter_var.get(),
+                self.heater_height_var.get(),
+                self.heater_stack_diameter_var.get(),
+                self.application_var.get(),
+                self.material_var.get(),
+                self.flanges_316_var.get(),
+                self.burner_model_var.get(),
+                self.gas_train_position_var.get(),
+                self.heater_mounting_var.get(),
+                self.gauge_cocks_var.get(),
+                self.temperature_switch_var.get(),
+                self.packaging_type_var.get(),
+                self.mod_piping_transducer_material_var.get(),
+                self.hose_material_var.get(),
+                self.modulating_valve_var.get(),
+                self.media_frame_height_var.get(),
+                self.gas_type_var.get(),
+                self.side_manway_option_var.get(),
+                self.side_manway_angle_var.get(),
+                self.water_inlet_size_var.get(),
+                self.water_inlet_angles_var.get(),
+                self.suction_fitting_size_var.get(),
+                self.suction_fitting_height_var.get(),
+                self.suction_fitting_angle_var.get(),
+                self.ballast_packing_rings_var.get(),
+                self.ballast_packing_rings_height_var.get(),
+                self.float_chamber_angle_var.get(),
+                self.heater_final_assembly_part_number_var.get(),
+                self.hose_length_var.get(),
+                self.hose_part_number_var.get(),
+                current_time,
+                current_time
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            # Update project list status
+            self.update_project_status(job_number)
+            
+        except Exception as e:
+            print(f"Error saving configuration: {e}")
+    
     def save_configuration(self):
         """Save the current configuration"""
         job_number = self.job_number_var.get().strip()
         if not job_number:
-            messagebox.showwarning("Warning", "Please enter a job number")
             return
         
-        conn = sqlite3.connect('drafting_tools.db')
-        cursor = conn.cursor()
-        
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        cursor.execute('''
-            INSERT OR REPLACE INTO heater_configurations (
-                job_number, heater_model, location, heater_diameter, heater_height,
-                heater_stack_diameter, application, material, flanges_316, burner_model,
-                gas_train_position, heater_mounting, gauge_cocks, temperature_switch,
-                packaging_type, mod_piping_transducer_material, hose_material,
-                modulating_valve, media_frame_height, gas_type, side_manway_option,
-                side_manway_angle, water_inlet_size, water_inlet_angles,
-                suction_fitting_size, suction_fitting_height, suction_fitting_angle,
-                ballast_packing_rings, ballast_packing_rings_height, float_chamber_angle,
-                heater_final_assembly_part_number, hose_length, hose_part_number,
-                created_date, updated_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            job_number,
-            self.heater_model_var.get(),
-            self.location_var.get(),
-            self.heater_diameter_var.get(),
-            self.heater_height_var.get(),
-            self.heater_stack_diameter_var.get(),
-            self.application_var.get(),
-            self.material_var.get(),
-            self.flanges_316_var.get(),
-            self.burner_model_var.get(),
-            self.gas_train_position_var.get(),
-            self.heater_mounting_var.get(),
-            self.gauge_cocks_var.get(),
-            self.temperature_switch_var.get(),
-            self.packaging_type_var.get(),
-            self.mod_piping_transducer_material_var.get(),
-            self.hose_material_var.get(),
-            self.modulating_valve_var.get(),
-            self.media_frame_height_var.get(),
-            self.gas_type_var.get(),
-            self.side_manway_option_var.get(),
-            self.side_manway_angle_var.get(),
-            self.water_inlet_size_var.get(),
-            self.water_inlet_angles_var.get(),
-            self.suction_fitting_size_var.get(),
-            self.suction_fitting_height_var.get(),
-            self.suction_fitting_angle_var.get(),
-            self.ballast_packing_rings_var.get(),
-            self.ballast_packing_rings_height_var.get(),
-            self.float_chamber_angle_var.get(),
-            self.heater_final_assembly_part_number_var.get(),
-            self.hose_length_var.get(),
-            self.hose_part_number_var.get(),
-            current_time,
-            current_time
-        ))
-        
-        conn.commit()
-        conn.close()
-        
-        messagebox.showinfo("Success", f"Configuration saved for job {job_number}")
+        self.save_configuration_silent()
+        # No popup - user can see status in the project list
+    
+    def update_project_status(self, job_number):
+        """Update the configuration status in the project list"""
+        try:
+            # Find the project in the tree and update its status
+            for item in self.project_tree.get_children():
+                values = self.project_tree.item(item)['values']
+                if values[0] == job_number:
+                    # Update the status column
+                    new_status = self.check_configuration_status(job_number)
+                    self.project_tree.item(item, values=(values[0], values[1], new_status))
+                    break
+        except Exception as e:
+            print(f"Error updating project status: {e}")
     
     def delete_configuration(self):
         """Delete the current configuration"""
         job_number = self.job_number_var.get().strip()
         if not job_number:
-            messagebox.showwarning("Warning", "Please enter a job number")
             return
         
+        # Keep confirmation for delete - this is important
         if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete the configuration for job {job_number}?"):
             conn = sqlite3.connect('drafting_tools.db')
             cursor = conn.cursor()
@@ -957,13 +1198,13 @@ class ProductConfigurationsApp:
             conn.close()
             
             self.new_configuration()  # Clear the form
-            messagebox.showinfo("Success", f"Configuration deleted for job {job_number}")
+            # Update project list status
+            self.update_project_status(job_number)
     
     def export_configuration(self):
         """Export configuration to JSON"""
         job_number = self.job_number_var.get().strip()
         if not job_number:
-            messagebox.showwarning("Warning", "Please enter a job number")
             return
         
         conn = sqlite3.connect('drafting_tools.db')
@@ -1024,9 +1265,8 @@ class ProductConfigurationsApp:
             with open(filename, 'w') as f:
                 json.dump(config_dict, f, indent=2)
             
-            messagebox.showinfo("Success", f"Configuration exported to {filename}")
-        else:
-            messagebox.showwarning("Warning", f"No configuration found for job {job_number}")
+            # No popup - user can see the file was saved
+        # No warning popup - user can see status in project list
     
     def toggle_fullscreen(self):
         """Toggle fullscreen mode"""

@@ -285,38 +285,83 @@ Developed for CECO Environmental Corp
         try:
             # Get current process ID to avoid closing ourselves
             current_pid = os.getpid()
+            print(f"Current PID: {current_pid}")
             
             # Find all Python processes running our scripts
             related_processes = []
+            all_python_processes = []
+            
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
                     if proc.info['name'] and 'python' in proc.info['name'].lower():
                         cmdline = proc.info['cmdline']
                         if cmdline:
-                            cmdline_str = ' '.join(cmdline).lower()
+                            cmdline_str = ' '.join(cmdline)
+                            all_python_processes.append(f"PID {proc.info['pid']}: {cmdline_str}")
+                            
                             # More flexible matching - look for our script names anywhere in the command line
-                            if any(script in cmdline_str for script in ['projects.py', 'product_configurations.py', 'dashboard.py']):
+                            if any(script in cmdline_str.lower() for script in ['projects.py', 'product_configurations.py', 'dashboard.py']):
                                 if proc.info['pid'] != current_pid:  # Don't close ourselves
                                     related_processes.append(proc)
+                                    print(f"Found related process: PID {proc.info['pid']} - {cmdline_str}")
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     continue
+            
+            # Also try to find by window title (Windows-specific)
+            try:
+                import win32gui
+                import win32process
+                
+                def enum_windows_callback(hwnd, windows):
+                    if win32gui.IsWindowVisible(hwnd):
+                        window_title = win32gui.GetWindowText(hwnd)
+                        if any(title in window_title for title in ['Product Configurations', 'Project Management', 'Drafting Tools']):
+                            _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                            if pid != current_pid:
+                                # Find the process object
+                                for proc in psutil.process_iter(['pid']):
+                                    if proc.info['pid'] == pid:
+                                        if proc not in related_processes:
+                                            related_processes.append(proc)
+                                            print(f"Found by window title: PID {pid} - {window_title}")
+                                        break
+                    return True
+                
+                win32gui.EnumWindows(enum_windows_callback, [])
+            except ImportError:
+                print("win32gui not available, skipping window title detection")
+            except Exception as e:
+                print(f"Error in window title detection: {e}")
+            
+            print(f"All Python processes found:")
+            for proc_info in all_python_processes:
+                print(f"  {proc_info}")
+            
+            print(f"Related processes to close: {len(related_processes)}")
             
             # Close all related processes
             for proc in related_processes:
                 try:
-                    print(f"Closing process: {proc.info['pid']} - {' '.join(proc.info['cmdline'])}")
+                    print(f"Attempting to close process: {proc.info['pid']} - {' '.join(proc.info['cmdline'])}")
                     proc.terminate()
                     # Give it a moment to close gracefully
                     try:
                         proc.wait(timeout=3)
+                        print(f"Successfully closed process: {proc.info['pid']}")
                     except psutil.TimeoutExpired:
                         # Force kill if it doesn't close gracefully
                         print(f"Force killing process: {proc.info['pid']}")
                         proc.kill()
+                        print(f"Force killed process: {proc.info['pid']}")
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
                     print(f"Error closing process {proc.info['pid']}: {e}")
             
             print(f"Closed {len(related_processes)} related processes")
+            
+            # If no processes were found, try a more aggressive approach
+            if len(related_processes) == 0:
+                print("No processes found with standard detection, trying aggressive approach...")
+                self.aggressive_process_cleanup(current_pid)
             
         except Exception as e:
             print(f"Error finding related processes: {e}")
@@ -333,6 +378,40 @@ Developed for CECO Environmental Corp
                     print(f"Error closing tracked process: {e}")
             
             self.child_processes.clear()
+    
+    def aggressive_process_cleanup(self, current_pid):
+        """More aggressive approach to find and close related processes"""
+        try:
+            print("Attempting aggressive process cleanup...")
+            killed_count = 0
+            
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    if proc.info['name'] and 'python' in proc.info['name'].lower():
+                        if proc.info['pid'] != current_pid:
+                            cmdline = proc.info['cmdline']
+                            if cmdline:
+                                cmdline_str = ' '.join(cmdline)
+                                # Look for any indication this might be our app
+                                if any(indicator in cmdline_str.lower() for indicator in [
+                                    'product_configurations', 'projects', 'dashboard',
+                                    'drafting', 'tkinter', 'gui'
+                                ]):
+                                    print(f"Aggressively closing: PID {proc.info['pid']} - {cmdline_str}")
+                                    proc.terminate()
+                                    try:
+                                        proc.wait(timeout=2)
+                                        killed_count += 1
+                                    except psutil.TimeoutExpired:
+                                        proc.kill()
+                                        killed_count += 1
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    continue
+            
+            print(f"Aggressive cleanup killed {killed_count} processes")
+            
+        except Exception as e:
+            print(f"Error in aggressive cleanup: {e}")
     
     def center_window(self):
         """Center the window on screen"""
