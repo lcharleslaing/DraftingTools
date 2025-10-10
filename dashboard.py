@@ -100,6 +100,11 @@ class DashboardApp:
                                command=self.launch_configurations, style='App.TButton')
         config_btn.grid(row=0, column=1, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
         
+        # Print Package Management
+        print_btn = ttk.Button(parent, text="🖨️ Print Package Management\n\nManage drawing print\npackages with global\nsearch and print queue", 
+                              command=self.launch_print_package, style='App.TButton')
+        print_btn.grid(row=0, column=2, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
         # Placeholder for future apps
         future_btn = ttk.Button(parent, text="🔧 Additional Tools\n\nMore drafting tools\ncoming soon...", 
                                command=self.show_coming_soon, style='App.TButton')
@@ -162,6 +167,20 @@ class DashboardApp:
                 messagebox.showerror("Error", "product_configurations.py not found in current directory")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch Product Configurations:\n{str(e)}")
+    
+    def launch_print_package(self):
+        """Launch the Print Package Management application"""
+        try:
+            # Check if print_package.py exists
+            if os.path.exists('print_package.py'):
+                process = subprocess.Popen([sys.executable, 'print_package.py'])
+                self.child_processes.append(process)
+                # Clean up finished processes
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "print_package.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Print Package Management:\n{str(e)}")
     
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""
@@ -239,20 +258,25 @@ Developed for CECO Environmental Corp
     
     def exit_application(self):
         """Exit the application and close all related windows"""
-        # Get list of currently running related processes
-        running_processes = self.get_running_related_processes()
-        
-        if running_processes:
-            process_list = "\n".join([f"• {proc.info['name']} (PID: {proc.info['pid']})" for proc in running_processes])
-            message = f"Are you sure you want to exit the Drafting Tools Suite?\n\nThis will close all open applications:\n\n{process_list}\n\nContinue?"
-        else:
-            message = "Are you sure you want to exit the Drafting Tools Suite?"
-        
-        if messagebox.askyesno("Exit Application", message):
-            # Find and close all related processes
-            self.close_all_related_processes()
+        try:
+            # Get list of currently running related processes
+            running_processes = self.get_running_related_processes()
             
-            # Close the main window
+            if running_processes:
+                process_list = "\n".join([f"• {proc.info.get('name', 'Unknown')} (PID: {proc.info.get('pid', 'Unknown')})" for proc in running_processes])
+                message = f"Are you sure you want to exit the Drafting Tools Suite?\n\nThis will close all open applications:\n\n{process_list}\n\nContinue?"
+            else:
+                message = "Are you sure you want to exit the Drafting Tools Suite?"
+            
+            if messagebox.askyesno("Exit Application", message):
+                # Find and close all related processes
+                self.close_all_related_processes()
+                
+                # Close the main window
+                self.root.quit()
+        except Exception as e:
+            print(f"Error in exit_application: {e}")
+            # Fallback: just close the main window
             self.root.quit()
     
     def get_running_related_processes(self):
@@ -264,15 +288,15 @@ Developed for CECO Environmental Corp
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
                     if proc.info['name'] and 'python' in proc.info['name'].lower():
-                        cmdline = proc.info['cmdline']
+                        cmdline = proc.info.get('cmdline', [])
                         if cmdline:
                             cmdline_str = ' '.join(cmdline).lower()
                             # More flexible matching - look for our script names anywhere in the command line
-                            if any(script in cmdline_str for script in ['projects.py', 'product_configurations.py', 'dashboard.py']):
+                            if any(script in cmdline_str for script in ['projects.py', 'product_configurations.py', 'print_package.py', 'dashboard.py']):
                                 if proc.info['pid'] != current_pid:  # Don't include ourselves
                                     related_processes.append(proc)
                                     print(f"Found related process: PID {proc.info['pid']} - {cmdline_str}")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
                     continue
             
             return related_processes
@@ -294,17 +318,17 @@ Developed for CECO Environmental Corp
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
                     if proc.info['name'] and 'python' in proc.info['name'].lower():
-                        cmdline = proc.info['cmdline']
+                        cmdline = proc.info.get('cmdline', [])
                         if cmdline:
                             cmdline_str = ' '.join(cmdline)
                             all_python_processes.append(f"PID {proc.info['pid']}: {cmdline_str}")
                             
                             # More flexible matching - look for our script names anywhere in the command line
-                            if any(script in cmdline_str.lower() for script in ['projects.py', 'product_configurations.py', 'dashboard.py']):
+                            if any(script in cmdline_str.lower() for script in ['projects.py', 'product_configurations.py', 'print_package.py', 'dashboard.py']):
                                 if proc.info['pid'] != current_pid:  # Don't close ourselves
                                     related_processes.append(proc)
                                     print(f"Found related process: PID {proc.info['pid']} - {cmdline_str}")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
                     continue
             
             # Also try to find by window title (Windows-specific)
@@ -315,7 +339,7 @@ Developed for CECO Environmental Corp
                 def enum_windows_callback(hwnd, windows):
                     if win32gui.IsWindowVisible(hwnd):
                         window_title = win32gui.GetWindowText(hwnd)
-                        if any(title in window_title for title in ['Product Configurations', 'Project Management', 'Drafting Tools']):
+                        if any(title in window_title for title in ['Product Configurations', 'Project Management', 'Print Package Management', 'Drafting Tools']):
                             _, pid = win32process.GetWindowThreadProcessId(hwnd)
                             if pid != current_pid:
                                 # Find the process object
@@ -389,12 +413,12 @@ Developed for CECO Environmental Corp
                 try:
                     if proc.info['name'] and 'python' in proc.info['name'].lower():
                         if proc.info['pid'] != current_pid:
-                            cmdline = proc.info['cmdline']
+                            cmdline = proc.info.get('cmdline', [])
                             if cmdline:
                                 cmdline_str = ' '.join(cmdline)
                                 # Look for any indication this might be our app
                                 if any(indicator in cmdline_str.lower() for indicator in [
-                                    'product_configurations', 'projects', 'dashboard',
+                                    'product_configurations', 'projects', 'print_package', 'dashboard',
                                     'drafting', 'tkinter', 'gui'
                                 ]):
                                     print(f"Aggressively closing: PID {proc.info['pid']} - {cmdline_str}")
@@ -405,7 +429,7 @@ Developed for CECO Environmental Corp
                                     except psutil.TimeoutExpired:
                                         proc.kill()
                                         killed_count += 1
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
                     continue
             
             print(f"Aggressive cleanup killed {killed_count} processes")

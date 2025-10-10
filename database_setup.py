@@ -184,6 +184,21 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass  # Column already exists
         
+        # Create drawings table for print packages
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS drawings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_number TEXT NOT NULL,
+                drawing_path TEXT NOT NULL,
+                drawing_name TEXT NOT NULL,
+                drawing_type TEXT,
+                file_extension TEXT,
+                added_date TEXT,
+                added_by TEXT,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
         conn.commit()
         conn.close()
     
