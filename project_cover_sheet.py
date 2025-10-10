@@ -4,10 +4,9 @@ import sqlite3
 from datetime import datetime
 import os
 from database_setup import DatabaseManager
-from docx import Document
-from docx.shared import Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+import openpyxl
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl.utils import get_column_letter
 
 class ProjectCoverSheet:
     def __init__(self, job_number, db_manager):
@@ -122,77 +121,81 @@ class ProjectCoverSheet:
             return "N/A"
         return f"{days} days"
     
-    def create_cover_sheet_docx(self, output_path):
-        """Create the project cover sheet as a Word document"""
-        doc = Document()
+    def create_cover_sheet_excel(self, output_path):
+        """Create the project cover sheet as an Excel workbook"""
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Project Status Report"
         
-        # Set page orientation to landscape
-        section = doc.sections[0]
-        section.page_width = Inches(11)  # Landscape width
-        section.page_height = Inches(8.5)  # Landscape height
+        # Set page setup for 8.5 x 11 paper size
+        ws.page_setup.paperSize = ws.PAPERSIZE_LETTER  # 8.5 x 11
+        ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
+        ws.page_margins.left = 0.5
+        ws.page_margins.right = 0.5
+        ws.page_margins.top = 0.5
+        ws.page_margins.bottom = 0.5
         
-        # Set default font to Calibri
-        style = doc.styles['Normal']
-        font = style.font
-        font.name = 'Calibri'
-        font.size = Inches(0.1)
+        # Center the content horizontally on the page (CORRECT METHOD)
+        ws.print_options.horizontalCentered = True
         
-        # Job Number (BIG & no label)
-        job_para = doc.add_paragraph()
-        job_run = job_para.add_run(str(self.job_number))  # Convert to string
-        job_run.font.name = 'Calibri'
-        job_run.font.size = Inches(0.35)  # Large font
-        job_run.bold = True
-        job_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # Set up styles
+        header_font = Font(name='Calibri', size=24, bold=True)
+        subheader_font = Font(name='Calibri', size=18, bold=True)
+        normal_font = Font(name='Calibri', size=12)
+        small_font = Font(name='Calibri', size=10)
         
-        # Add some space
-        doc.add_paragraph()
+        center_alignment = Alignment(horizontal='center', vertical='center')
+        left_alignment = Alignment(horizontal='left', vertical='center')
         
-        # Customer Name and Location (BIG & no label)
+        # Check if Engineering is processed
+        engineering_processed = self.check_engineering_processed()
+        
+        # Job Number (BIG & no label) - Row 1 - Centered on page
+        ws['D1'] = str(self.job_number)
+        ws['D1'].font = header_font
+        ws['D1'].alignment = center_alignment
+        
+        # Customer Name - Row 2 - Centered on page
         customer_name = self.project_data[2] or "Not Set"
+        ws['D2'] = customer_name
+        ws['D2'].font = subheader_font
+        ws['D2'].alignment = center_alignment
+        
+        # Customer Location - Row 3 - Centered on page
         customer_location = self.project_data[3] or "Not Set"
+        ws['D3'] = customer_location
+        ws['D3'].font = subheader_font
+        ws['D3'].alignment = center_alignment
         
-        customer_para = doc.add_paragraph()
-        customer_run = customer_para.add_run(customer_name)
-        customer_run.font.name = 'Calibri'
-        customer_run.font.size = Inches(0.2)
-        customer_run.bold = True
-        customer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        
-        location_para = doc.add_paragraph()
-        location_run = location_para.add_run(customer_location)
-        location_run.font.name = 'Calibri'
-        location_run.font.size = Inches(0.2)
-        location_run.bold = True
-        location_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        
-        # Add some space
-        doc.add_paragraph()
-        
-        # Status (BIG & with label) - Updated format
+        # Status - Row 4 - Centered on page
         status = self.get_project_status()
         start_date = self.format_date(self.project_data[6]) if self.project_data[6] else "Not Set"
         
-        status_para = doc.add_paragraph()
         if status == "In Progress":
             status_text = f"Status: {status}, Started: {start_date}"
         else:
             status_text = f"Status: {status}"
-        status_run = status_para.add_run(status_text)
-        status_run.font.name = 'Calibri'
-        status_run.font.size = Inches(0.18)
-        status_run.bold = True
-        status_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        ws['D4'] = status_text
+        ws['D4'].font = subheader_font
+        ws['D4'].alignment = center_alignment
         
         # Add some space
-        doc.add_paragraph()
+        ws.row_dimensions[5].height = 20
         
-        # Project Workflow Section - Latest Update/Next Up
-        workflow_heading = doc.add_paragraph()
-        workflow_run = workflow_heading.add_run("PROJECT WORKFLOW (Latest Update/Next Up)")
-        workflow_run.font.name = 'Calibri'
-        workflow_run.font.size = Inches(0.12)
-        workflow_run.bold = True
+        # Project Workflow Section - Row 6 - Centered on page
+        ws['D6'] = "PROJECT WORKFLOW (Latest Update/Next Up)"
+        ws['D6'].font = Font(name='Calibri', size=14, bold=True)
+        ws['D6'].alignment = center_alignment
+        
+        # Add engineering warning if not processed - Row 7
+        if not engineering_processed:
+            ws['D7'] = "⚠️ ENGINEERING NOT PROCESSED ⚠️"
+            ws['D7'].font = Font(name='Calibri', size=16, bold=True, color='FF0000')  # Red color
+            ws['D7'].alignment = center_alignment
+            current_row = 8  # Start workflow content after warning
+        else:
+            current_row = 7  # Start workflow content normally
         
         # Find latest completed and next pending
         latest_completed = None
@@ -224,41 +227,132 @@ class ProjectCoverSheet:
                     if not next_pending:
                         next_pending = (step_name, None, step_data[1] if len(step_data) > 2 else None, step_data[0])
         
-        # Display latest completed
+        # current_row is already set above based on whether warning is shown
+        
+        # Display latest completed - Centered
         if latest_completed:
             step_name, step_num, engineer, date = latest_completed
             if step_num:
-                doc.add_paragraph(f"   Update {step_num}: ✓ Completed")
+                ws[f'D{current_row}'] = f"Update {step_num}: [COMPLETED]"
             else:
-                doc.add_paragraph(f"{step_name}: ✓ Completed")
+                ws[f'D{current_row}'] = f"{step_name}: [COMPLETED]"
+            ws[f'D{current_row}'].font = normal_font
+            ws[f'D{current_row}'].alignment = center_alignment
+            current_row += 1
+            
             if engineer:
-                doc.add_paragraph(f"   Engineer: {engineer}")
+                ws[f'D{current_row}'] = f"Engineer: {engineer}"
+                ws[f'D{current_row}'].font = normal_font
+                ws[f'D{current_row}'].alignment = center_alignment
+                current_row += 1
             if date:
-                doc.add_paragraph(f"   Date: {self.format_date(date)}")
+                ws[f'D{current_row}'] = f"Date: {self.format_date(date)}"
+                ws[f'D{current_row}'].font = normal_font
+                ws[f'D{current_row}'].alignment = center_alignment
+                current_row += 1
         
-        # Display next pending
+        # Add space between sections
+        current_row += 1
+        
+        # Display next pending - Centered
         if next_pending:
             step_name, step_num, engineer, date = next_pending
             if step_num:
-                doc.add_paragraph(f"   Update {step_num}: ○ Pending")
+                ws[f'D{current_row}'] = f"Update {step_num}: [PENDING]"
             else:
-                doc.add_paragraph(f"{step_name}: ○ Pending")
+                ws[f'D{current_row}'] = f"{step_name}: [PENDING]"
+            ws[f'D{current_row}'].font = normal_font
+            ws[f'D{current_row}'].alignment = center_alignment
+            current_row += 1
+            
             if engineer:
-                doc.add_paragraph(f"   Engineer: {engineer}")
+                ws[f'D{current_row}'] = f"Engineer: {engineer}"
+                ws[f'D{current_row}'].font = normal_font
+                ws[f'D{current_row}'].alignment = center_alignment
+                current_row += 1
             if date:
-                doc.add_paragraph(f"   Date: {self.format_date(date)}")
+                ws[f'D{current_row}'] = f"Date: {self.format_date(date)}"
+                ws[f'D{current_row}'].font = normal_font
+                ws[f'D{current_row}'].alignment = center_alignment
+                current_row += 1
         
-        # Footer with generation date
-        doc.add_paragraph()
-        footer_para = doc.add_paragraph()
-        footer_run = footer_para.add_run(f"Generated: {datetime.now().strftime('%m/%d/%Y %I:%M %p')}")
-        footer_run.font.name = 'Calibri'
-        footer_run.font.size = Inches(0.08)
-        footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # Footer with generation date - Row 20 - Centered on page
+        ws['D20'] = f"Generated: {datetime.now().strftime('%m/%d/%Y %I:%M %p')}"
+        ws['D20'].font = small_font
+        ws['D20'].alignment = center_alignment
         
-        # Save the document
-        doc.save(output_path)
-        return True
+        # Remove custom column widths - let horizontal centering do its job
+        # ws.column_dimensions['A'].width = 10  # Left margin
+        # ws.column_dimensions['B'].width = 10  # Left margin
+        # ws.column_dimensions['C'].width = 20  # Content area
+        # ws.column_dimensions['D'].width = 20  # Main content (centered)
+        # ws.column_dimensions['E'].width = 20  # Content area
+        # ws.column_dimensions['F'].width = 10  # Right margin
+        # ws.column_dimensions['G'].width = 10  # Right margin
+        
+        # Set row heights
+        ws.row_dimensions[1].height = 40  # Job number
+        ws.row_dimensions[2].height = 30  # Customer name
+        ws.row_dimensions[3].height = 30  # Customer location
+        ws.row_dimensions[4].height = 30  # Status
+        
+        # Add watermark if engineering not processed (after all content is added)
+        # if not engineering_processed:
+        #     self.add_engineering_watermark(ws)
+        
+        # Save the workbook with error handling
+        try:
+            wb.save(output_path)
+            return True
+        except PermissionError:
+            print(f"Permission denied saving to {output_path}. File may be open in Excel.")
+            # Try saving to a different location
+            import tempfile
+            temp_path = os.path.join(tempfile.gettempdir(), f"temp_status_report_{self.job_number}.xlsx")
+            wb.save(temp_path)
+            print(f"Saved to temporary location: {temp_path}")
+            return True
+        except Exception as e:
+            print(f"Error saving workbook: {e}")
+            return False
+    
+    def check_engineering_processed(self):
+        """Check if engineering has been processed (any workflow step completed)"""
+        # Check if any workflow step is completed
+        if self.workflow_data.get('initial_redline') and isinstance(self.workflow_data['initial_redline'], (list, tuple)) and len(self.workflow_data['initial_redline']) >= 3:
+            if self.workflow_data['initial_redline'][2]:  # is_completed
+                return True
+        
+        # Check redline updates
+        redline_updates = self.workflow_data.get('redline_updates', [])
+        if redline_updates and isinstance(redline_updates, list):
+            for update in redline_updates:
+                if isinstance(update, (list, tuple)) and len(update) >= 4:
+                    if update[3]:  # is_completed
+                        return True
+        
+        # Check OPS review
+        if self.workflow_data.get('ops_review') and isinstance(self.workflow_data['ops_review'], (list, tuple)) and len(self.workflow_data['ops_review']) >= 2:
+            if self.workflow_data['ops_review'][1]:  # is_completed
+                return True
+        
+        return False
+    
+    def add_engineering_watermark(self, ws):
+        """Add a subtle engineering watermark that doesn't interfere with content"""
+        # Add a single subtle watermark at the bottom of the page
+        watermark_text = "ENGINEERING NOT PROCESSED"
+        
+        # Add watermark only in empty cells at the bottom
+        for row in range(15, 25):  # Bottom rows only
+            for col in range(1, 8):  # All columns
+                cell = ws.cell(row=row, column=col)
+                # Only add watermark if cell is empty
+                if cell.value is None:
+                    cell.value = watermark_text
+                    cell.font = Font(name='Calibri', size=12, color='E0E0E0', italic=True)  # Very light gray
+                    cell.alignment = Alignment(horizontal='center', vertical='center', text_rotation=45)
+                    cell.fill = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
 
 def print_project_cover_sheet(job_number, db_manager):
     """Main function to create and print project cover sheet"""
@@ -283,22 +377,24 @@ def print_project_cover_sheet(job_number, db_manager):
         else:
             output_dir = job_directory
         
-        # Create timestamped reports folder
-        timestamp_folder = datetime.now().strftime("%Y%m%d_%H%M%S")
-        reports_folder = os.path.join(output_dir, f"Status_Reports_{timestamp_folder}")
+        # Create single Status Reports folder
+        reports_folder = os.path.join(output_dir, "Status Reports")
         
         # Create the reports folder if it doesn't exist
         os.makedirs(reports_folder, exist_ok=True)
         
-        # Create output filename
-        output_filename = f"Project_Status_Report_{job_number}_{timestamp_folder}.docx"
+        # Create output filename with human-readable timestamp
+        now = datetime.now()
+        date_str = now.strftime("%m-%d-%Y")  # MM-DD-YYYY format
+        time_str = now.strftime("%I%M%p").lower()  # HHMMpm format (no colon)
+        output_filename = f"{job_number}-ProjectStatusReport-{date_str}@{time_str}.xlsx"
         output_path = os.path.join(reports_folder, output_filename)
         
-        print(f"DEBUG: About to create Word document at {output_path}")
+        print(f"DEBUG: About to create Excel document at {output_path}")
         
-        # Create Word document
-        if cover_sheet.create_cover_sheet_docx(output_path):
-            print(f"DEBUG: Word document created successfully")
+        # Create Excel document
+        if cover_sheet.create_cover_sheet_excel(output_path):
+            print(f"DEBUG: Excel document created successfully")
             # Record the cover sheet generation date in the database
             try:
                 conn = sqlite3.connect(db_manager.db_path)
@@ -313,11 +409,17 @@ def print_project_cover_sheet(job_number, db_manager):
             except Exception as e:
                 print(f"Warning: Could not update cover sheet date: {e}")
             
-            messagebox.showinfo("Success", f"Status report created: {output_filename}\nSaved to: {reports_folder}")
-            
-            # Open the Word document
+            # Open the Excel document (no modal message as requested)
             import subprocess
-            subprocess.run(['start', output_path], shell=True)
+            try:
+                # Try to open with Excel directly
+                subprocess.run(['excel', output_path], check=True)
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                try:
+                    # Fallback to using os.startfile
+                    os.startfile(output_path)
+                except Exception as e:
+                    print(f"Could not open Excel document: {e}")
             return True
         else:
             messagebox.showerror("Error", "Failed to create status report")
