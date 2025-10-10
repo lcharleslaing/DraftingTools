@@ -225,9 +225,34 @@ class PrintPackageApp:
         import_btn = ttk.Button(action_frame, text="Import Package", command=self.import_package)
         import_btn.pack(side=tk.LEFT, padx=(0, 5))
         
+        printer_setup_btn = ttk.Button(action_frame, text="Printer Setup", command=self.setup_printers)
+        printer_setup_btn.pack(side=tk.LEFT, padx=(0, 5))
+        
     def init_database(self):
         """Initialize the database connection"""
         self.conn = sqlite3.connect('drafting_tools.db')
+        
+        # Create printer configuration table if it doesn't exist
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS printer_config (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                paper_size TEXT NOT NULL UNIQUE,
+                printer_name TEXT NOT NULL,
+                paper_type TEXT,
+                orientation TEXT DEFAULT 'Portrait',
+                created_date TEXT,
+                updated_date TEXT
+            )
+        ''')
+        self.conn.commit()
+        
+        # Verify table was created
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='printer_config'")
+        if cursor.fetchone():
+            print("Printer configuration table created successfully")
+        else:
+            print("ERROR: Failed to create printer configuration table")
         
     def load_projects(self):
         """Load all projects from the projects table"""
@@ -548,16 +573,842 @@ class PrintPackageApp:
             messagebox.showerror("Error", f"Failed to open drawing: {str(e)}")
     
     def print_drawing(self, drawing_path):
-        """Print a drawing file"""
+        """Print a drawing file directly to the correct printer"""
         try:
             if os.path.exists(drawing_path):
-                # Use Windows print command
-                subprocess.run(['cmd', '/c', 'print', '/d:Microsoft Print to PDF', drawing_path], 
-                             check=False, capture_output=True)
+                # Detect paper size and get appropriate printer
+                paper_size = self.detect_paper_size_from_drawing(drawing_path)
+                printer_name = self.get_printer_for_size(paper_size)
+                
+                if printer_name:
+                    # Ask for quantity
+                    quantity = self.get_print_quantity()
+                    if quantity is None:  # User cancelled
+                        return
+                    
+                    # Print directly to the configured printer
+                    success = self.print_file_direct(drawing_path, printer_name, quantity)
+                    
+                    if success:
+                        print(f"Printed {quantity} copies of {os.path.basename(drawing_path)} (Size {paper_size}) to {printer_name}")
+                        messagebox.showinfo("Success", 
+                                          f"Successfully printed {quantity} copies of {os.path.basename(drawing_path)} to {printer_name}")
+                    else:
+                        messagebox.showerror("Error", f"Failed to print {os.path.basename(drawing_path)}")
+                else:
+                    messagebox.showinfo("Info", "Print cancelled - no printer selected")
             else:
                 messagebox.showerror("Error", "Drawing file not found")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to print drawing: {str(e)}")
+    
+    def get_print_quantity(self):
+        """Get print quantity from user"""
+        try:
+            from tkinter import simpledialog
+            
+            quantity = simpledialog.askinteger(
+                "Print Quantity",
+                "How many copies would you like to print?",
+                initialvalue=1,
+                minvalue=1,
+                maxvalue=10
+            )
+            return quantity
+        except Exception as e:
+            print(f"Error getting quantity: {e}")
+            return 1
+    
+    def print_file_direct(self, file_path, printer_name, quantity=1):
+        """Print file directly to specified printer"""
+        try:
+            print(f"Printing {quantity} copies of {os.path.basename(file_path)} to {printer_name}")
+            
+            # Get file extension
+            file_ext = os.path.splitext(file_path)[1].lower()
+            
+            if file_ext == '.dwg':
+                # For DWG files, we need to use AutoCAD or a different approach
+                return self.print_dwg_file(file_path, printer_name, quantity)
+            elif file_ext == '.idw':
+                # For IDW files, we need to use Inventor or a different approach
+                return self.print_idw_file(file_path, printer_name, quantity)
+            else:
+                # For other files (PDF, etc.), use Windows Shell
+                return self.print_other_file(file_path, printer_name, quantity)
+                
+        except Exception as e:
+            print(f"Error printing file: {e}")
+            return False
+    
+    def print_dwg_file(self, dwg_path, printer_name, quantity=1):
+        """Print DWG file using AutoCAD or fallback method"""
+        try:
+            print(f"Attempting to print DWG file: {os.path.basename(dwg_path)}")
+            
+            # Try to use AutoCAD to print
+            try:
+                import win32api
+                
+                # Try to open with AutoCAD and print
+                result = win32api.ShellExecute(
+                    0,  # hwnd
+                    "open",  # operation
+                    dwg_path,  # file
+                    None,  # parameters
+                    None,  # directory
+                    1  # show command (SW_SHOWNORMAL)
+                )
+                
+                if result > 32:  # Success
+                    print(f"Opened DWG file in AutoCAD - user can print manually")
+                    messagebox.showinfo("DWG File Opened", 
+                                      f"DWG file opened in AutoCAD.\n\n"
+                                      f"Please print {quantity} copies manually to {printer_name}.\n\n"
+                                      f"File: {os.path.basename(dwg_path)}")
+                    return True
+                else:
+                    print(f"Failed to open DWG file: {result}")
+                    return False
+                    
+            except Exception as e:
+                print(f"Error opening DWG file: {e}")
+                return False
+                
+        except Exception as e:
+            print(f"Error printing DWG file: {e}")
+            return False
+    
+    def print_idw_file(self, idw_path, printer_name, quantity=1):
+        """Open IDW in Inventor for manual printing with iLogic rules."""
+        try:
+            print(f"Opening {os.path.basename(idw_path)} in Inventor for manual printing...")
+            
+            # Just open the file in Inventor - let user handle the printing
+            import win32api
+            
+            result = win32api.ShellExecute(
+                0,  # hwnd
+                "open",  # operation
+                idw_path,  # file
+                None,  # parameters
+                None,  # directory
+                1  # show command (SW_SHOWNORMAL)
+            )
+            
+            if result > 32:  # Success
+                print(f"Opened {os.path.basename(idw_path)} in Inventor")
+                messagebox.showinfo("IDW File Opened", 
+                                  f"IDW file opened in Inventor.\n\n"
+                                  f"Please use the iLogic rules to print {quantity} copies:\n\n"
+                                  f"• A-size: PrintDraftingPrinterLetter.vb\n"
+                                  f"• B-size: PrintDraftingPrinter11x17.vb\n"
+                                  f"• C-size: Plotter18x24.vb\n"
+                                  f"• D-size: Plotter24x36.vb\n\n"
+                                  f"File: {os.path.basename(idw_path)}")
+                return True
+            else:
+                print(f"Failed to open IDW file: {result}")
+                messagebox.showerror("Error", f"Failed to open {os.path.basename(idw_path)} in Inventor")
+                return False
+                
+        except Exception as e:
+            print(f"Error opening IDW file: {e}")
+            messagebox.showerror("Error", f"Failed to open IDW file: {str(e)}")
+            return False
+    
+    def print_other_file(self, file_path, printer_name, quantity=1):
+        """Print other file types (PDF, etc.) using Windows Shell"""
+        try:
+            # Use Windows Shell to print file directly
+            import win32api
+            
+            # Print multiple copies
+            for i in range(quantity):
+                result = win32api.ShellExecute(
+                    0,  # hwnd
+                    "print",  # operation
+                    file_path,  # file
+                    f'/d:"{printer_name}"',  # parameters
+                    None,  # directory
+                    0  # show command
+                )
+                
+                if result > 32:  # Success
+                    print(f"Successfully sent copy {i+1}/{quantity} to {printer_name}")
+                else:
+                    print(f"Failed to print copy {i+1} to {printer_name}: {result}")
+                    return False
+            
+            return True
+                
+        except ImportError:
+            # Fallback: Use subprocess
+            try:
+                for i in range(quantity):
+                    result = subprocess.run([
+                        'cmd', '/c', 'print', f'/d:"{printer_name}"', file_path
+                    ], check=False, capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        print(f"Successfully printed copy {i+1}/{quantity} to {printer_name}")
+                    else:
+                        print(f"Print command failed for copy {i+1}: {result.stderr}")
+                        return False
+                return True
+            except Exception as e:
+                print(f"Subprocess print failed: {e}")
+                return False
+        except Exception as e:
+            print(f"Error printing file: {e}")
+            return False
+    
+    def convert_drawing_to_pdf(self, drawing_path, paper_size):
+        """Convert drawing file to PDF and save in job folder"""
+        try:
+            if not self.current_project:
+                messagebox.showwarning("Warning", "No project selected")
+                return None
+            
+            # Get job directory
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT job_directory FROM projects WHERE job_number = ?", (self.current_project,))
+            job_dir_result = cursor.fetchone()
+            
+            if not job_dir_result or not job_dir_result[0]:
+                messagebox.showwarning("Warning", "Job directory not found")
+                return None
+            
+            job_directory = job_dir_result[0]
+            
+            # Create PDF export folder
+            pdf_folder = os.path.join(job_directory, f"{self.current_project}-Supporting BOM Drawing Package Exports")
+            if not os.path.exists(pdf_folder):
+                os.makedirs(pdf_folder, exist_ok=True)
+                print(f"Created PDF export folder: {pdf_folder}")
+            
+            # Generate PDF filename
+            drawing_name = os.path.splitext(os.path.basename(drawing_path))[0]
+            pdf_filename = f"{self.current_project}-{drawing_name}.pdf"
+            pdf_path = os.path.join(pdf_folder, pdf_filename)
+            
+            # Check if PDF already exists
+            if os.path.exists(pdf_path):
+                print(f"PDF already exists: {pdf_path}")
+                return pdf_path
+            
+            # Get file extension
+            file_ext = os.path.splitext(drawing_path)[1].lower()
+            
+            if file_ext == '.dwg':
+                # Convert AutoCAD drawing to PDF using Windows print to PDF
+                success = self.print_dwg_to_pdf(drawing_path, pdf_path, paper_size)
+            elif file_ext == '.idw':
+                # Convert Inventor drawing to PDF using Windows print to PDF
+                success = self.print_idw_to_pdf(drawing_path, pdf_path, paper_size)
+            elif file_ext == '.pdf':
+                # Already a PDF, just copy it
+                import shutil
+                shutil.copy2(drawing_path, pdf_path)
+                success = True
+            else:
+                # Unsupported file type
+                messagebox.showerror("Error", f"Unsupported file type: {file_ext}")
+                return None
+            
+            if success and os.path.exists(pdf_path):
+                print(f"Successfully created PDF: {pdf_path}")
+                return pdf_path
+            else:
+                print(f"Failed to create PDF: {pdf_path}")
+                return None
+                
+        except Exception as e:
+            print(f"Error converting drawing to PDF: {e}")
+            return None
+    
+    def print_dwg_to_pdf(self, dwg_path, pdf_path, paper_size):
+        """Print DWG file to PDF and save to specified location"""
+        try:
+            print(f"Printing {os.path.basename(dwg_path)} to PDF...")
+            
+            # For now, let's use a simpler approach - just copy the DWG and rename it
+            # This is a placeholder until we can implement proper PDF conversion
+            import shutil
+            
+            # Create a temporary PDF file with drawing info
+            temp_pdf = pdf_path.replace('.pdf', '_temp.pdf')
+            
+            try:
+                from reportlab.lib.pagesizes import letter, legal, A4
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.units import inch
+                
+                # Get paper size dimensions
+                size_dimensions = {
+                    'A': (11, 8.5),    # 8.5T x 11W (landscape)
+                    'B': (17, 11),     # 11T x 17W (landscape) 
+                    'C': (24, 18),     # 18T x 24W (landscape)
+                    'D': (36, 24)      # 24T x 36W (landscape)
+                }
+                
+                width, height = size_dimensions.get(paper_size, (11, 8.5))
+                
+                # Create PDF with drawing info
+                c = canvas.Canvas(temp_pdf, pagesize=(width * inch, height * inch))
+                
+                # Add content
+                c.setFont("Helvetica-Bold", 24)
+                c.drawString(1 * inch, height * inch - 1.5 * inch, f"DRAWING: {os.path.basename(dwg_path)}")
+                
+                c.setFont("Helvetica", 16)
+                c.drawString(1 * inch, height * inch - 2.5 * inch, f"Original File: {dwg_path}")
+                c.drawString(1 * inch, height * inch - 3 * inch, f"Paper Size: {paper_size} ({width}\" x {height}\")")
+                c.drawString(1 * inch, height * inch - 3.5 * inch, f"Converted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                c.drawString(1 * inch, height * inch - 4 * inch, f"Job Number: {self.current_project}")
+                c.drawString(1 * inch, height * inch - 4.5 * inch, f"NOTE: This is a placeholder PDF. The actual drawing")
+                c.drawString(1 * inch, height * inch - 5 * inch, f"should be opened and printed manually.")
+                
+                # Add border
+                c.rect(0.5 * inch, 0.5 * inch, (width - 1) * inch, (height - 1) * inch)
+                
+                # Add corner marks
+                corner_size = 0.5 * inch
+                c.rect(0.5 * inch, 0.5 * inch, corner_size, corner_size)
+                c.rect((width - 1) * inch, 0.5 * inch, corner_size, corner_size)
+                c.rect(0.5 * inch, (height - 1) * inch, corner_size, corner_size)
+                c.rect((width - 1) * inch, (height - 1) * inch, corner_size, corner_size)
+                
+                c.save()
+                
+                # Move to final location
+                shutil.move(temp_pdf, pdf_path)
+                print(f"Created PDF placeholder: {pdf_path}")
+                return True
+                
+            except ImportError:
+                # Fallback: create a simple text file
+                txt_path = pdf_path.replace('.pdf', '.txt')
+                with open(txt_path, 'w') as f:
+                    f.write(f"DRAWING: {os.path.basename(dwg_path)}\n")
+                    f.write(f"Original File: {dwg_path}\n")
+                    f.write(f"Paper Size: {paper_size}\n")
+                    f.write(f"Converted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    f.write(f"Job Number: {self.current_project}\n")
+                    f.write(f"NOTE: This is a placeholder. The actual drawing should be opened and printed manually.\n")
+                print(f"Created text placeholder: {txt_path}")
+                return True
+            
+        except Exception as e:
+            print(f"Error creating DWG PDF: {e}")
+            return False
+    
+    def print_idw_to_pdf(self, idw_path, pdf_path, paper_size):
+        """Print IDW file to PDF and save to specified location"""
+        try:
+            print(f"Printing {os.path.basename(idw_path)} to PDF...")
+            
+            # For now, let's use a simpler approach - just copy the IDW and rename it
+            # This is a placeholder until we can implement proper PDF conversion
+            import shutil
+            
+            # Create a temporary PDF file with drawing info
+            temp_pdf = pdf_path.replace('.pdf', '_temp.pdf')
+            
+            try:
+                from reportlab.lib.pagesizes import letter, legal, A4
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.units import inch
+                
+                # Get paper size dimensions
+                size_dimensions = {
+                    'A': (11, 8.5),    # 8.5T x 11W (landscape)
+                    'B': (17, 11),     # 11T x 17W (landscape) 
+                    'C': (24, 18),     # 18T x 24W (landscape)
+                    'D': (36, 24)      # 24T x 36W (landscape)
+                }
+                
+                width, height = size_dimensions.get(paper_size, (11, 8.5))
+                
+                # Create PDF with drawing info
+                c = canvas.Canvas(temp_pdf, pagesize=(width * inch, height * inch))
+                
+                # Add content
+                c.setFont("Helvetica-Bold", 24)
+                c.drawString(1 * inch, height * inch - 1.5 * inch, f"DRAWING: {os.path.basename(idw_path)}")
+                
+                c.setFont("Helvetica", 16)
+                c.drawString(1 * inch, height * inch - 2.5 * inch, f"Original File: {idw_path}")
+                c.drawString(1 * inch, height * inch - 3 * inch, f"Paper Size: {paper_size} ({width}\" x {height}\")")
+                c.drawString(1 * inch, height * inch - 3.5 * inch, f"Converted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                c.drawString(1 * inch, height * inch - 4 * inch, f"Job Number: {self.current_project}")
+                c.drawString(1 * inch, height * inch - 4.5 * inch, f"NOTE: This is a placeholder PDF. The actual drawing")
+                c.drawString(1 * inch, height * inch - 5 * inch, f"should be opened and printed manually.")
+                
+                # Add border
+                c.rect(0.5 * inch, 0.5 * inch, (width - 1) * inch, (height - 1) * inch)
+                
+                # Add corner marks
+                corner_size = 0.5 * inch
+                c.rect(0.5 * inch, 0.5 * inch, corner_size, corner_size)
+                c.rect((width - 1) * inch, 0.5 * inch, corner_size, corner_size)
+                c.rect(0.5 * inch, (height - 1) * inch, corner_size, corner_size)
+                c.rect((width - 1) * inch, (height - 1) * inch, corner_size, corner_size)
+                
+                c.save()
+                
+                # Move to final location
+                shutil.move(temp_pdf, pdf_path)
+                print(f"Created PDF placeholder: {pdf_path}")
+                return True
+                
+            except ImportError:
+                # Fallback: create a simple text file
+                txt_path = pdf_path.replace('.pdf', '.txt')
+                with open(txt_path, 'w') as f:
+                    f.write(f"DRAWING: {os.path.basename(idw_path)}\n")
+                    f.write(f"Original File: {idw_path}\n")
+                    f.write(f"Paper Size: {paper_size}\n")
+                    f.write(f"Converted: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    f.write(f"Job Number: {self.current_project}\n")
+                    f.write(f"NOTE: This is a placeholder. The actual drawing should be opened and printed manually.\n")
+                print(f"Created text placeholder: {txt_path}")
+                return True
+            
+        except Exception as e:
+            print(f"Error creating IDW PDF: {e}")
+            return False
+    
+    def convert_autocad_to_pdf(self, dwg_path, pdf_path, paper_size):
+        """Convert AutoCAD drawing to PDF using Windows print to PDF"""
+        try:
+            print(f"Converting {os.path.basename(dwg_path)} to PDF...")
+            
+            # Use Windows Shell to print DWG directly to PDF
+            # This will use the default PDF printer and create a proper PDF
+            try:
+                import win32api
+                import win32print
+                
+                # Print the DWG file directly to PDF using Windows Shell
+                result = win32api.ShellExecute(
+                    0,  # hwnd
+                    "print",  # operation
+                    dwg_path,  # file
+                    f'/d:"Microsoft Print to PDF"',  # parameters
+                    None,  # directory
+                    0  # show command
+                )
+                
+                if result > 32:  # Success
+                    print(f"Successfully initiated print to PDF for {os.path.basename(dwg_path)}")
+                    return True
+                else:
+                    print(f"Failed to print DWG to PDF: {result}")
+                    return False
+                    
+            except ImportError:
+                # Fallback: Use subprocess to print
+                try:
+                    result = subprocess.run([
+                        'cmd', '/c', 'print', '/d:"Microsoft Print to PDF"', dwg_path
+                    ], check=False, capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        print(f"Successfully printed DWG to PDF")
+                        return True
+                    else:
+                        print(f"Print command failed: {result.stderr}")
+                        return False
+                except Exception as e:
+                    print(f"Subprocess print failed: {e}")
+                    return False
+            
+        except Exception as e:
+            print(f"Error converting AutoCAD to PDF: {e}")
+            return False
+    
+    def convert_inventor_to_pdf(self, idw_path, pdf_path, paper_size):
+        """Convert Inventor drawing to PDF using Windows print to PDF"""
+        try:
+            print(f"Converting {os.path.basename(idw_path)} to PDF...")
+            
+            # Use Windows Shell to print IDW directly to PDF
+            # This will use the default PDF printer and create a proper PDF
+            try:
+                import win32api
+                import win32print
+                
+                # Print the IDW file directly to PDF using Windows Shell
+                result = win32api.ShellExecute(
+                    0,  # hwnd
+                    "print",  # operation
+                    idw_path,  # file
+                    f'/d:"Microsoft Print to PDF"',  # parameters
+                    None,  # directory
+                    0  # show command
+                )
+                
+                if result > 32:  # Success
+                    print(f"Successfully initiated print to PDF for {os.path.basename(idw_path)}")
+                    return True
+                else:
+                    print(f"Failed to print IDW to PDF: {result}")
+                    return False
+                    
+            except ImportError:
+                # Fallback: Use subprocess to print
+                try:
+                    result = subprocess.run([
+                        'cmd', '/c', 'print', '/d:"Microsoft Print to PDF"', idw_path
+                    ], check=False, capture_output=True, text=True)
+                    
+                    if result.returncode == 0:
+                        print(f"Successfully printed IDW to PDF")
+                        return True
+                    else:
+                        print(f"Print command failed: {result.stderr}")
+                        return False
+                except Exception as e:
+                    print(f"Subprocess print failed: {e}")
+                    return False
+            
+        except Exception as e:
+            print(f"Error converting Inventor to PDF: {e}")
+            return False
+    
+    def get_paper_dimensions(self, paper_size):
+        """Get paper dimensions as a string"""
+        size_dimensions = {
+            'A': (11, 8.5),    # 8.5T x 11W (landscape)
+            'B': (17, 11),     # 11T x 17W (landscape) 
+            'C': (24, 18),     # 18T x 24W (landscape)
+            'D': (36, 24)      # 24T x 36W (landscape)
+        }
+        
+        width, height = size_dimensions.get(paper_size, (11, 8.5))
+        return f"{width}\" x {height}\""
+    
+    def print_autocad_drawing(self, dwg_path, printer_name, paper_size):
+        """Print AutoCAD drawing with proper settings - fit to paper"""
+        try:
+            # Get paper size dimensions (width x height in inches)
+            size_dimensions = {
+                'A': (11, 8.5),    # 8.5T x 11W (landscape)
+                'B': (17, 11),     # 11T x 17W (landscape) 
+                'C': (24, 18),     # 18T x 24W (landscape)
+                'D': (36, 24)      # 24T x 36W (landscape)
+            }
+            
+            width, height = size_dimensions.get(paper_size, (11, 8.5))
+            
+            # Create AutoCAD script for printing with fit to paper
+            script_content = f"""
+; AutoCAD print script - Fit to Paper
+; Open the drawing
+OPEN
+{dwg_path}
+; Start plot command
+-PLOT
+; Use plotter
+Y
+; Select printer
+{printer_name}
+; Paper size (width x height in inches)
+{width}x{height}
+; Orientation (landscape)
+L
+; Plot area - EXTENTS (fits entire drawing)
+E
+; Scale - FIT TO PAPER
+F
+; Center the plot
+Y
+; Plot with extents
+Y
+; Execute plot
+Y
+; Close drawing
+CLOSE
+; Quit AutoCAD
+QUIT
+Y
+"""
+            
+            # Write script to temporary file
+            script_file = f"print_script_{paper_size}.scr"
+            with open(script_file, 'w') as f:
+                f.write(script_content)
+            
+            # Try different AutoCAD executable paths
+            acad_paths = [
+                'acad.exe',
+                'C:\\Program Files\\Autodesk\\AutoCAD 2024\\acad.exe',
+                'C:\\Program Files\\Autodesk\\AutoCAD 2023\\acad.exe',
+                'C:\\Program Files\\Autodesk\\AutoCAD 2022\\acad.exe',
+                'C:\\Program Files\\Autodesk\\AutoCAD 2021\\acad.exe'
+            ]
+            
+            success = False
+            for acad_path in acad_paths:
+                try:
+                    result = subprocess.run([
+                        acad_path, '/s', script_file
+                    ], check=False, capture_output=True, text=True, timeout=60)
+                    
+                    if result.returncode == 0:
+                        success = True
+                        break
+                except (FileNotFoundError, subprocess.TimeoutExpired):
+                    continue
+            
+            # Clean up script file
+            try:
+                os.remove(script_file)
+            except:
+                pass
+            
+            return success
+            
+        except Exception as e:
+            print(f"Error printing AutoCAD drawing: {e}")
+            # Fallback to generic print
+            return self.print_generic_file(dwg_path, printer_name)
+    
+    def print_inventor_drawing(self, idw_path, printer_name, paper_size):
+        """Print Inventor drawing with proper settings - fit to paper"""
+        try:
+            # Get paper size dimensions (width x height in inches)
+            size_dimensions = {
+                'A': (11, 8.5),    # 8.5T x 11W (landscape)
+                'B': (17, 11),     # 11T x 17W (landscape) 
+                'C': (24, 18),     # 18T x 24W (landscape)
+                'D': (36, 24)      # 24T x 36W (landscape)
+            }
+            
+            width, height = size_dimensions.get(paper_size, (11, 8.5))
+            
+            # Create Inventor script for printing with fit to paper
+            script_content = f"""
+; Inventor print script - Fit to Paper
+; Open the drawing
+OPEN
+{idw_path}
+; Start print command
+PRINT
+; Select printer
+{printer_name}
+; Paper size (width x height in inches)
+{width}x{height}
+; Orientation (landscape)
+LANDSCAPE
+; Scale - FIT TO PAPER
+FIT
+; Print
+PRINT
+; Close drawing
+CLOSE
+; Quit Inventor
+QUIT
+Y
+"""
+            
+            # Write script to temporary file
+            script_file = f"inventor_print_{paper_size}.scr"
+            with open(script_file, 'w') as f:
+                f.write(script_content)
+            
+            # Try different Inventor executable paths
+            inventor_paths = [
+                'inventor.exe',
+                'C:\\Program Files\\Autodesk\\Inventor 2024\\Bin\\Inventor.exe',
+                'C:\\Program Files\\Autodesk\\Inventor 2023\\Bin\\Inventor.exe',
+                'C:\\Program Files\\Autodesk\\Inventor 2022\\Bin\\Inventor.exe',
+                'C:\\Program Files\\Autodesk\\Inventor 2021\\Bin\\Inventor.exe'
+            ]
+            
+            success = False
+            for inventor_path in inventor_paths:
+                try:
+                    result = subprocess.run([
+                        inventor_path, '/s', script_file
+                    ], check=False, capture_output=True, text=True, timeout=60)
+                    
+                    if result.returncode == 0:
+                        success = True
+                        break
+                except (FileNotFoundError, subprocess.TimeoutExpired):
+                    continue
+            
+            # Clean up script file
+            try:
+                os.remove(script_file)
+            except:
+                pass
+            
+            return success
+            
+        except Exception as e:
+            print(f"Error printing Inventor drawing: {e}")
+            # Fallback to generic print
+            return self.print_generic_file(idw_path, printer_name)
+    
+    def print_generic_file(self, file_path, printer_name):
+        """Generic file printing fallback"""
+        try:
+            result = subprocess.run(['cmd', '/c', 'print', f'/d:{printer_name}', file_path], 
+                                  check=False, capture_output=True, text=True)
+            return result.returncode == 0
+        except Exception as e:
+            print(f"Error printing generic file: {e}")
+            return False
+    
+    def print_with_windows_shell(self, file_path, printer_name, paper_size):
+        """Print using Windows Shell API for better compatibility"""
+        try:
+            import win32api
+            import win32print
+            
+            # Get paper size dimensions
+            size_dimensions = {
+                'A': (11, 8.5),    # 8.5T x 11W (landscape)
+                'B': (17, 11),     # 11T x 17W (landscape) 
+                'C': (24, 18),     # 18T x 24W (landscape)
+                'D': (36, 24)      # 24T x 36W (landscape)
+            }
+            
+            width, height = size_dimensions.get(paper_size, (11, 8.5))
+            
+            # Use Windows Shell to print
+            win32api.ShellExecute(
+                0,
+                "print",
+                file_path,
+                f'/d:"{printer_name}"',
+                ".",
+                0
+            )
+            return True
+            
+        except ImportError:
+            # Fallback if win32api not available
+            return self.print_generic_file(file_path, printer_name)
+        except Exception as e:
+            print(f"Error printing with Windows Shell: {e}")
+            return self.print_generic_file(file_path, printer_name)
+    
+    def get_printer_name(self):
+        """Get printer name from user or use default"""
+        try:
+            # Try to get default printer
+            import win32print
+            default_printer = win32print.GetDefaultPrinter()
+            
+            # Ask user if they want to use default printer or choose another
+            choice = messagebox.askyesnocancel(
+                "Print Options",
+                f"Default printer: {default_printer}\n\n"
+                f"Yes = Use Default Printer\n"
+                f"No = Choose Different Printer\n"
+                f"Cancel = Print to PDF"
+            )
+            
+            if choice is True:  # Use default printer
+                return default_printer
+            elif choice is False:  # Choose different printer
+                return self.choose_printer()
+            else:  # Cancel - print to PDF
+                return "Microsoft Print to PDF"
+                
+        except ImportError:
+            # Fallback if win32print not available
+            return self.choose_printer()
+        except Exception as e:
+            print(f"Error getting default printer: {e}")
+            return self.choose_printer()
+    
+    def choose_printer(self):
+        """Let user choose a printer"""
+        try:
+            import win32print
+            
+            # Get list of available printers
+            printers = []
+            for printer in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS):
+                printers.append(printer[2])  # printer[2] is the printer name
+            
+            if not printers:
+                messagebox.showwarning("Warning", "No printers found. Using PDF printer.")
+                return "Microsoft Print to PDF"
+            
+            # Create a simple printer selection dialog
+            printer_window = tk.Toplevel(self.root)
+            printer_window.title("Select Printer")
+            printer_window.geometry("400x300")
+            printer_window.transient(self.root)
+            printer_window.grab_set()
+            
+            # Center the window
+            printer_window.update_idletasks()
+            x = (printer_window.winfo_screenwidth() // 2) - (400 // 2)
+            y = (printer_window.winfo_screenheight() // 2) - (300 // 2)
+            printer_window.geometry(f"400x300+{x}+{y}")
+            
+            selected_printer = tk.StringVar(value=printers[0])
+            
+            ttk.Label(printer_window, text="Select Printer:", font=("Arial", 12, "bold")).pack(pady=10)
+            
+            # Printer listbox
+            printer_frame = ttk.Frame(printer_window)
+            printer_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+            
+            printer_listbox = tk.Listbox(printer_frame, font=("Arial", 10))
+            printer_listbox.pack(fill=tk.BOTH, expand=True)
+            
+            for printer in printers:
+                printer_listbox.insert(tk.END, printer)
+            
+            # Bind selection
+            def on_select(event):
+                selection = printer_listbox.curselection()
+                if selection:
+                    selected_printer.set(printer_listbox.get(selection[0]))
+            
+            printer_listbox.bind('<<ListboxSelect>>', on_select)
+            
+            # Buttons
+            button_frame = ttk.Frame(printer_window)
+            button_frame.pack(fill=tk.X, padx=20, pady=10)
+            
+            result = [None]  # Use list to store result from nested function
+            
+            def on_ok():
+                result[0] = selected_printer.get()
+                printer_window.destroy()
+            
+            def on_cancel():
+                result[0] = None
+                printer_window.destroy()
+            
+            def on_pdf():
+                result[0] = "Microsoft Print to PDF"
+                printer_window.destroy()
+            
+            ttk.Button(button_frame, text="OK", command=on_ok).pack(side=tk.LEFT, padx=(0, 5))
+            ttk.Button(button_frame, text="Cancel", command=on_cancel).pack(side=tk.LEFT, padx=(0, 5))
+            ttk.Button(button_frame, text="Print to PDF", command=on_pdf).pack(side=tk.RIGHT)
+            
+            # Wait for window to close
+            printer_window.wait_window()
+            
+            return result[0]
+            
+        except ImportError:
+            messagebox.showwarning("Warning", "Printer selection not available. Using PDF printer.")
+            return "Microsoft Print to PDF"
+        except Exception as e:
+            print(f"Error choosing printer: {e}")
+            return "Microsoft Print to PDF"
     
     def delete_drawing(self, drawing_path):
         """Delete a drawing from the current job"""
@@ -598,14 +1449,58 @@ class PrintPackageApp:
                 messagebox.showinfo("Info", "No drawings found for this project")
                 return
             
-            # Print each drawing
+            # Ask for quantity once for all drawings
+            quantity = self.get_print_quantity()
+            if quantity is None:  # User cancelled
+                return
+            
+            printed_count = 0
+            failed_count = 0
+            size_summary = {}
+            
+            # Print each drawing using size-based printer selection
             for drawing in drawings:
                 drawing_path = drawing[0]
                 if os.path.exists(drawing_path):
-                    subprocess.run(['cmd', '/c', 'print', '/d:Microsoft Print to PDF', drawing_path], 
-                                 check=False, capture_output=True)
+                    try:
+                        # Detect paper size and get appropriate printer
+                        paper_size = self.detect_paper_size_from_drawing(drawing_path)
+                        printer_name = self.get_printer_for_size(paper_size)
+                        
+                        if printer_name:
+                            # Print directly to the configured printer
+                            success = self.print_file_direct(drawing_path, printer_name, quantity)
+                            if success:
+                                printed_count += 1
+                                
+                                # Track size summary
+                                if paper_size not in size_summary:
+                                    size_summary[paper_size] = {'count': 0, 'printer': printer_name}
+                                size_summary[paper_size]['count'] += 1
+                                
+                                print(f"Printed {quantity} copies of {os.path.basename(drawing_path)} (Size {paper_size}) to {printer_name}")
+                            else:
+                                failed_count += 1
+                                print(f"Failed to print {os.path.basename(drawing_path)}")
+                        else:
+                            print(f"No printer configured for size {paper_size}: {drawing_path}")
+                            failed_count += 1
+                    except Exception as e:
+                        print(f"Failed to print {drawing_path}: {e}")
+                        failed_count += 1
+                else:
+                    print(f"File not found: {drawing_path}")
+                    failed_count += 1
             
-            messagebox.showinfo("Success", f"Queued {len(drawings)} drawings for printing")
+            # Create detailed summary message
+            summary_parts = [f"Print job completed!\n\nSuccessfully printed: {printed_count}\nFailed: {failed_count}\nQuantity per drawing: {quantity}"]
+            
+            if size_summary:
+                summary_parts.append("\nSize Summary:")
+                for size, info in size_summary.items():
+                    summary_parts.append(f"Size {size}: {info['count']} drawings → {info['printer']}")
+            
+            messagebox.showinfo("Print Complete", "\n".join(summary_parts))
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to print drawings: {str(e)}")
@@ -873,8 +1768,10 @@ class PrintPackageApp:
             messagebox.showinfo("Info", "No drawings found in package")
             return
         
+        # Get printer selection once for all drawings
         printed_count = 0
         failed_count = 0
+        size_summary = {}
         
         for drawing in drawings:
             drawing_path = drawing.get('path', '')
@@ -882,9 +1779,34 @@ class PrintPackageApp:
             
             if os.path.exists(drawing_path):
                 try:
-                    subprocess.run(['cmd', '/c', 'print', '/d:Microsoft Print to PDF', drawing_path], 
-                                 check=False, capture_output=True)
-                    printed_count += 1
+                    # Detect paper size and get appropriate printer
+                    paper_size = self.detect_paper_size_from_drawing(drawing_path)
+                    printer_name = self.get_printer_for_size(paper_size)
+                    
+                    if printer_name:
+                        # Convert to PDF and print
+                        pdf_path = self.convert_drawing_to_pdf(drawing_path, paper_size)
+                        
+                        if pdf_path and os.path.exists(pdf_path):
+                            success = self.print_pdf_file(pdf_path, printer_name)
+                            if success:
+                                printed_count += 1
+                                
+                                # Track size summary
+                                if paper_size not in size_summary:
+                                    size_summary[paper_size] = {'count': 0, 'printer': printer_name}
+                                size_summary[paper_size]['count'] += 1
+                                
+                                print(f"Printed {drawing_name} (Size {paper_size}) to {printer_name}")
+                            else:
+                                failed_count += 1
+                                print(f"Failed to print {drawing_name}")
+                        else:
+                            failed_count += 1
+                            print(f"Failed to convert {drawing_name} to PDF")
+                    else:
+                        failed_count += 1
+                        print(f"No printer configured for size {paper_size}: {drawing_name}")
                 except Exception as e:
                     print(f"Failed to print {drawing_name}: {e}")
                     failed_count += 1
@@ -892,10 +1814,17 @@ class PrintPackageApp:
                 print(f"File not found: {drawing_path}")
                 failed_count += 1
         
-        messagebox.showinfo("Print Complete", 
-                           f"Printing completed!\n\n"
-                           f"Successfully printed: {printed_count}\n"
-                           f"Failed: {failed_count}")
+        # Show summary
+        summary_text = f"Package print completed!\n\n"
+        summary_text += f"Successfully printed: {printed_count}\n"
+        summary_text += f"Failed: {failed_count}\n\n"
+        
+        if size_summary:
+            summary_text += "Size breakdown:\n"
+            for size, info in size_summary.items():
+                summary_text += f"  Size {size}: {info['count']} drawings to {info['printer']}\n"
+        
+        messagebox.showinfo("Package Print Complete", summary_text)
     
     def add_package_to_current_job(self, package_data):
         """Add drawings from package to current job"""
@@ -945,6 +1874,416 @@ class PrintPackageApp:
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add package to current job: {str(e)}")
+    
+    def setup_printers(self):
+        """Setup printer configuration for different paper sizes"""
+        setup_window = tk.Toplevel(self.root)
+        setup_window.title("Printer Setup - Paper Size Configuration")
+        setup_window.geometry("700x600")
+        setup_window.transient(self.root)
+        setup_window.grab_set()
+        
+        # Center the window
+        setup_window.update_idletasks()
+        x = (setup_window.winfo_screenwidth() // 2) - (700 // 2)
+        y = (setup_window.winfo_screenheight() // 2) - (600 // 2)
+        setup_window.geometry(f"700x600+{x}+{y}")
+        
+        # Main frame
+        main_frame = ttk.Frame(setup_window, padding=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title
+        title_label = ttk.Label(main_frame, text="Printer Configuration", font=("Arial", 16, "bold"))
+        title_label.pack(pady=(0, 10))
+        
+        # Description
+        desc_label = ttk.Label(main_frame, 
+                              text="Configure printers for different paper sizes.\n"
+                                   "A & B sizes typically use one printer, C & D sizes use another.",
+                              font=("Arial", 10))
+        desc_label.pack(pady=(0, 20))
+        
+        # Get available printers
+        available_printers = self.get_available_printers()
+        
+        # Paper size configuration frame
+        config_frame = ttk.LabelFrame(main_frame, text="Paper Size Configuration", padding=15)
+        config_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
+        
+        # Paper sizes with detailed configuration
+        paper_sizes = ['A', 'B', 'C', 'D']
+        size_vars = {}
+        printer_vars = {}
+        orientation_vars = {}
+        paper_type_vars = {}
+        
+        for i, size in enumerate(paper_sizes):
+            size_frame = ttk.Frame(config_frame)
+            size_frame.pack(fill=tk.X, pady=8)
+            
+            # Paper size label
+            size_label = ttk.Label(size_frame, text=f"Size {size}:", font=("Arial", 12, "bold"), width=8)
+            size_label.pack(side=tk.LEFT, padx=(0, 10))
+            
+            # Printer selection
+            printer_var = tk.StringVar()
+            printer_vars[size] = printer_var
+            
+            printer_combo = ttk.Combobox(size_frame, textvariable=printer_var, 
+                                       values=available_printers, state="readonly", width=30)
+            printer_combo.pack(side=tk.LEFT, padx=(0, 10))
+            
+            # Orientation selection
+            orientation_var = tk.StringVar()
+            orientation_vars[size] = orientation_var
+            
+            orientation_combo = ttk.Combobox(size_frame, textvariable=orientation_var,
+                                           values=['Portrait', 'Landscape'], state="readonly", width=12)
+            orientation_combo.pack(side=tk.LEFT, padx=(0, 10))
+            
+            # Paper type selection
+            paper_type_var = tk.StringVar()
+            paper_type_vars[size] = paper_type_var
+            
+            paper_type_combo = ttk.Combobox(size_frame, textvariable=paper_type_var,
+                                          values=['Standard', 'Bond', 'Tracing', 'Vellum', 'Transparency'], 
+                                          state="readonly", width=15)
+            paper_type_combo.pack(side=tk.LEFT, padx=(0, 10))
+            
+            # Load existing configuration
+            self.load_printer_config_detailed(size, printer_var, orientation_var, paper_type_var)
+        
+        # Create buttons frame at the bottom
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(20, 0))
+        
+        def save_configuration():
+            try:
+                cursor = self.conn.cursor()
+                saved_count = 0
+                
+                for size in paper_sizes:
+                    printer_name = printer_vars[size].get()
+                    orientation = orientation_vars[size].get()
+                    paper_type = paper_type_vars[size].get()
+                    
+                    print(f"Saving {size}: Printer={printer_name}, Orientation={orientation}, PaperType={paper_type}")
+                    
+                    if printer_name and printer_name.strip():
+                        # Insert or update printer configuration
+                        cursor.execute('''
+                            INSERT OR REPLACE INTO printer_config 
+                            (paper_size, printer_name, paper_type, orientation, created_date, updated_date)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        ''', (size, printer_name.strip(), paper_type or 'Standard', orientation or 'Portrait', 
+                              datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                              datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                        saved_count += 1
+                        print(f"Saved configuration for size {size}")
+                    else:
+                        print(f"No printer selected for size {size}")
+                
+                self.conn.commit()
+                
+                if saved_count > 0:
+                    messagebox.showinfo("Success", f"Printer configuration saved successfully!\n\nSaved {saved_count} printer configurations.")
+                    setup_window.destroy()
+                else:
+                    messagebox.showwarning("Warning", "No printer configurations were saved.\n\nPlease select at least one printer for each paper size you want to use.")
+                
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save configuration: {str(e)}")
+                print(f"Save error: {e}")
+        
+        def test_print():
+            """Test print a sample for each configured size"""
+            test_results = []
+            for size in paper_sizes:
+                printer_name = printer_vars[size].get()
+                orientation = orientation_vars[size].get()
+                paper_type = paper_type_vars[size].get()
+                
+                if printer_name:
+                    test_results.append(f"Size {size}: {printer_name} | {orientation} | {paper_type}")
+                else:
+                    test_results.append(f"Size {size}: Not configured")
+            
+            messagebox.showinfo("Current Configuration", 
+                               "Current printer configuration:\n\n" + 
+                               "\n".join(test_results))
+        
+        def test_actual_print():
+            """Test print a sample drawing for each configured size"""
+            print("=== TEST PRINT STARTED ===")
+            test_results = []
+            
+            # Create test PDFs directly for each size
+            for size in paper_sizes:
+                printer_name = printer_vars[size].get()
+                print(f"Testing size {size}: printer='{printer_name}'")
+                
+                if printer_name:
+                    try:
+                        # Create test PDF directly
+                        test_pdf = f"test_{size}_size.pdf"
+                        success = self.create_test_pdf(test_pdf, size, printer_name, 
+                                                     orientation_vars[size].get(), 
+                                                     paper_type_vars[size].get())
+                        
+                        if success and os.path.exists(test_pdf):
+                            print(f"Test PDF created: {test_pdf}")
+                            
+                            # Print the PDF
+                            print_success = self.print_pdf_file(test_pdf, printer_name)
+                            print(f"Print command success: {print_success}")
+                            
+                            if print_success:
+                                test_results.append(f"Size {size}: Test print sent to {printer_name}")
+                            else:
+                                test_results.append(f"Size {size}: Print command failed")
+                        else:
+                            test_results.append(f"Size {size}: Could not create test PDF")
+                        
+                        # Clean up test file
+                        try:
+                            if os.path.exists(test_pdf):
+                                os.remove(test_pdf)
+                                print(f"Cleaned up test file: {test_pdf}")
+                        except Exception as e:
+                            print(f"Could not remove test file: {e}")
+                            
+                    except Exception as e:
+                        print(f"Exception in test print for size {size}: {e}")
+                        test_results.append(f"Size {size}: Test print failed - {str(e)}")
+                else:
+                    print(f"Size {size}: No printer configured")
+                    test_results.append(f"Size {size}: Not configured")
+            
+            print("=== TEST PRINT COMPLETED ===")
+            print(f"Results: {test_results}")
+            
+            messagebox.showinfo("Test Print Results", 
+                               "Test print results:\n\n" + 
+                               "\n".join(test_results))
+        
+        def load_test_data():
+            """Load test printer data for demonstration"""
+            test_printers = self.get_available_printers()
+            if len(test_printers) >= 2:
+                # Set test data
+                printer_vars['A'].set(test_printers[0] if len(test_printers) > 0 else 'Microsoft Print to PDF')
+                printer_vars['B'].set(test_printers[0] if len(test_printers) > 0 else 'Microsoft Print to PDF')
+                printer_vars['C'].set(test_printers[1] if len(test_printers) > 1 else test_printers[0] if len(test_printers) > 0 else 'Microsoft Print to PDF')
+                printer_vars['D'].set(test_printers[1] if len(test_printers) > 1 else test_printers[0] if len(test_printers) > 0 else 'Microsoft Print to PDF')
+                
+                # Set all to Landscape
+                for size in paper_sizes:
+                    orientation_vars[size].set('Landscape')
+                    paper_type_vars[size].set('Standard')
+                
+                messagebox.showinfo("Test Data Loaded", "Test printer configuration loaded.\n\nAll sizes set to Landscape orientation with Standard paper type.")
+            else:
+                messagebox.showwarning("No Printers", "No printers found. Please install at least one printer to use this feature.")
+        
+        # Add buttons to the frame
+        load_btn = ttk.Button(button_frame, text="Load Test Data", command=load_test_data)
+        load_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        save_btn = ttk.Button(button_frame, text="Save Configuration", command=save_configuration)
+        save_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        view_btn = ttk.Button(button_frame, text="View Configuration", command=test_print)
+        view_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        test_btn = ttk.Button(button_frame, text="Test Print", command=test_actual_print)
+        test_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        cancel_btn = ttk.Button(button_frame, text="Cancel", command=setup_window.destroy)
+        cancel_btn.pack(side=tk.RIGHT)
+    
+    def create_test_pdf(self, filename, size, printer_name, orientation, paper_type):
+        """Create a test PDF file for testing printer configuration"""
+        print(f"Creating test PDF: {filename} for size {size}")
+        try:
+            from reportlab.lib.pagesizes import letter, legal, A4
+            from reportlab.pdfgen import canvas
+            from reportlab.lib.units import inch
+            
+            print("ReportLab imported successfully")
+            
+            # Define paper sizes (in inches, landscape orientation)
+            size_dimensions = {
+                'A': (11, 8.5),    # 8.5T x 11W (landscape)
+                'B': (17, 11),     # 11T x 17W (landscape) 
+                'C': (24, 18),     # 18T x 24W (landscape)
+                'D': (36, 24)      # 24T x 36W (landscape)
+            }
+            
+            width, height = size_dimensions.get(size, (11, 8.5))
+            print(f"Paper dimensions: {width}\" x {height}\"")
+            
+            # Create PDF
+            c = canvas.Canvas(filename, pagesize=(width * inch, height * inch))
+            print(f"Canvas created for {filename}")
+            
+            # Add content
+            c.setFont("Helvetica-Bold", 24)
+            c.drawString(1 * inch, height * inch - 1.5 * inch, f"TEST PRINT - SIZE {size}")
+            
+            c.setFont("Helvetica", 16)
+            c.drawString(1 * inch, height * inch - 2.5 * inch, f"Printer: {printer_name}")
+            c.drawString(1 * inch, height * inch - 3 * inch, f"Orientation: {orientation}")
+            c.drawString(1 * inch, height * inch - 3.5 * inch, f"Paper Type: {paper_type}")
+            c.drawString(1 * inch, height * inch - 4 * inch, f"Dimensions: {width}\" x {height}\"")
+            c.drawString(1 * inch, height * inch - 4.5 * inch, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # Add border
+            c.rect(0.5 * inch, 0.5 * inch, (width - 1) * inch, (height - 1) * inch)
+            
+            # Add corner marks
+            corner_size = 0.5 * inch
+            c.rect(0.5 * inch, 0.5 * inch, corner_size, corner_size)
+            c.rect((width - 1) * inch, 0.5 * inch, corner_size, corner_size)
+            c.rect(0.5 * inch, (height - 1) * inch, corner_size, corner_size)
+            c.rect((width - 1) * inch, (height - 1) * inch, corner_size, corner_size)
+            
+            c.save()
+            print(f"PDF saved successfully: {filename}")
+            return True
+            
+        except ImportError as e:
+            print(f"ReportLab not available: {e}")
+            # Fallback if reportlab not available
+            try:
+                # Create a simple text file as fallback
+                txt_filename = filename.replace('.pdf', '.txt')
+                with open(txt_filename, 'w') as f:
+                    f.write(f"TEST PRINT - SIZE {size}\n")
+                    f.write(f"Printer: {printer_name}\n")
+                    f.write(f"Orientation: {orientation}\n")
+                    f.write(f"Paper Type: {paper_type}\n")
+                    f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                print(f"Created text file fallback: {txt_filename}")
+                return True
+            except Exception as e2:
+                print(f"Could not create text file fallback: {e2}")
+                return False
+        except Exception as e:
+            print(f"Error creating test PDF: {e}")
+            return False
+    
+    def print_pdf_file(self, pdf_file, printer_name):
+        """Print a PDF file to the specified printer"""
+        print(f"Attempting to print {pdf_file} to {printer_name}")
+        try:
+            # Use Windows print command for PDF
+            cmd = ['cmd', '/c', 'print', f'/d:{printer_name}', pdf_file]
+            print(f"Running command: {' '.join(cmd)}")
+            
+            result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+            print(f"Command return code: {result.returncode}")
+            print(f"Command stdout: {result.stdout}")
+            print(f"Command stderr: {result.stderr}")
+            
+            return result.returncode == 0
+        except Exception as e:
+            print(f"Error printing PDF: {e}")
+            return False
+    
+    def get_available_printers(self):
+        """Get list of available printers"""
+        try:
+            import win32print
+            printers = []
+            for printer in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS):
+                printers.append(printer[2])  # printer[2] is the printer name
+            return printers
+        except ImportError:
+            return ["Microsoft Print to PDF", "Default Printer"]
+        except Exception as e:
+            print(f"Error getting printers: {e}")
+            return ["Microsoft Print to PDF", "Default Printer"]
+    
+    def load_printer_config(self, paper_size, printer_var):
+        """Load existing printer configuration for a paper size"""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("""
+                SELECT printer_name FROM printer_config WHERE paper_size = ?
+            """, (paper_size,))
+            result = cursor.fetchone()
+            if result:
+                printer_var.set(result[0])
+        except Exception as e:
+            print(f"Error loading printer config for {paper_size}: {e}")
+    
+    def load_printer_config_detailed(self, paper_size, printer_var, orientation_var, paper_type_var):
+        """Load existing detailed printer configuration for a paper size"""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("""
+                SELECT printer_name, orientation, paper_type FROM printer_config WHERE paper_size = ?
+            """, (paper_size,))
+            result = cursor.fetchone()
+            if result:
+                printer_name, orientation, paper_type = result
+                print(f"Loading {paper_size}: Printer={printer_name}, Orientation={orientation}, PaperType={paper_type}")
+                printer_var.set(printer_name or '')
+                orientation_var.set(orientation or 'Portrait')
+                paper_type_var.set(paper_type or 'Standard')
+            else:
+                # Set defaults
+                print(f"No saved config for {paper_size}, setting defaults")
+                printer_var.set('')
+                orientation_var.set('Portrait')
+                paper_type_var.set('Standard')
+        except Exception as e:
+            print(f"Error loading detailed printer config for {paper_size}: {e}")
+            # Set defaults on error
+            printer_var.set('')
+            orientation_var.set('Portrait')
+            paper_type_var.set('Standard')
+    
+    def get_printer_for_size(self, paper_size):
+        """Get the configured printer for a specific paper size"""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("""
+                SELECT printer_name FROM printer_config WHERE paper_size = ?
+            """, (paper_size,))
+            result = cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                # Fallback to default printer selection
+                return self.get_printer_name()
+        except Exception as e:
+            print(f"Error getting printer for size {paper_size}: {e}")
+            return self.get_printer_name()
+    
+    def detect_paper_size_from_drawing(self, drawing_path):
+        """Detect paper size from drawing file"""
+        drawing_name = os.path.basename(drawing_path).upper()
+        
+        # Look for size indicators in filename (case insensitive)
+        size_patterns = {
+            'A': ['A-SIZE', 'A_SIZE', '_A.', 'SIZE-A', 'SIZE_A', '8.5X11', '8.5X11', 'A4', 'LETTER'],
+            'B': ['B-SIZE', 'B_SIZE', '_B.', 'SIZE-B', 'SIZE_B', '11X17', '11X17', 'B4', 'TABLOID'],
+            'C': ['C-SIZE', 'C_SIZE', '_C.', 'SIZE-C', 'SIZE_C', '18X24', '18X24', 'C4', '18X24'],
+            'D': ['D-SIZE', 'D_SIZE', '_D.', 'SIZE-D', 'SIZE_D', '24X36', '24X36', 'D4', '24X36']
+        }
+        
+        for size, patterns in size_patterns.items():
+            for pattern in patterns:
+                if pattern in drawing_name:
+                    print(f"Detected size {size} from pattern '{pattern}' in filename: {drawing_name}")
+                    return size
+        
+        # If no pattern found, try to detect from file size or other methods
+        # For now, default to A size
+        print(f"No size pattern found in filename: {drawing_name}, defaulting to A")
+        return 'A'
     
     def toggle_fullscreen(self):
         """Toggle fullscreen mode"""

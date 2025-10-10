@@ -26,6 +26,9 @@ class ProjectsApp:
         # Initialize database
         self.db_manager = DatabaseManager()
         
+        # Initialize current project tracking
+        self.current_project = None
+        
         # Create main frame with scrollbar
         self.create_scrollable_main_frame()
         
@@ -130,16 +133,22 @@ class ProjectsApp:
         self.sort_customer_btn = ttk.Button(search_sort_frame, text="Customer ↑", command=self.sort_by_customer, width=12)
         self.sort_customer_btn.grid(row=1, column=1, padx=(3, 0), sticky=tk.W, pady=(3, 0))
         
-        # Treeview for projects - simplified columns
-        columns = ('Job Number', 'Customer', 'Status')
+        # Treeview for projects - show start and completion dates for debugging
+        columns = ('Job Number', 'Customer', 'Start Date', 'Completion Date', 'Status')
         self.tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=18)
         
-        # Set column widths - make job number narrow, customer wider, status narrow
+        # Set column widths
         self.tree.heading('Job Number', text='Job Number')
         self.tree.column('Job Number', width=80, minwidth=80)
         
         self.tree.heading('Customer', text='Customer')
-        self.tree.column('Customer', width=200, minwidth=150)
+        self.tree.column('Customer', width=150, minwidth=100)
+        
+        self.tree.heading('Start Date', text='Start Date')
+        self.tree.column('Start Date', width=100, minwidth=80)
+        
+        self.tree.heading('Completion Date', text='Completion Date')
+        self.tree.column('Completion Date', width=100, minwidth=80)
         
         self.tree.heading('Status', text='Status')
         self.tree.column('Status', width=100, minwidth=80)
@@ -231,6 +240,8 @@ class ProjectsApp:
         self.customer_name_var.trace('w', self.auto_save)
         self.customer_location_var.trace('w', self.auto_save)
         self.assigned_to_var.trace('w', self.auto_save)
+        self.start_date_entry.var.trace('w', self.auto_save)
+        self.completion_date_entry.var.trace('w', self.auto_save)
         self.released_to_dee_entry.var.trace('w', self.auto_save)
         
         # Auto-save for directory pickers
@@ -244,20 +255,147 @@ class ProjectsApp:
         workflow_frame.grid(row=1, column=2, sticky=(tk.W, tk.E, tk.N, tk.S))
         workflow_frame.columnconfigure(0, weight=1)
         
+        # Cover Sheet Print Button at the top
+        self.create_cover_sheet_button(workflow_frame)
+        
         # 1. Initial Redline
-        self.create_initial_redline_section(workflow_frame, 0)
+        self.create_initial_redline_section(workflow_frame, 1)
         
         # 2. Redline Updates (multiple cycles)
-        self.create_redline_updates_section(workflow_frame, 1)
+        self.create_redline_updates_section(workflow_frame, 2)
         
         # 3. OPS Review
-        self.create_ops_review_section(workflow_frame, 2)
+        self.create_ops_review_section(workflow_frame, 3)
         
         # 4. Peter Weck Review
-        self.create_peter_weck_section(workflow_frame, 3)
+        self.create_peter_weck_section(workflow_frame, 4)
         
         # 5. Release to Dee
-        self.create_release_to_dee_section(workflow_frame, 4)
+        self.create_release_to_dee_section(workflow_frame, 5)
+    
+    def create_cover_sheet_button(self, parent):
+        """Create the cover sheet print button"""
+        button_frame = ttk.Frame(parent)
+        button_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        button_frame.columnconfigure(0, weight=1)
+        
+        # Cover sheet button - will be updated based on project status
+        self.cover_sheet_btn = ttk.Button(button_frame, text="📄 Print Status Report", 
+                                         command=self.print_cover_sheet, width=25)
+        self.cover_sheet_btn.grid(row=0, column=0, pady=5)
+        
+        # Initialize button state
+        self.update_cover_sheet_button()
+    
+    def print_cover_sheet(self):
+        """Print the project cover sheet"""
+        if not self.current_project:
+            messagebox.showwarning("Warning", "Please select a project first!")
+            return
+        
+        try:
+            from project_cover_sheet import print_project_cover_sheet
+            print_project_cover_sheet(self.current_project, self.db_manager)
+        except ImportError:
+            messagebox.showerror("Error", "Cover sheet module not found!")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to print cover sheet: {str(e)}")
+    
+    def update_cover_sheet_button(self):
+        """Update the cover sheet button appearance based on project status"""
+        if not hasattr(self, 'cover_sheet_btn'):
+            return
+            
+        if not self.current_project:
+            self.cover_sheet_btn.config(text="📄 Print Status Report", 
+                                      style="TButton")
+            return
+        
+        # Check if there are recent updates that warrant a new report
+        has_updates = self.check_for_recent_updates()
+        
+        if has_updates:
+            # Make button stand out with different color/text
+            self.cover_sheet_btn.config(text="🆕 Print NEW Status Report", 
+                                      style="Accent.TButton")
+            # Try to make it more visually distinct
+            try:
+                self.cover_sheet_btn.configure(background='#ff6b6b', foreground='white')
+            except:
+                pass  # Fallback if styling doesn't work
+        else:
+            self.cover_sheet_btn.config(text="📄 Print Status Report", 
+                                      style="TButton")
+            # Reset to default styling
+            try:
+                self.cover_sheet_btn.configure(background='', foreground='')
+            except:
+                pass
+    
+    def check_for_recent_updates(self):
+        """Check if there are recent updates since last report"""
+        if not self.current_project:
+            return False
+            
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cursor = conn.cursor()
+            
+            # Get the last cover sheet date
+            cursor.execute("""
+                SELECT last_cover_sheet_date FROM projects 
+                WHERE job_number = ?
+            """, (self.current_project,))
+            result = cursor.fetchone()
+            last_cover_sheet_date = result[0] if result and result[0] else None
+            
+            if not last_cover_sheet_date:
+                # No cover sheet generated yet, so there are "updates"
+                conn.close()
+                return True
+            
+            # Check if any workflow data has been updated since last cover sheet
+            from datetime import datetime
+            last_date = datetime.strptime(last_cover_sheet_date, "%Y-%m-%d %H:%M:%S")
+            
+            # Get project ID
+            cursor.execute("SELECT id FROM projects WHERE job_number = ?", (self.current_project,))
+            project_id = cursor.fetchone()[0]
+            
+            # Check for recent updates in workflow tables
+            tables_to_check = [
+                ("initial_redline", "redline_date"),
+                ("redline_updates", "update_date"),
+                ("ops_review", "review_date"),
+                ("peter_weck_review", "fixed_errors_date"),
+                ("release_to_dee", "release_date")
+            ]
+            
+            for table, date_column in tables_to_check:
+                cursor.execute(f"""
+                    SELECT {date_column} FROM {table} 
+                    WHERE project_id = ? AND {date_column} IS NOT NULL
+                """, (project_id,))
+                dates = cursor.fetchall()
+                
+                for date_row in dates:
+                    if date_row[0]:
+                        try:
+                            update_date = datetime.strptime(date_row[0], "%Y-%m-%d")
+                            if update_date > last_date:
+                                conn.close()
+                                return True
+                        except ValueError:
+                            # Skip invalid dates
+                            continue
+            
+            conn.close()
+            return False
+            
+        except Exception as e:
+            print(f"Error checking for updates: {e}")
+            # Default to showing updates available
+            return True
     
     def create_initial_redline_section(self, parent, row):
         """Create initial redline section"""
@@ -387,6 +525,56 @@ class ProjectsApp:
         ttk.Label(section_frame, text="Date:").grid(row=4, column=0, sticky=tk.W)
         self.other_date_entry = DateEntry(section_frame, width=20)
         self.other_date_entry.grid(row=4, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        # Set up auto-save traces for all workflow fields
+        self.setup_workflow_autosave()
+    
+    def setup_workflow_autosave(self):
+        """Set up auto-save traces for all workflow fields"""
+        # Auto-save for initial redline
+        if hasattr(self, 'initial_redline_var'):
+            self.initial_redline_var.trace('w', self.auto_save)
+        if hasattr(self, 'initial_engineer_var'):
+            self.initial_engineer_var.trace('w', self.auto_save)
+        if hasattr(self, 'initial_date_entry'):
+            self.initial_date_entry.var.trace('w', self.auto_save)
+        
+        # Auto-save for redline updates
+        for i in range(1, 5):
+            var_name = f"redline_update_{i}_var"
+            engineer_var_name = f"redline_update_{i}_engineer_var"
+            date_entry_name = f"redline_update_{i}_date_entry"
+            
+            if hasattr(self, var_name):
+                getattr(self, var_name).trace('w', self.auto_save)
+            if hasattr(self, engineer_var_name):
+                getattr(self, engineer_var_name).trace('w', self.auto_save)
+            if hasattr(self, date_entry_name):
+                getattr(self, date_entry_name).var.trace('w', self.auto_save)
+        
+        # Auto-save for OPS review
+        if hasattr(self, 'ops_review_var'):
+            self.ops_review_var.trace('w', self.auto_save)
+        if hasattr(self, 'ops_review_date_entry'):
+            self.ops_review_date_entry.var.trace('w', self.auto_save)
+        
+        # Auto-save for Peter Weck review
+        if hasattr(self, 'peter_weck_var'):
+            self.peter_weck_var.trace('w', self.auto_save)
+        if hasattr(self, 'peter_weck_date_entry'):
+            self.peter_weck_date_entry.var.trace('w', self.auto_save)
+        
+        # Auto-save for release to Dee
+        if hasattr(self, 'release_fixed_errors_var'):
+            self.release_fixed_errors_var.trace('w', self.auto_save)
+        if hasattr(self, 'missing_prints_date_entry'):
+            self.missing_prints_date_entry.var.trace('w', self.auto_save)
+        if hasattr(self, 'd365_updates_date_entry'):
+            self.d365_updates_date_entry.var.trace('w', self.auto_save)
+        if hasattr(self, 'other_notes_var'):
+            self.other_notes_var.trace('w', self.auto_save)
+        if hasattr(self, 'other_date_entry'):
+            self.other_date_entry.var.trace('w', self.auto_save)
     
     def create_quick_access_panel(self):
         """Create the quick access panel for files and folders"""
@@ -1144,6 +1332,8 @@ class ProjectsApp:
         if self.is_valid_job_number(job_number):
             try:
                 self.save_project_silent()
+                # Update cover sheet button after saving
+                self.update_cover_sheet_button()
             except Exception as e:
                 print(f"Auto-save failed: {e}")
     
@@ -1206,6 +1396,13 @@ class ProjectsApp:
                 self.released_to_dee_entry.get() or None
             ))
             
+            # Get project ID
+            cursor.execute("SELECT id FROM projects WHERE job_number = ?", (job_number,))
+            project_id = cursor.fetchone()[0]
+            
+            # Save workflow data
+            self.save_workflow_data(cursor, project_id)
+            
             conn.commit()
             
         except Exception as e:
@@ -1244,8 +1441,12 @@ class ProjectsApp:
         cursor = conn.cursor()
         
         query = """
-        SELECT p.job_number, p.customer_name, 
-               CASE WHEN p.completion_date IS NOT NULL THEN 'Completed' ELSE 'In Progress' END as status
+        SELECT p.job_number, p.customer_name, p.start_date, p.completion_date,
+               CASE 
+                   WHEN p.completion_date IS NOT NULL THEN 'Completed'
+                   WHEN p.start_date IS NOT NULL THEN 'In Progress'
+                   ELSE 'Assigned'
+               END as status
         FROM projects p
         ORDER BY p.assignment_date DESC
         """
@@ -1259,8 +1460,17 @@ class ProjectsApp:
         
         # Insert projects
         for project in projects:
+            # Format dates for display
+            start_date = project[2] if project[2] else ""
+            completion_date = project[3] if project[3] else ""
+            status = project[4]
+            
             self.tree.insert('', 'end', values=(
-                project[0], project[1] or "N/A", project[2] or "N/A"
+                project[0],  # job_number
+                project[1],  # customer_name
+                start_date,
+                completion_date,
+                status
             ))
         
         conn.close()
@@ -1353,8 +1563,46 @@ class ProjectsApp:
         item = self.tree.item(selection[0])
         job_number = item['values'][0]
         print(f"DEBUG: Selected project: {job_number}")
+        
+        # Set current project before loading details
+        self.current_project = job_number
+        
         self.load_project_details(job_number)
     
+    def clear_workflow_data(self):
+        """Clear all workflow data before loading new project"""
+        # Temporarily disable auto-save to prevent saving empty values
+        self._loading_project = True
+        
+        # Clear initial redline
+        self.initial_redline_var.set(False)
+        self.initial_engineer_var.set("")
+        self.initial_date_entry.set("")
+        
+        # Clear redline updates
+        for i in range(1, 5):
+            if hasattr(self, f"redline_update_{i}_var"):
+                getattr(self, f"redline_update_{i}_var").set(False)
+            if hasattr(self, f"redline_update_{i}_engineer_var"):
+                getattr(self, f"redline_update_{i}_engineer_var").set("")
+            if hasattr(self, f"redline_update_{i}_date_entry"):
+                getattr(self, f"redline_update_{i}_date_entry").set("")
+        
+        # Clear OPS review
+        self.ops_review_var.set(False)
+        self.ops_review_date_entry.set("")
+        
+        # Clear Peter Weck review
+        self.peter_weck_var.set(False)
+        self.peter_weck_date_entry.set("")
+        
+        # Clear release to Dee
+        self.release_fixed_errors_var.set(False)
+        self.missing_prints_date_entry.set("")
+        self.d365_updates_date_entry.set("")
+        self.other_notes_var.set("")
+        self.other_date_entry.set("")
+
     def load_project_details(self, job_number):
         """Load details for selected project"""
         print(f"DEBUG: Loading project details for: {job_number}")
@@ -1370,6 +1618,9 @@ class ProjectsApp:
                     break
         
         print(f"DEBUG: Cleaned job number: {clean_job_number}")
+        
+        # Clear workflow data first to prevent showing old data
+        self.clear_workflow_data()
         
         # Temporarily disable auto-save to prevent interference
         self._loading_project = True
@@ -1408,10 +1659,13 @@ class ProjectsApp:
             self.released_to_dee_entry.set(project[11] or "")
         
         # Load workflow data
-        self.load_workflow_data(job_number, cursor)
+        self.load_workflow_data(clean_job_number, cursor)
         
         # Update quick access panel
         self.update_quick_access()
+        
+        # Update cover sheet button
+        self.update_cover_sheet_button()
         
         # Re-enable auto-save
         self._loading_project = False
@@ -1630,74 +1884,72 @@ class ProjectsApp:
     
     def save_workflow_data(self, cursor, project_id):
         """Save workflow data for the project"""
-        # Save initial redline
-        if self.initial_redline_var.get():
+        # Save initial redline (always save, regardless of checkbox state)
+        engineer_id = None
+        if self.initial_engineer_var.get():
+            cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.initial_engineer_var.get(),))
+            result = cursor.fetchone()
+            if result:
+                engineer_id = result[0]
+        
+        cursor.execute("""
+            INSERT OR REPLACE INTO initial_redline 
+            (project_id, engineer_id, redline_date, is_completed)
+            VALUES (?, ?, ?, ?)
+        """, (project_id, engineer_id, self.initial_date_entry.get() or None, self.initial_redline_var.get()))
+        
+        # Save redline updates (always save all cycles, regardless of checkbox state)
+        for i in range(1, 5):
+            var_name = f"redline_update_{i}_var"
+            engineer_var_name = f"redline_update_{i}_engineer_var"
+            date_entry_name = f"redline_update_{i}_date_entry"
+            
             engineer_id = None
-            if self.initial_engineer_var.get():
-                cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.initial_engineer_var.get(),))
+            if hasattr(self, engineer_var_name) and getattr(self, engineer_var_name).get():
+                cursor.execute("SELECT id FROM engineers WHERE name = ?", (getattr(self, engineer_var_name).get(),))
                 result = cursor.fetchone()
                 if result:
                     engineer_id = result[0]
             
+            date_value = None
+            if hasattr(self, date_entry_name):
+                date_value = getattr(self, date_entry_name).get()
+            
+            checkbox_value = False
+            if hasattr(self, var_name):
+                checkbox_value = getattr(self, var_name).get()
+            
             cursor.execute("""
-                INSERT OR REPLACE INTO initial_redline 
-                (project_id, engineer_id, redline_date, is_completed)
-                VALUES (?, ?, ?, ?)
-            """, (project_id, engineer_id, self.initial_date_entry.get() or None, True))
+                INSERT OR REPLACE INTO redline_updates 
+                (project_id, engineer_id, update_date, update_cycle, is_completed)
+                VALUES (?, ?, ?, ?, ?)
+            """, (project_id, engineer_id, date_value, i, checkbox_value))
         
-        # Save redline updates
-        for i in range(1, 5):
-            var_name = f"redline_update_{i}_var"
-            if hasattr(self, var_name) and getattr(self, var_name).get():
-                engineer_var_name = f"redline_update_{i}_engineer_var"
-                date_var_name = f"redline_update_{i}_date_var"
-                
-                engineer_id = None
-                if hasattr(self, engineer_var_name) and getattr(self, engineer_var_name).get():
-                    cursor.execute("SELECT id FROM engineers WHERE name = ?", (getattr(self, engineer_var_name).get(),))
-                    result = cursor.fetchone()
-                    if result:
-                        engineer_id = result[0]
-                
-                date_entry_name = f"redline_update_{i}_date_entry"
-                date_value = None
-                if hasattr(self, date_entry_name):
-                    date_value = getattr(self, date_entry_name).get()
-                
-                cursor.execute("""
-                    INSERT OR REPLACE INTO redline_updates 
-                    (project_id, engineer_id, update_date, update_cycle, is_completed)
-                    VALUES (?, ?, ?, ?, ?)
-                """, (project_id, engineer_id, date_value, i, True))
+        # Save OPS review (always save, regardless of checkbox state)
+        cursor.execute("""
+            INSERT OR REPLACE INTO ops_review 
+            (project_id, review_date, is_completed)
+            VALUES (?, ?, ?)
+        """, (project_id, self.ops_review_date_entry.get() or None, self.ops_review_var.get()))
         
-        # Save OPS review
-        if self.ops_review_var.get():
-            cursor.execute("""
-                INSERT OR REPLACE INTO ops_review 
-                (project_id, review_date, is_completed)
-                VALUES (?, ?, ?)
-            """, (project_id, self.ops_review_date_entry.get() or None, True))
+        # Save Peter Weck review (always save, regardless of checkbox state)
+        cursor.execute("""
+            INSERT OR REPLACE INTO peter_weck_review 
+            (project_id, fixed_errors_date, is_completed)
+            VALUES (?, ?, ?)
+        """, (project_id, self.peter_weck_date_entry.get() or None, self.peter_weck_var.get()))
         
-        # Save Peter Weck review
-        if self.peter_weck_var.get():
-            cursor.execute("""
-                INSERT OR REPLACE INTO peter_weck_review 
-                (project_id, fixed_errors_date, is_completed)
-                VALUES (?, ?, ?)
-            """, (project_id, self.peter_weck_date_entry.get() or None, True))
-        
-        # Save release to Dee
-        if self.release_fixed_errors_var.get():
-            cursor.execute("""
-                INSERT OR REPLACE INTO release_to_dee 
-                (project_id, release_date, missing_prints_date, d365_updates_date, 
-                 other_notes, other_date, is_completed)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (project_id, self.released_to_dee_entry.get() or None,
-                 self.missing_prints_date_entry.get() or None,
-                 self.d365_updates_date_entry.get() or None,
-                 self.other_notes_var.get() or None,
-                 self.other_date_entry.get() or None, True))
+        # Save release to Dee (always save, regardless of checkbox state)
+        cursor.execute("""
+            INSERT OR REPLACE INTO release_to_dee 
+            (project_id, release_date, missing_prints_date, d365_updates_date, 
+             other_notes, other_date, is_completed)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (project_id, self.released_to_dee_entry.get() or None,
+             self.missing_prints_date_entry.get() or None,
+             self.d365_updates_date_entry.get() or None,
+             self.other_notes_var.get() or None,
+             self.other_date_entry.get() or None, self.release_fixed_errors_var.get()))
     
     def delete_project(self):
         """Delete selected project"""

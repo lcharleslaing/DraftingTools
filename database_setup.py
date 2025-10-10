@@ -184,6 +184,11 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass  # Column already exists
         
+        try:
+            cursor.execute("ALTER TABLE projects ADD COLUMN last_cover_sheet_date TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
         # Create drawings table for print packages
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS drawings (
