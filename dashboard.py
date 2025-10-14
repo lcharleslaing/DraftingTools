@@ -257,16 +257,9 @@ class DashboardApp:
     def launch_projects(self):
         """Launch the Projects Management application"""
         try:
-            # Check if projects.py is already running
-            if self.is_app_running('projects.py'):
-                messagebox.showinfo("Already Running", "Projects Management is already open.\n\nPlease use the existing window.")
-                return
-            
-            # Check if projects.py exists
             if os.path.exists('projects.py'):
                 process = subprocess.Popen([sys.executable, 'projects.py'])
                 self.child_processes.append(process)
-                # Clean up finished processes
                 self.cleanup_finished_processes()
             else:
                 messagebox.showerror("Error", "projects.py not found in current directory")
@@ -276,16 +269,9 @@ class DashboardApp:
     def launch_configurations(self):
         """Launch the Product Configurations application"""
         try:
-            # Check if product_configurations.py is already running
-            if self.is_app_running('product_configurations.py'):
-                messagebox.showinfo("Already Running", "Product Configurations is already open.\n\nPlease use the existing window.")
-                return
-            
-            # Check if product_configurations.py exists
             if os.path.exists('product_configurations.py'):
                 process = subprocess.Popen([sys.executable, 'product_configurations.py'])
                 self.child_processes.append(process)
-                # Clean up finished processes
                 self.cleanup_finished_processes()
             else:
                 messagebox.showerror("Error", "product_configurations.py not found in current directory")
@@ -295,16 +281,9 @@ class DashboardApp:
     def launch_print_package(self):
         """Launch the Print Package Management application"""
         try:
-            # Check if print_package.py is already running
-            if self.is_app_running('print_package.py'):
-                messagebox.showinfo("Already Running", "Print Package Management is already open.\n\nPlease use the existing window.")
-                return
-            
-            # Check if print_package.py exists
             if os.path.exists('print_package.py'):
                 process = subprocess.Popen([sys.executable, 'print_package.py'])
                 self.child_processes.append(process)
-                # Clean up finished processes
                 self.cleanup_finished_processes()
             else:
                 messagebox.showerror("Error", "print_package.py not found in current directory")
@@ -314,25 +293,6 @@ class DashboardApp:
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""
         self.child_processes = [p for p in self.child_processes if p.poll() is None]
-    
-    def is_app_running(self, script_name):
-        """Check if a specific application is already running"""
-        try:
-            current_pid = os.getpid()
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                try:
-                    if proc.info['name'] and 'python' in proc.info['name'].lower():
-                        cmdline = proc.info.get('cmdline', [])
-                        if cmdline:
-                            cmdline_str = ' '.join(cmdline).lower()
-                            if script_name.lower() in cmdline_str and proc.info['pid'] != current_pid:
-                                return True
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
-                    continue
-            return False
-        except Exception as e:
-            print(f"Error checking if app is running: {e}")
-            return False
     
     def schedule_cleanup(self):
         """Schedule periodic cleanup of finished processes"""
@@ -598,42 +558,6 @@ Developed for CECO Environmental Corp
         """Run the dashboard application"""
         self.root.mainloop()
 
-def is_dashboard_running():
-    """Check if Dashboard is already running"""
-    try:
-        current_pid = os.getpid()
-        
-        for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'create_time']):
-            try:
-                if proc.info['name'] and 'python' in proc.info['name'].lower():
-                    cmdline = proc.info.get('cmdline', [])
-                    if cmdline:
-                        cmdline_str = ' '.join(cmdline).lower()
-                        if 'dashboard.py' in cmdline_str and proc.info['pid'] != current_pid:
-                            # Check if process has been running for more than 1 second
-                            # This ensures it's a real dashboard, not just starting up
-                            import time
-                            process_age = time.time() - proc.info['create_time']
-                            if process_age > 1.0 and proc.is_running():
-                                return True
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
-                continue
-        
-        return False
-        
-    except Exception as e:
-        print(f"Error checking if dashboard is running: {e}")
-        return False
-
 if __name__ == "__main__":
-    # Check if dashboard is already running
-    if is_dashboard_running():
-        root = tk.Tk()
-        root.withdraw()  # Hide the window
-        messagebox.showwarning("Already Running", 
-                              "Dashboard is already open.\n\nPlease use the existing Dashboard window.")
-        root.destroy()
-        sys.exit(0)
-    
     app = DashboardApp()
     app.run()

@@ -230,6 +230,17 @@ class DatabaseManager:
             )
         ''')
         
+        # Create print_packages table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS print_packages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_number TEXT NOT NULL,
+                package_name TEXT,
+                created_date TEXT,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
         conn.commit()
         conn.close()
     

@@ -5,6 +5,7 @@ import sqlite3
 import os
 import subprocess
 import sys
+import shutil
 from database_setup import DatabaseManager
 from date_picker import DateEntry
 from directory_picker import DirectoryPicker, FilePicker
@@ -69,9 +70,10 @@ class ProjectsApp:
         
         # Configure root grid weights for full expansion
         root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)  # Title row
+        root.rowconfigure(0, weight=0)  # Title row (fixed)
         root.rowconfigure(1, weight=100)  # Main content (expands)
-        root.rowconfigure(2, weight=0)  # Footer (fixed)
+        root.rowconfigure(2, weight=0)  # Separator (fixed)
+        root.rowconfigure(3, weight=0)  # Footer (fixed)
         
         self.create_widgets()
         self.load_projects()
@@ -291,6 +293,711 @@ class ProjectsApp:
         self.job_directory_picker.var.trace('w', self.auto_extract_and_save)
         self.customer_name_picker.var.trace('w', self.auto_save)
         self.customer_location_picker.var.trace('w', self.auto_save)
+        
+        # Add specifications section below project details
+        self.create_specifications_section(details_frame)
+    
+    def create_specifications_section(self, parent_frame):
+        """Create the specifications section below project details"""
+        # Add separator
+        separator = ttk.Separator(parent_frame, orient='horizontal')
+        separator.grid(row=12, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 5))
+        
+        # Configure parent frame columns to use full width
+        parent_frame.columnconfigure(0, weight=2)  # Buttons take 2/3 of space
+        parent_frame.columnconfigure(1, weight=1)  # Inputs take 1/3 of space
+        
+        # Specifications label
+        specs_label = ttk.Label(parent_frame, text="Specifications", font=('Arial', 12, 'bold'))
+        specs_label.grid(row=13, column=0, columnspan=2, sticky=tk.W, pady=(5, 10))
+        
+        # Initialize specifications buttons list and input fields
+        self.spec_buttons = []
+        self.spec_input_fields = {}
+        
+        # Create specifications content
+        self.update_specifications(parent_frame)
+    
+    def update_specifications(self, parent_frame=None):
+        """Update the specifications panel based on available files"""
+        if parent_frame is None:
+            return
+            
+        # Clear existing buttons and input fields
+        for button in self.spec_buttons:
+            button.destroy()
+        self.spec_buttons.clear()
+        
+        for field in self.spec_input_fields.values():
+            field.destroy()
+        self.spec_input_fields.clear()
+        
+        # Check if we have a job directory
+        if not hasattr(self, 'job_directory_picker') or not self.job_directory_picker.get():
+            no_data_label = ttk.Label(parent_frame, 
+                                    text="No project selected", 
+                                    foreground="gray", justify="center")
+            no_data_label.grid(row=14, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=20)
+            self.spec_buttons.append(no_data_label)
+            return
+        
+        # Look for Heater Design file in Quick Access
+        heater_design_file = None
+        if hasattr(self, 'engineering_general_docs') and self.engineering_general_docs:
+            for file_path in self.engineering_general_docs:
+                filename = os.path.basename(file_path).upper()
+                # Check if filename contains "HEATER DESIGN" OR if file has a "Heater Design" sheet inside
+                if "HEATER DESIGN" in filename or self.has_heater_design_sheet(file_path):
+                    heater_design_file = file_path
+                    print(f"Found Heater Design file: {filename}")
+                    break
+        
+        # Can Size specification
+        can_size_value = "No Heater Design"
+        can_size_button_state = "disabled"
+        button_color = "#FFB6C1"  # Light pink for no file
+        button_text_color = "black"
+        
+        if heater_design_file and os.path.exists(heater_design_file):
+            try:
+                # Read Excel file to get Can Size from "Heater Design" sheet
+                can_size_value = self.read_excel_can_size(heater_design_file)
+                if can_size_value:
+                    can_size_button_state = "normal"
+                    button_color = "#90EE90"  # Light green for file with value
+                    button_text_color = "black"
+                else:
+                    button_color = "#FFB6C1"  # Light pink for file but no value
+                    button_text_color = "black"
+            except Exception as e:
+                print(f"Error reading Heater Design file: {e}")
+                can_size_value = "Error reading file"
+                button_color = "#FFB6C1"  # Light pink for error
+                button_text_color = "black"
+        
+        # Create Can Size button
+        can_size_btn = tk.Button(parent_frame, 
+                                text=f"Can Size: {can_size_value}",
+                                state=can_size_button_state,
+                                command=lambda: self.open_heater_design_file(heater_design_file) if heater_design_file else None,
+                                width=30, height=2,
+                                font=('Arial', 10),
+                                relief='raised', bd=2, 
+                                cursor='hand2' if can_size_button_state == "normal" else 'arrow',
+                                bg=button_color, fg=button_text_color,
+                                activebackground=button_color, activeforeground=button_text_color)
+        can_size_btn.grid(row=14, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
+        self.spec_buttons.append(can_size_btn)
+        
+        # Add Heater Specs group
+        self.create_heater_specs_group(parent_frame, heater_design_file)
+    
+    def create_heater_specs_group(self, parent_frame, heater_design_file):
+        """Create the Heater Specs group with dimension buttons"""
+        # Heater Specs label
+        heater_specs_label = ttk.Label(parent_frame, text="Heater Specs", font=('Arial', 11, 'bold'), foreground="darkblue")
+        heater_specs_label.grid(row=15, column=0, columnspan=2, sticky=tk.W, pady=(15, 5))
+        self.spec_buttons.append(heater_specs_label)
+        
+        # Define the heater dimension specifications
+        heater_specs = [
+            ("Heater Diameter", "H13"),
+            ("Heater Height", "B31"),
+            ("Can Height", "C33"),
+            ("Packing Rings Bottom", "D41"),
+            ("Packing Rings Height", "D31"),
+            ("Packing Rings to Spray Nozzle", "D25"),
+            ("Stack Diameter", "H14")
+        ]
+        
+        # Add Spray Nozzle Size and Length from Engineering Design file
+        spray_nozzle_size = self.get_spray_nozzle_size_from_engineering_design()
+        spray_nozzle_length = self.get_spray_nozzle_length_from_engineering_design()
+        
+        # Check for manual specs first, then use found values
+        manual_size = self.get_saved_manual_spec("Spray Nozzle Size")
+        if spray_nozzle_size:
+            heater_specs.append(("Spray Nozzle Size", spray_nozzle_size))
+        elif manual_size:
+            heater_specs.append(("Spray Nozzle Size", f"Manual: {manual_size}"))
+        else:
+            heater_specs.append(("Spray Nozzle Size", "No Size Found"))
+            
+        manual_length = self.get_saved_manual_spec("Spray Nozzle Length")
+        if spray_nozzle_length:
+            heater_specs.append(("Spray Nozzle Length", spray_nozzle_length))
+        elif manual_length:
+            heater_specs.append(("Spray Nozzle Length", f"Manual: {manual_length}"))
+        else:
+            heater_specs.append(("Spray Nozzle Length", "No Length Found"))
+        
+        # Add Spray Nozzle P/N from Spray Nozzles file
+        spray_nozzle_pn = self.read_spray_nozzle_pn_from_files()
+        manual_pn = self.get_saved_manual_spec("Spray Nozzle P/N")
+        if spray_nozzle_pn:
+            heater_specs.append(("Spray Nozzle P/N", spray_nozzle_pn))
+        elif manual_pn:
+            heater_specs.append(("Spray Nozzle P/N", f"Manual: {manual_pn}"))
+        else:
+            # Add "No Spray Nozzle Found" if no match found
+            heater_specs.append(("Spray Nozzle P/N", "No Spray Nozzle Found"))
+        
+        # Create buttons for each spec
+        for i, (spec_name, cell_ref_or_value) in enumerate(heater_specs):
+            # Check if this is a pre-formatted value (Spray Nozzle specs) or a cell reference
+            if spec_name in ["Spray Nozzle P/N", "Spray Nozzle Size", "Spray Nozzle Length"]:
+                spec_value = cell_ref_or_value  # This is already the formatted value
+            else:
+                spec_value = self.read_heater_spec_value(heater_design_file, cell_ref_or_value)
+                if not spec_value:
+                    spec_value = "No Data"
+            
+            # Determine button color and state
+            if spec_value and spec_value not in ["No Spray Nozzle Found", "No Size Found", "No Length Found", "No Data"]:
+                if spec_value.startswith("Manual:"):
+                    button_color = "#FFE082"  # Light yellow for manual values
+                else:
+                    button_color = "#90EE90"  # Light green for found values
+                button_state = "normal"
+                cursor_type = "hand2"
+            elif spec_value in ["No Spray Nozzle Found", "No Size Found", "No Length Found", "No Data"]:
+                button_color = "#FFB6C1"  # Light pink for "No [item] Found" or "No Data"
+                button_state = "disabled"
+                cursor_type = "arrow"
+            else:
+                button_color = "#FFB6C1"  # Light pink for no value
+                button_state = "disabled"
+                cursor_type = "arrow"
+            
+            # Create button (wider to fill more space)
+            spec_btn = tk.Button(parent_frame, 
+                               text=f"{spec_name}: {spec_value or 'No Data'}",
+                               state=button_state,
+                               command=lambda file=heater_design_file: self.open_heater_design_file(file) if file else None,
+                               width=45, height=1,
+                               font=('Arial', 9),
+                               relief='raised', bd=1,
+                               cursor=cursor_type,
+                               bg=button_color, fg="black",
+                               activebackground=button_color, activeforeground="black")
+            spec_btn.grid(row=16+i, column=0, sticky=(tk.W, tk.E), pady=1, padx=(0, 10))
+            
+            # Add right-click context menu
+            self.create_spec_context_menu(spec_btn, spec_name, parent_frame, 16+i)
+            
+            self.spec_buttons.append(spec_btn)
+            
+            # Add input field for missing values (all "No Data" or "No [Item] Found" cases)
+            if spec_value in ["No Spray Nozzle Found", "No Size Found", "No Length Found", "No Data"] or not spec_value:
+                self.create_spec_input_field(parent_frame, spec_name, 16+i, 1)  # Column 1 for right side
+    
+    def create_spec_context_menu(self, button, spec_name, parent_frame, row):
+        """Create right-click context menu for specification buttons"""
+        def show_context_menu(event):
+            context_menu = tk.Menu(self.root, tearoff=0)
+            
+            # Add Edit option
+            context_menu.add_command(label="Edit", 
+                                   command=lambda: self.edit_spec_value(spec_name, parent_frame, row))
+            
+            # Add Delete option (only if manual value exists)
+            if self.get_saved_manual_spec(spec_name):
+                context_menu.add_command(label="Delete", 
+                                       command=lambda: self.delete_manual_spec(spec_name))
+            
+            # Add separator and refresh option
+            context_menu.add_separator()
+            context_menu.add_command(label="Refresh", 
+                                   command=lambda: self.update_specifications(parent_frame))
+            
+            try:
+                context_menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                context_menu.grab_release()
+        
+        button.bind("<Button-3>", show_context_menu)  # Right-click
+    
+    def edit_spec_value(self, spec_name, parent_frame, row):
+        """Edit a specification value"""
+        current_value = self.get_saved_manual_spec(spec_name)
+        if current_value:
+            # Remove "Manual:" prefix if present
+            if current_value.startswith("Manual: "):
+                current_value = current_value[8:]
+        else:
+            current_value = ""
+        
+        # Create edit dialog
+        edit_window = tk.Toplevel(self.root)
+        edit_window.title(f"Edit {spec_name}")
+        edit_window.geometry("400x150")
+        edit_window.transient(self.root)
+        edit_window.grab_set()
+        
+        # Center the window
+        edit_window.update_idletasks()
+        x = (edit_window.winfo_screenwidth() // 2) - (400 // 2)
+        y = (edit_window.winfo_screenheight() // 2) - (150 // 2)
+        edit_window.geometry(f"400x150+{x}+{y}")
+        
+        # Label
+        ttk.Label(edit_window, text=f"Enter new value for {spec_name}:", font=('Arial', 10)).pack(pady=10)
+        
+        # Input field
+        input_var = tk.StringVar(value=current_value)
+        input_entry = ttk.Entry(edit_window, textvariable=input_var, width=40, font=('Arial', 10))
+        input_entry.pack(pady=10)
+        input_entry.focus()
+        input_entry.select_range(0, tk.END)
+        
+        # Buttons
+        button_frame = tk.Frame(edit_window)
+        button_frame.pack(pady=10)
+        
+        tk.Button(button_frame, text="Save", 
+                command=lambda: self.save_edit_spec(spec_name, input_var.get(), edit_window),
+                width=10, bg='#4CAF50', fg='white').pack(side=tk.LEFT, padx=5)
+        
+        tk.Button(button_frame, text="Cancel", 
+                command=edit_window.destroy,
+                width=10, bg='#f44336', fg='white').pack(side=tk.LEFT, padx=5)
+        
+        # Bind Enter key to save
+        input_entry.bind('<Return>', lambda e: self.save_edit_spec(spec_name, input_var.get(), edit_window))
+    
+    def save_edit_spec(self, spec_name, value, window):
+        """Save edited specification value"""
+        if not value.strip():
+            messagebox.showwarning("Warning", f"Please enter a value for {spec_name}")
+            return
+        
+        self.save_manual_spec(spec_name, value)
+        window.destroy()
+    
+    def delete_manual_spec(self, spec_name):
+        """Delete a manual specification value"""
+        if hasattr(self, 'manual_specs') and spec_name in self.manual_specs:
+            del self.manual_specs[spec_name]
+            messagebox.showinfo("Deleted", f"{spec_name} manual value deleted")
+            # Refresh the specifications
+            self.update_specifications(self.project_details_container.winfo_children()[0])
+    
+    def create_spec_input_field(self, parent_frame, spec_name, row, column=1):
+        """Create an input field for manual entry of missing specifications"""
+        # Create input frame for right side - positioned next to the button
+        input_frame = tk.Frame(parent_frame)
+        input_frame.grid(row=row, column=column, sticky=(tk.W, tk.E), pady=1, padx=(0, 0))
+        
+        # Input field (compact, no label)
+        input_var = tk.StringVar()
+        input_entry = ttk.Entry(input_frame, textvariable=input_var, width=20, font=('Arial', 9))
+        input_entry.pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Save button (compact but visible)
+        save_btn = tk.Button(input_frame, text="Save", 
+                           command=lambda: self.save_manual_spec(spec_name, input_var.get()),
+                           width=6, height=1, font=('Arial', 8, 'bold'),
+                           bg='#4CAF50', fg='white', relief='raised', bd=1)
+        save_btn.pack(side=tk.LEFT, padx=(0, 0))
+        
+        # Store the input field for later reference
+        self.spec_input_fields[spec_name] = input_frame
+        
+        # Load any previously saved value
+        saved_value = self.get_saved_manual_spec(spec_name)
+        if saved_value:
+            input_var.set(saved_value)
+        else:
+            # Add placeholder text
+            input_entry.insert(0, f"Enter value...")
+            input_entry.bind('<FocusIn>', lambda e: input_entry.delete(0, tk.END) if input_entry.get() == f"Enter value..." else None)
+            input_entry.bind('<FocusOut>', lambda e: input_entry.insert(0, f"Enter value...") if not input_entry.get() else None)
+    
+    def save_manual_spec(self, spec_name, value):
+        """Save a manually entered specification value"""
+        if not value.strip():
+            messagebox.showwarning("Warning", f"Please enter a value for {spec_name}")
+            return
+        
+        # Store in a simple way (you could save to database if needed)
+        if not hasattr(self, 'manual_specs'):
+            self.manual_specs = {}
+        
+        self.manual_specs[spec_name] = value.strip()
+        messagebox.showinfo("Saved", f"{spec_name} saved as: {value.strip()}")
+        
+        # Update the specifications to show the saved value
+        self.update_specifications(self.project_details_container.winfo_children()[0])
+    
+    def get_saved_manual_spec(self, spec_name):
+        """Get a previously saved manual specification value"""
+        if hasattr(self, 'manual_specs') and spec_name in self.manual_specs:
+            return self.manual_specs[spec_name]
+        return None
+    
+    def read_heater_spec_value(self, file_path, cell_ref):
+        """Read a specific cell value from the Heater Cross Section sheet"""
+        if not file_path or not os.path.exists(file_path):
+            return None
+            
+        try:
+            import openpyxl
+            
+            # Load the workbook
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            
+            # Look for "Heater Cross Section" sheet
+            cross_section_sheet = None
+            for sheet_name in workbook.sheetnames:
+                if "Heater Cross Section" in sheet_name:
+                    cross_section_sheet = workbook[sheet_name]
+                    break
+            
+            if not cross_section_sheet:
+                print(f"No 'Heater Cross Section' sheet found in {file_path}")
+                return None
+            
+            # Get the value from the specified cell
+            cell_value = cross_section_sheet[cell_ref].value
+            if cell_value is not None:
+                print(f"Found {cell_ref}: {cell_value}")
+                return str(cell_value)
+            else:
+                print(f"No value found in cell {cell_ref}")
+                return None
+            
+        except Exception as e:
+            print(f"Error reading cell {cell_ref} from {file_path}: {e}")
+            return None
+    
+    def read_spray_nozzle_pn_from_files(self):
+        """Read Spray Nozzle P/N by getting nozzle specs from Engineering Design file and looking up in Spray Nozzles file"""
+        # First, find the Engineering Design file to get nozzle size and length
+        engineering_design_file = None
+        spray_nozzles_file = None
+        
+        if hasattr(self, 'engineering_general_docs') and self.engineering_general_docs:
+            for file_path in self.engineering_general_docs:
+                filename = os.path.basename(file_path).upper()
+                if "ENGINEERING DESIGN" in filename:
+                    engineering_design_file = file_path
+                    print(f"Found Engineering Design file: {filename}")
+                elif "SPRAY NOZZLES" in filename:
+                    spray_nozzles_file = file_path
+                    print(f"Found Spray Nozzles file: {filename}")
+        
+        if not engineering_design_file:
+            print("No Engineering Design file found")
+            return None
+            
+        if not spray_nozzles_file:
+            print("No Spray Nozzles file found")
+            return None
+        
+        # Get nozzle size and length from Engineering Design file
+        nozzle_size = self.get_nozzle_size_from_heater_design(engineering_design_file)
+        nozzle_length = self.get_nozzle_length_from_heater_design(engineering_design_file)
+        
+        if not nozzle_size or not nozzle_length:
+            print(f"Could not get Nozzle Size or Length from Engineering Design file")
+            return None
+        
+        # Now look up the part numbers in the Spray Nozzles file
+        return self.lookup_spray_nozzle_pn(spray_nozzles_file, nozzle_size, nozzle_length)
+    
+    def get_spray_nozzle_size_from_engineering_design(self):
+        """Get Spray Nozzle Size from Engineering Design file"""
+        if hasattr(self, 'engineering_general_docs') and self.engineering_general_docs:
+            for file_path in self.engineering_general_docs:
+                filename = os.path.basename(file_path).upper()
+                if "ENGINEERING DESIGN" in filename:
+                    return self.get_nozzle_size_from_heater_design(file_path)
+        return None
+    
+    def get_spray_nozzle_length_from_engineering_design(self):
+        """Get Spray Nozzle Length from Engineering Design file"""
+        if hasattr(self, 'engineering_general_docs') and self.engineering_general_docs:
+            for file_path in self.engineering_general_docs:
+                filename = os.path.basename(file_path).upper()
+                if "ENGINEERING DESIGN" in filename:
+                    return self.get_nozzle_length_from_heater_design(file_path)
+        return None
+    
+    def lookup_spray_nozzle_pn(self, spray_nozzles_file, nozzle_size, nozzle_length):
+        """Look up Spray Nozzle P/N in the Spray Nozzles file using size and length"""
+        if not spray_nozzles_file or not os.path.exists(spray_nozzles_file):
+            return None
+            
+        try:
+            import openpyxl
+            
+            # Load the Spray Nozzles workbook
+            workbook = openpyxl.load_workbook(spray_nozzles_file, data_only=True)
+            
+            # Look for "Spray Nozzles" sheet or "Nozzle Selection" sheet or use Sheet1
+            spray_nozzles_sheet = None
+            for sheet_name in workbook.sheetnames:
+                if "Spray Nozzles" in sheet_name or "Nozzle Selection" in sheet_name:
+                    spray_nozzles_sheet = workbook[sheet_name]
+                    print(f"Found sheet: {sheet_name}")
+                    break
+            
+            # If no "Spray Nozzles" or "Nozzle Selection" sheet found, try Sheet1
+            if not spray_nozzles_sheet and "Sheet1" in workbook.sheetnames:
+                spray_nozzles_sheet = workbook["Sheet1"]
+                print(f"Using Sheet1 for Spray Nozzles data")
+            
+            if not spray_nozzles_sheet:
+                print(f"No 'Spray Nozzles', 'Nozzle Selection', or 'Sheet1' sheet found in {spray_nozzles_file}")
+                return None
+            
+            # Search for matching row based on Nozzle Size (Column A) and Nozzle Length (Column P)
+            print(f"Searching for matching row in {spray_nozzles_sheet.max_row} rows...")
+            print(f"Looking for Nozzle Size: {nozzle_size}, Nozzle Length: {nozzle_length}")
+            
+            for row in range(1, spray_nozzles_sheet.max_row + 1):
+                cell_a = spray_nozzles_sheet[f'A{row}']  # Nozzle Size
+                cell_p = spray_nozzles_sheet[f'P{row}']  # Nozzle Length
+                
+                # Debug: Print what we find in each row
+                if cell_a.value or cell_p.value:
+                    print(f"Row {row}: A='{cell_a.value}', P='{cell_p.value}'")
+                
+                # Check if both cells have values and match our criteria
+                if cell_a.value and cell_p.value:
+                    # Convert to strings and compare
+                    size_match = str(cell_a.value).strip() == str(nozzle_size).strip()
+                    length_match = str(cell_p.value).strip() == str(nozzle_length).strip()
+                    
+                    print(f"Row {row} - Size match: {size_match}, Length match: {length_match}")
+                    
+                    if size_match and length_match:
+                        # Found the matching row! Get the part numbers from columns B and C
+                        cell_b = spray_nozzles_sheet[f'B{row}']
+                        cell_c = spray_nozzles_sheet[f'C{row}']
+                        
+                        if cell_b.value and cell_c.value:
+                            column_b_value = str(cell_b.value).strip()
+                            column_c_value = str(cell_c.value).strip()
+                            spray_pn = f"{column_b_value}-{column_c_value}"
+                            print(f"Found Spray Nozzle P/N: {spray_pn} in matching row {row}")
+                            return spray_pn
+            
+            print(f"No matching row found for Nozzle Size: {nozzle_size}, Length: {nozzle_length}")
+            return None
+            
+        except Exception as e:
+            print(f"Error looking up Spray Nozzle P/N: {e}")
+            return None
+    
+    def read_spray_nozzle_pn(self, file_path):
+        """Read Spray Nozzle P/N by matching Nozzle Size and Length from Heater Design sheet"""
+        if not file_path or not os.path.exists(file_path):
+            return None
+            
+        try:
+            import openpyxl
+            
+            # Load the workbook
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            
+            # First, get the Nozzle Size and Length from the Heater Design sheet
+            nozzle_size = self.get_nozzle_size_from_heater_design(file_path)
+            nozzle_length = self.get_nozzle_length_from_heater_design(file_path)
+            
+            if not nozzle_size or not nozzle_length:
+                print(f"Could not get Nozzle Size or Length from Heater Design sheet")
+                return None
+            
+            print(f"Looking for Nozzle Size: {nozzle_size}, Nozzle Length: {nozzle_length}")
+            
+            # Look for "Spray Nozzles" sheet or "Nozzle Selection" sheet or use Sheet1
+            spray_nozzles_sheet = None
+            for sheet_name in workbook.sheetnames:
+                if "Spray Nozzles" in sheet_name or "Nozzle Selection" in sheet_name:
+                    spray_nozzles_sheet = workbook[sheet_name]
+                    print(f"Found sheet: {sheet_name}")
+                    break
+            
+            # If no "Spray Nozzles" or "Nozzle Selection" sheet found, try Sheet1
+            if not spray_nozzles_sheet and "Sheet1" in workbook.sheetnames:
+                spray_nozzles_sheet = workbook["Sheet1"]
+                print(f"Using Sheet1 for Spray Nozzles data")
+            
+            if not spray_nozzles_sheet:
+                print(f"No 'Spray Nozzles', 'Nozzle Selection', or 'Sheet1' sheet found in {file_path}")
+                return None
+            
+            # Search for matching row based on Nozzle Size (Column A) and Nozzle Length (Column P)
+            print(f"Searching for matching row in {spray_nozzles_sheet.max_row} rows...")
+            
+            for row in range(1, spray_nozzles_sheet.max_row + 1):
+                cell_a = spray_nozzles_sheet[f'A{row}']  # Nozzle Size
+                cell_p = spray_nozzles_sheet[f'P{row}']  # Nozzle Length
+                
+                # Debug: Print what we find in each row
+                if cell_a.value or cell_p.value:
+                    print(f"Row {row}: A='{cell_a.value}', P='{cell_p.value}'")
+                
+                # Check if both cells have values and match our criteria
+                if cell_a.value and cell_p.value:
+                    # Convert to strings and compare
+                    size_match = str(cell_a.value).strip() == str(nozzle_size).strip()
+                    length_match = str(cell_p.value).strip() == str(nozzle_length).strip()
+                    
+                    print(f"Row {row} - Size match: {size_match}, Length match: {length_match}")
+                    
+                    if size_match and length_match:
+                        # Found the matching row! Get the part numbers from columns B and C
+                        cell_b = spray_nozzles_sheet[f'B{row}']
+                        cell_c = spray_nozzles_sheet[f'C{row}']
+                        
+                        if cell_b.value and cell_c.value:
+                            column_b_value = str(cell_b.value).strip()
+                            column_c_value = str(cell_c.value).strip()
+                            spray_pn = f"{column_b_value}-{column_c_value}"
+                            print(f"Found Spray Nozzle P/N: {spray_pn} in matching row {row}")
+                            return spray_pn
+            
+            print(f"No matching row found for Nozzle Size: {nozzle_size}, Length: {nozzle_length}")
+            return None
+            
+        except Exception as e:
+            print(f"Error reading Spray Nozzle P/N from {file_path}: {e}")
+            return None
+    
+    def get_nozzle_size_from_heater_design(self, file_path):
+        """Get Nozzle Size from L22 in Heater Design sheet"""
+        try:
+            import openpyxl
+            
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            
+            # Look for "Heater Design" sheet
+            heater_sheet = None
+            for sheet_name in workbook.sheetnames:
+                if "Heater Design" in sheet_name:
+                    heater_sheet = workbook[sheet_name]
+                    break
+            
+            if not heater_sheet:
+                print(f"No 'Heater Design' sheet found for nozzle size")
+                return None
+            
+            # Get value from L22
+            cell_l22 = heater_sheet['L22']
+            if cell_l22.value:
+                nozzle_size = str(cell_l22.value).strip()
+                print(f"Found Nozzle Size: {nozzle_size}")
+                return nozzle_size
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error getting nozzle size: {e}")
+            return None
+    
+    def get_nozzle_length_from_heater_design(self, file_path):
+        """Get Nozzle Length from L21 in Heater Design sheet"""
+        try:
+            import openpyxl
+            
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            
+            # Look for "Heater Design" sheet
+            heater_sheet = None
+            for sheet_name in workbook.sheetnames:
+                if "Heater Design" in sheet_name:
+                    heater_sheet = workbook[sheet_name]
+                    break
+            
+            if not heater_sheet:
+                print(f"No 'Heater Design' sheet found for nozzle length")
+                return None
+            
+            # Get value from L21
+            cell_l21 = heater_sheet['L21']
+            if cell_l21.value:
+                nozzle_length = str(cell_l21.value).strip()
+                print(f"Found Nozzle Length: {nozzle_length}")
+                return nozzle_length
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error getting nozzle length: {e}")
+            return None
+    
+    def has_heater_design_sheet(self, file_path):
+        """Check if an Excel file has a 'Heater Design' sheet inside it"""
+        try:
+            import openpyxl
+            
+            # Load the workbook
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            
+            # Check if any sheet name contains "Heater Design"
+            for sheet_name in workbook.sheetnames:
+                if "Heater Design" in sheet_name:
+                    print(f"Found 'Heater Design' sheet in file: {os.path.basename(file_path)}")
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            print(f"Error checking for Heater Design sheet in {file_path}: {e}")
+            return False
+    
+    def read_excel_can_size(self, file_path):
+        """Read Can Size from Excel file (column I, value from column L) on 'Heater Design' sheet"""
+        try:
+            import openpyxl
+            
+            # Load the workbook
+            workbook = openpyxl.load_workbook(file_path, data_only=True)
+            
+            # Look for "Heater Design" sheet specifically
+            heater_sheet = None
+            for sheet_name in workbook.sheetnames:
+                if "Heater Design" in sheet_name:
+                    heater_sheet = workbook[sheet_name]
+                    break
+            
+            if not heater_sheet:
+                print(f"No 'Heater Design' sheet found in {file_path}")
+                return None
+            
+            # Method 1: Look for "Can Size:" in column I and get value from column L
+            for row in range(1, heater_sheet.max_row + 1):
+                cell_i = heater_sheet[f'I{row}']
+                if cell_i.value and "Can Size" in str(cell_i.value):
+                    # Get the value from column L in the same row
+                    cell_l = heater_sheet[f'L{row}']
+                    if cell_l.value:
+                        print(f"Found Can Size: {cell_l.value} in row {row} (method 1)")
+                        return str(cell_l.value)
+            
+            # Method 2: Check cell L48 directly (fallback)
+            cell_l48 = heater_sheet['L48']
+            if cell_l48.value:
+                print(f"Found Can Size: {cell_l48.value} in cell L48 (method 2)")
+                return str(cell_l48.value)
+            
+            print(f"No 'Can Size:' found in column I or L48 of Heater Design sheet")
+            return None
+            
+        except Exception as e:
+            print(f"Error reading Excel file {file_path}: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
+    def open_heater_design_file(self, file_path):
+        """Open the Heater Design file"""
+        if file_path and os.path.exists(file_path):
+            self.open_path(file_path)
+        else:
+            messagebox.showwarning("Warning", "Heater Design file not found!")
     
     def create_workflow_panel(self):
         """Create the workflow tracking panel with collapsible sections"""
@@ -322,6 +1029,9 @@ class ProjectsApp:
         def _configure_canvas(event):
             canvas.itemconfig(canvas_window, width=event.width)
         canvas.bind('<Configure>', _configure_canvas)
+        
+        # Enable mouse wheel scrolling
+        self._bind_mousewheel(canvas, workflow_frame)
         
         main_container.rowconfigure(1, weight=1)
         workflow_frame.columnconfigure(0, weight=1)
@@ -878,10 +1588,44 @@ class ProjectsApp:
             self.release_due_date_entry.var.trace('w', self.update_release_due_display)
     
     def create_quick_access_panel(self):
-        """Create the quick access panel for files and folders"""
-        self.access_frame = ttk.LabelFrame(self.quick_access_container, text="Quick Access", padding="10")
-        self.access_frame.pack(fill=tk.BOTH, expand=True)
+        """Create the quick access panel for files and folders with scrolling"""
+        main_container = ttk.LabelFrame(self.quick_access_container, text="Quick Access", padding="5")
+        main_container.pack(fill=tk.BOTH, expand=True)
+        main_container.rowconfigure(0, weight=1)
+        main_container.columnconfigure(0, weight=1)
+        
+        # Create canvas and scrollbar for scrolling
+        canvas = tk.Canvas(main_container, bg='white', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=canvas.yview)
+        
+        # Create frame inside canvas for content
+        self.access_frame = ttk.Frame(canvas)
         self.access_frame.columnconfigure(0, weight=1)
+        
+        # Store canvas reference for later updates
+        self.quick_access_canvas = canvas
+        
+        # Configure canvas scrolling with better region calculation
+        def update_scroll_region(event=None):
+            canvas.update_idletasks()
+            canvas.configure(scrollregion=canvas.bbox("all"))
+        
+        self.access_frame.bind("<Configure>", update_scroll_region)
+        
+        canvas_window = canvas.create_window((0, 0), window=self.access_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Grid canvas and scrollbar (always show scrollbar)
+        canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Adjust canvas window width when canvas resizes
+        def _configure_canvas(event):
+            canvas.itemconfig(canvas_window, width=event.width)
+        canvas.bind('<Configure>', _configure_canvas)
+        
+        # Enable mouse wheel scrolling
+        self._bind_mousewheel(canvas, self.access_frame)
         
         # Initialize empty quick access area
         self.quick_access_buttons = []
@@ -1100,31 +1844,356 @@ class ProjectsApp:
                 self.quick_access_buttons.append(engineering_placeholder)
                 row += 1
         
+        # Drafting documents section - always show if job directory is loaded
+        if hasattr(self, 'job_directory_picker') and self.job_directory_picker.get():
+            # Add DRAFTING divider
+            drafting_label = ttk.Label(self.access_frame, text="DRAFTING", font=('Arial', 10, 'bold'), foreground="purple")
+            drafting_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(10, 5))
+            self.quick_access_buttons.append(drafting_label)
+            row += 1
+            
+            # Check for Systems folder
+            job_dir = self.job_directory_picker.get()
+            systems_dir = os.path.join(job_dir, "4. Drafting", "Systems")
+            
+            if os.path.exists(systems_dir) and os.path.isdir(systems_dir):
+                # Systems subsection
+                systems_label = ttk.Label(self.access_frame, text="Systems", font=('Arial', 9, 'bold'), foreground="darkviolet")
+                systems_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(5, 2))
+                self.quick_access_buttons.append(systems_label)
+                row += 1
+                
+                # Scan for .dwg files
+                dwg_files = []
+                try:
+                    for file in os.listdir(systems_dir):
+                        if file.lower().endswith('.dwg'):
+                            dwg_files.append(os.path.join(systems_dir, file))
+                except Exception as e:
+                    print(f"Error scanning drafting systems directory: {e}")
+                
+                if dwg_files:
+                    # Sort by name
+                    dwg_files.sort(key=lambda x: os.path.basename(x).lower())
+                    
+                    for file_path in dwg_files:
+                        filename = os.path.basename(file_path)
+                        button_text = self.create_short_button_text("📐", filename)
+                        button = ttk.Button(self.access_frame, text=button_text, 
+                                          command=lambda path=file_path: self.open_drafting_doc(path))
+                        button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(button)
+                        row += 1
+                else:
+                    # No .dwg files found
+                    placeholder = ttk.Label(self.access_frame, text="Systems: No DWG files found", 
+                                         font=('Arial', 8), foreground="gray")
+                    placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                    self.quick_access_buttons.append(placeholder)
+                    row += 1
+                
+                # Package subsection
+                package_dir = os.path.join(job_dir, "4. Drafting", "Package")
+                if os.path.exists(package_dir) and os.path.isdir(package_dir):
+                    package_label = ttk.Label(self.access_frame, text="Package", font=('Arial', 9, 'bold'), foreground="darkviolet")
+                    package_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(5, 2))
+                    self.quick_access_buttons.append(package_label)
+                    row += 1
+                    
+                    # Scan for .dwf and .dwg files
+                    package_files = []
+                    try:
+                        for file in os.listdir(package_dir):
+                            if file.lower().endswith(('.dwf', '.dwg')):
+                                package_files.append(os.path.join(package_dir, file))
+                    except Exception as e:
+                        print(f"Error scanning drafting package directory: {e}")
+                    
+                    if package_files:
+                        # Sort by name
+                        package_files.sort(key=lambda x: os.path.basename(x).lower())
+                        
+                        for file_path in package_files:
+                            filename = os.path.basename(file_path)
+                            # Use different icon for .dwf vs .dwg
+                            icon = "📦" if filename.lower().endswith('.dwf') else "📐"
+                            button_text = self.create_short_button_text(icon, filename)
+                            button = ttk.Button(self.access_frame, text=button_text, 
+                                              command=lambda path=file_path: self.open_drafting_doc(path))
+                            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                            self.quick_access_buttons.append(button)
+                            row += 1
+                    else:
+                        # No package files found
+                        placeholder = ttk.Label(self.access_frame, text="Package: No files found", 
+                                             font=('Arial', 8), foreground="gray")
+                        placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(placeholder)
+                        row += 1
+                
+                # Fabs subsection
+                fabs_dir = os.path.join(job_dir, "4. Drafting", "Fabs")
+                if os.path.exists(fabs_dir) and os.path.isdir(fabs_dir):
+                    fabs_label = ttk.Label(self.access_frame, text="Fabs", font=('Arial', 9, 'bold'), foreground="darkviolet")
+                    fabs_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(5, 2))
+                    self.quick_access_buttons.append(fabs_label)
+                    row += 1
+                    
+                    # Get customer and location info from job_dir path
+                    # Parse: F:\Customer\Location\JobNum\4. Drafting\Fabs
+                    # to get: C:\$WorkingFolder\Jobs F\Customer\Location\JobNum\4. Drafting\Fabs
+                    customer_name = self.customer_name_var.get()
+                    customer_location = self.customer_location_var.get()
+                    job_number = self.job_number_var.get()
+                    
+                    # Build working folder path
+                    working_fabs_dir = None
+                    if customer_name and customer_location and job_number:
+                        working_fabs_dir = os.path.join(r"C:\$WorkingFolder\Jobs F", 
+                                                       customer_name, customer_location, 
+                                                       job_number, "4. Drafting", "Fabs")
+                    
+                    # Scan for files in specific order: .dwf (for .idw lookup), then .dwg, then excel files
+                    idw_files = []  # Changed from dwf_files
+                    dwg_files = []
+                    excel_files = []
+                    
+                    try:
+                        for file in os.listdir(fabs_dir):
+                            file_lower = file.lower()
+                            file_path = os.path.join(fabs_dir, file)
+                            
+                            if file_lower.endswith('.dwf'):
+                                # For .dwf files, look for corresponding .idw in working folder
+                                base_name = os.path.splitext(file)[0]
+                                idw_name = base_name + '.idw'
+                                
+                                if working_fabs_dir and os.path.exists(working_fabs_dir):
+                                    idw_path = os.path.join(working_fabs_dir, idw_name)
+                                    if os.path.exists(idw_path):
+                                        idw_files.append((file, idw_path))  # Store display name and actual path
+                                    else:
+                                        # .idw not found, still add but will open .dwf
+                                        idw_files.append((file, file_path))
+                                else:
+                                    # Working folder not available, use .dwf
+                                    idw_files.append((file, file_path))
+                            elif file_lower.endswith('.dwg'):
+                                dwg_files.append(file_path)
+                            elif file_lower.endswith(('.xls', '.xlsx', '.xlsm')):
+                                excel_files.append(file_path)
+                    except Exception as e:
+                        print(f"Error scanning drafting fabs directory: {e}")
+                    
+                    # Sort each category
+                    idw_files.sort(key=lambda x: x[0].lower())  # Sort by display name
+                    dwg_files.sort(key=lambda x: os.path.basename(x).lower())
+                    excel_files.sort(key=lambda x: os.path.basename(x).lower())
+                    
+                    # Display .idw files first
+                    if idw_files:
+                        for display_name, actual_path in idw_files:
+                            # Show .idw in the button text if it's actually an .idw file
+                            if actual_path.lower().endswith('.idw'):
+                                button_filename = os.path.splitext(display_name)[0] + '.idw'
+                                icon = "🔧"  # Inventor icon
+                            else:
+                                button_filename = display_name
+                                icon = "📦"  # .dwf fallback
+                            
+                            button_text = self.create_short_button_text(icon, button_filename)
+                            button = ttk.Button(self.access_frame, text=button_text, 
+                                              command=lambda path=actual_path: self.open_drafting_doc(path))
+                            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                            self.quick_access_buttons.append(button)
+                            row += 1
+                    
+                    # Then .dwg files
+                    if dwg_files:
+                        for file_path in dwg_files:
+                            filename = os.path.basename(file_path)
+                            button_text = self.create_short_button_text("📐", filename)
+                            button = ttk.Button(self.access_frame, text=button_text, 
+                                              command=lambda path=file_path: self.open_drafting_doc(path))
+                            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                            self.quick_access_buttons.append(button)
+                            row += 1
+                    
+                    # Check for D365 Import file
+                    has_d365_import = False
+                    if excel_files:
+                        for file_path in excel_files:
+                            filename = os.path.basename(file_path).upper()
+                            if "D365 IMPORT" in filename:
+                                has_d365_import = True
+                                break
+                    
+                    # Show "NEW D365 Import" button if file doesn't exist
+                    if not has_d365_import:
+                        new_d365_btn = tk.Button(self.access_frame, text="📊 NEW D365 Import", 
+                                                bg='#28a745', fg='white',
+                                                font=('Arial', 9, 'bold'),
+                                                relief='raised', bd=2, cursor='hand2',
+                                                activebackground='#218838', activeforeground='white',
+                                                command=lambda: self.create_d365_import(fabs_dir))
+                        new_d365_btn.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(new_d365_btn)
+                        row += 1
+                    
+                    # Check for Transmittal Notice DWG file
+                    has_transmittal = False
+                    if dwg_files:
+                        for file_path in dwg_files:
+                            filename = os.path.basename(file_path).upper()
+                            if "TRANSMITTAL NOTICE" in filename or "TRANMITTAL NOTICE" in filename:
+                                has_transmittal = True
+                                break
+                    
+                    # Show "NEW Transmittal Notice" button if file doesn't exist
+                    if not has_transmittal:
+                        new_transmittal_btn = tk.Button(self.access_frame, text="📐 NEW Transmittal Notice", 
+                                                bg='#28a745', fg='white',
+                                                font=('Arial', 9, 'bold'),
+                                                relief='raised', bd=2, cursor='hand2',
+                                                activebackground='#218838', activeforeground='white',
+                                                command=lambda: self.create_transmittal_notice(fabs_dir))
+                        new_transmittal_btn.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(new_transmittal_btn)
+                        row += 1
+                    
+                    # Display Excel files
+                    if excel_files:
+                        for file_path in excel_files:
+                            filename = os.path.basename(file_path)
+                            button_text = self.create_short_button_text("📊", filename)
+                            button = ttk.Button(self.access_frame, text=button_text, 
+                                              command=lambda path=file_path: self.open_drafting_doc(path))
+                            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                            self.quick_access_buttons.append(button)
+                            row += 1
+                    
+                    if not idw_files and not dwg_files and not excel_files:
+                        # No fabs files found
+                        placeholder = ttk.Label(self.access_frame, text="Fabs: No files found", 
+                                             font=('Arial', 8), foreground="gray")
+                        placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(placeholder)
+                        row += 1
+                
+                # Burn Table Files subsection
+                burn_dir = os.path.join(job_dir, "4. Drafting", "Burn Table Files")
+                if os.path.exists(burn_dir) and os.path.isdir(burn_dir):
+                    burn_label = ttk.Label(self.access_frame, text="Burn Table Files", font=('Arial', 9, 'bold'), foreground="darkviolet")
+                    burn_label.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(5, 2))
+                    self.quick_access_buttons.append(burn_label)
+                    row += 1
+                    
+                    # Scan for .dwg files only
+                    burn_files = []
+                    try:
+                        for file in os.listdir(burn_dir):
+                            if file.lower().endswith('.dwg'):
+                                burn_files.append(os.path.join(burn_dir, file))
+                    except Exception as e:
+                        print(f"Error scanning burn table files directory: {e}")
+                    
+                    if burn_files:
+                        # Sort by name
+                        burn_files.sort(key=lambda x: os.path.basename(x).lower())
+                        
+                        for file_path in burn_files:
+                            filename = os.path.basename(file_path)
+                            button_text = self.create_short_button_text("🔥", filename)
+                            button = ttk.Button(self.access_frame, text=button_text, 
+                                              command=lambda path=file_path: self.open_drafting_doc(path))
+                            button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                            self.quick_access_buttons.append(button)
+                            row += 1
+                    else:
+                        # No burn table files found
+                        placeholder = ttk.Label(self.access_frame, text="Burn Table Files: No DWG files found", 
+                                             font=('Arial', 8), foreground="gray")
+                        placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        self.quick_access_buttons.append(placeholder)
+                        row += 1
+            else:
+                # Systems folder doesn't exist
+                placeholder = ttk.Label(self.access_frame, text="DRAFTING: NOT PROCESSED", 
+                                     font=('Arial', 9), foreground="gray")
+                placeholder.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                self.quick_access_buttons.append(placeholder)
+                row += 1
+        
         # If no quick access items, show a message
         if not self.quick_access_buttons:
             label = ttk.Label(self.access_frame, text="No quick access items\navailable for this project", 
                             foreground="gray", justify="center")
             label.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=20)
             self.quick_access_buttons.append(label)
+        
+        # Update scroll region after all buttons are added
+        if hasattr(self, 'quick_access_canvas'):
+            self.access_frame.update_idletasks()
+            self.quick_access_canvas.configure(scrollregion=self.quick_access_canvas.bbox("all"))
     
     def create_action_buttons(self):
-        """Create fixed footer with action buttons"""
-        # Footer frame - docked at bottom (row 2)
-        footer_frame = ttk.Frame(self.root, relief='raised', padding="10")
-        footer_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=0, pady=0)
+        """Create compact footer toolbar with uniform buttons"""
+        # Separator line above footer
+        separator = ttk.Separator(self.root, orient='horizontal')
+        separator.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E))
         
-        # Left side buttons
-        ttk.Button(footer_frame, text="🏠 Dashboard", command=self.open_dashboard, 
-                  style='Accent.TButton').pack(side=tk.LEFT, padx=(0, 15))
+        # Footer toolbar frame - pinned to bottom
+        footer_frame = tk.Frame(self.root, bg='#f5f5f5', relief='flat', bd=0, height=45)
+        footer_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E))
+        footer_frame.grid_propagate(False)
         
-        ttk.Button(footer_frame, text="New Project", command=self.new_project).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Save Project", command=self.save_project).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Delete Project", command=self.delete_project).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Clean & Fix Data", command=self.clean_duplicates).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Reset Database", command=self.reset_database).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Refresh", command=self.load_projects).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Export JSON", command=self.export_data).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(footer_frame, text="Import JSON", command=self.import_data).pack(side=tk.LEFT, padx=(0, 5))
+        # Inner container for buttons
+        button_container = tk.Frame(footer_frame, bg='#f5f5f5')
+        button_container.pack(side=tk.LEFT, padx=10, pady=6)
+        
+        # Dashboard button with accent style
+        dashboard_btn = tk.Button(button_container, text="🏠 Dashboard", 
+                                  command=self.open_dashboard,
+                                  width=12, height=1,
+                                  bg='#2196F3', fg='white',
+                                  font=('Arial', 9),
+                                  relief='raised', bd=1, cursor='hand2',
+                                  activebackground='#1976D2', activeforeground='white')
+        dashboard_btn.pack(side=tk.LEFT, padx=(0, 10))
+        self._add_button_hover_effect(dashboard_btn, '#2196F3', '#1976D2')
+        
+        # All other buttons with consistent styling
+        buttons = [
+            ("New Project", self.new_project),
+            ("Save Project", self.save_project),
+            ("Delete Project", self.delete_project),
+            ("Clean & Fix Data", self.clean_duplicates),
+            ("Reset Database", self.reset_database),
+            ("Refresh", self.load_projects),
+            ("Export JSON", self.export_data),
+            ("Import JSON", self.import_data)
+        ]
+        
+        for text, command in buttons:
+            btn = tk.Button(button_container, text=text, command=command,
+                          width=12, height=1,
+                          bg='#ffffff', fg='#333333',
+                          font=('Arial', 9),
+                          relief='raised', bd=1, cursor='hand2',
+                          activebackground='#E3F2FD', activeforeground='#1976D2')
+            btn.pack(side=tk.LEFT, padx=(0, 5))
+            self._add_button_hover_effect(btn, '#ffffff', '#E3F2FD')
+    
+    def _add_button_hover_effect(self, button, normal_bg, hover_bg):
+        """Add subtle hover effect to a button"""
+        def on_enter(e):
+            button.config(bg=hover_bg)
+        
+        def on_leave(e):
+            button.config(bg=normal_bg)
+        
+        button.bind('<Enter>', on_enter)
+        button.bind('<Leave>', on_leave)
     
     def open_job_directory(self):
         """Open the job directory"""
@@ -1597,6 +2666,124 @@ class ProjectsApp:
             self.open_path(doc_path)
         else:
             messagebox.showwarning("Warning", "Engineering document not found!")
+    
+    def open_drafting_doc(self, doc_path):
+        """Open a specific drafting document (.dwg file)"""
+        if doc_path and os.path.exists(doc_path):
+            print(f"DEBUG: Opening drafting document: {doc_path}")
+            self.open_path(doc_path)
+        else:
+            messagebox.showwarning("Warning", "Drafting document not found!")
+    
+    def create_d365_import(self, fabs_dir):
+        """Create a new D365 Import file by copying the Excel file and renaming it"""
+        try:
+            # Source Excel file (not template)
+            source_file = r"C:\excel\templates\XXXXX D365 IMPORT.xlsx"
+            
+            print(f"DEBUG: Source file: {source_file}")
+            print(f"DEBUG: Source exists: {os.path.exists(source_file)}")
+            
+            # Check if source file exists
+            if not os.path.exists(source_file):
+                messagebox.showerror("File Not Found", 
+                                   f"D365 Import file not found at:\n{source_file}")
+                return
+            
+            # Get job number
+            job_number = self.job_number_var.get()
+            print(f"DEBUG: Job number: {job_number}")
+            
+            if not job_number:
+                messagebox.showerror("Error", "Job number is required to create D365 Import file.")
+                return
+            
+            # Create new filename
+            new_filename = f"{job_number} D365 IMPORT.xlsx"
+            new_file_path = os.path.join(fabs_dir, new_filename)
+            
+            print(f"DEBUG: Target path: {new_file_path}")
+            print(f"DEBUG: Target exists: {os.path.exists(new_file_path)}")
+            
+            # Check if file already exists
+            if os.path.exists(new_file_path):
+                messagebox.showinfo("File Exists", 
+                                  f"D365 Import file already exists:\n{new_filename}")
+                return
+            
+            # Copy the Excel file to the new location with new name
+            print(f"DEBUG: About to copy from {source_file} to {new_file_path}")
+            shutil.copy2(source_file, new_file_path)
+            print(f"DEBUG: Copy completed")
+            print(f"DEBUG: New file exists: {os.path.exists(new_file_path)}")
+            
+            # Refresh Quick Access to remove the green button and show the new file
+            self.update_quick_access()
+            
+            messagebox.showinfo("Success", 
+                              f"D365 Import file created successfully!\n\n{new_filename}\n\nThe file is ready in the Fabs folder.\nClick the file button in Quick Access to open it.")
+            
+        except Exception as e:
+            messagebox.showerror("Error", 
+                               f"Failed to create D365 Import file:\n{str(e)}")
+            print(f"ERROR creating D365 Import file: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def create_transmittal_notice(self, fabs_dir):
+        """Create a new Transmittal Notice DWG by copying the template and renaming it"""
+        try:
+            # Source DWG file
+            source_file = r"C:\Users\llaing\OneDrive - CECO Environmental Corp\Drafting Standards\Release Process\Drawing Release Form (Blue).dwg"
+            
+            print(f"DEBUG: Source file: {source_file}")
+            print(f"DEBUG: Source exists: {os.path.exists(source_file)}")
+            
+            # Check if source file exists
+            if not os.path.exists(source_file):
+                messagebox.showerror("File Not Found", 
+                                   f"Transmittal Notice template not found at:\n{source_file}")
+                return
+            
+            # Get job number
+            job_number = self.job_number_var.get()
+            print(f"DEBUG: Job number: {job_number}")
+            
+            if not job_number:
+                messagebox.showerror("Error", "Job number is required to create Transmittal Notice.")
+                return
+            
+            # Create new filename
+            new_filename = f"{job_number} TRANMITTAL NOTICE.dwg"
+            new_file_path = os.path.join(fabs_dir, new_filename)
+            
+            print(f"DEBUG: Target path: {new_file_path}")
+            print(f"DEBUG: Target exists: {os.path.exists(new_file_path)}")
+            
+            # Check if file already exists
+            if os.path.exists(new_file_path):
+                messagebox.showinfo("File Exists", 
+                                  f"Transmittal Notice already exists:\n{new_filename}")
+                return
+            
+            # Copy the DWG file to the new location with new name
+            print(f"DEBUG: About to copy from {source_file} to {new_file_path}")
+            shutil.copy2(source_file, new_file_path)
+            print(f"DEBUG: Copy completed")
+            print(f"DEBUG: New file exists: {os.path.exists(new_file_path)}")
+            
+            # Refresh Quick Access to remove the green button and show the new file
+            self.update_quick_access()
+            
+            messagebox.showinfo("Success", 
+                              f"Transmittal Notice created successfully!\n\n{new_filename}\n\nThe file is ready in the Fabs folder.\nClick the file button in Quick Access to open it.")
+            
+        except Exception as e:
+            messagebox.showerror("Error", 
+                               f"Failed to create Transmittal Notice:\n{str(e)}")
+            print(f"ERROR creating Transmittal Notice: {e}")
+            import traceback
+            traceback.print_exc()
     
     def create_short_button_text(self, icon, filename):
         """Create short, consistent button text for files"""
@@ -2082,6 +3269,9 @@ class ProjectsApp:
         # Update quick access panel
         self.update_quick_access()
         
+        # Update specifications panel
+        self.update_specifications(self.project_details_container.winfo_children()[0])
+        
         # Update cover sheet button
         self.update_cover_sheet_button()
         
@@ -2528,6 +3718,25 @@ class ProjectsApp:
     def exit_fullscreen(self):
         """Exit fullscreen mode"""
         self.root.attributes('-fullscreen', False)
+    
+    def _bind_mousewheel(self, canvas, frame):
+        """Bind mouse wheel scrolling to a canvas"""
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        
+        def _bind_to_mousewheel(event):
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        def _unbind_from_mousewheel(event):
+            canvas.unbind_all("<MouseWheel>")
+        
+        # Bind when mouse enters the canvas or frame
+        canvas.bind('<Enter>', _bind_to_mousewheel)
+        frame.bind('<Enter>', _bind_to_mousewheel)
+        
+        # Unbind when mouse leaves
+        canvas.bind('<Leave>', _unbind_from_mousewheel)
+        frame.bind('<Leave>', _unbind_from_mousewheel)
     
     def on_closing(self):
         """Handle application closing"""
