@@ -220,14 +220,24 @@ class ProjectCoverSheet:
                 next_pending = ("1. Drafting Drawing Package to Engineering for Initial Review", None)
                 found_pending = True
         
-        # 2. Redline Updates
+        # 2. Redline Updates (only show the latest completed one)
         redline_updates = self.workflow_data.get('redline_updates', [])
+        latest_redline = None
         if redline_updates and isinstance(redline_updates, list):
-            for update in redline_updates:
+            for update in reversed(redline_updates):  # Start from latest
                 if isinstance(update, (list, tuple)) and len(update) >= 4:
                     if update[3]:  # is_completed
-                        completed_steps.append((f"2. Redline Updates", update[1]))
-                    elif not found_pending:
+                        latest_redline = (f"2. Redline Updates", update[1])
+                        break
+            
+            # Add the latest completed redline if found
+            if latest_redline:
+                completed_steps.append(latest_redline)
+            
+            # Check if there's a pending redline update
+            for update in redline_updates:
+                if isinstance(update, (list, tuple)) and len(update) >= 4:
+                    if not update[3] and not found_pending:  # Not completed
                         next_pending = ("2. Redline Updates", None)
                         found_pending = True
                         break

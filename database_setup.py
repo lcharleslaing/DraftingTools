@@ -169,6 +169,11 @@ class DatabaseManager:
         except sqlite3.OperationalError:
             pass  # Column already exists
         
+        try:
+            cursor.execute("ALTER TABLE release_to_dee ADD COLUMN due_date TEXT")
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+        
         # Add new project fields if they don't exist
         try:
             cursor.execute("ALTER TABLE projects ADD COLUMN job_directory TEXT")

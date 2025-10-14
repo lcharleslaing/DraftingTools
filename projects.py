@@ -335,6 +335,37 @@ class ProjectsApp:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to print cover sheet: {str(e)}")
     
+    def update_release_due_display(self, *args):
+        """Update the Release to Dee due date display"""
+        try:
+            due_date_str = self.release_due_date_entry.get()
+            if not due_date_str:
+                self.release_due_display_var.set("")
+                return
+            
+            # Parse the due date
+            due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+            today = datetime.now().date()
+            
+            # Calculate difference
+            delta = (due_date - today).days
+            
+            if delta == 0:
+                display_text = "Due TODAY"
+                color = "red"
+            elif delta > 0:
+                display_text = f"Due in {delta} day{'s' if delta != 1 else ''}"
+                color = "blue" if delta > 3 else "orange"
+            else:
+                display_text = f"Due {abs(delta)} day{'s' if abs(delta) != 1 else ''} ago"
+                color = "red"
+            
+            self.release_due_display_var.set(display_text)
+            self.release_due_display_label.config(foreground=color)
+            
+        except (ValueError, AttributeError):
+            self.release_due_display_var.set("")
+    
     def update_cover_sheet_button(self):
         """Update the cover sheet button appearance based on project status"""
         if not hasattr(self, 'cover_sheet_btn'):
@@ -576,6 +607,17 @@ class ProjectsApp:
         self.other_date_entry = DateEntry(section_frame, width=20)
         self.other_date_entry.grid(row=4, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
         
+        # Due Date with auto-updating display
+        ttk.Label(section_frame, text="Due Date:").grid(row=5, column=0, sticky=tk.W)
+        self.release_due_date_entry = DateEntry(section_frame, width=20)
+        self.release_due_date_entry.grid(row=5, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+        
+        # Due date display (auto-updating)
+        self.release_due_display_var = tk.StringVar()
+        self.release_due_display_label = ttk.Label(section_frame, textvariable=self.release_due_display_var, 
+                                                   foreground="blue", font=('Arial', 9, 'italic'))
+        self.release_due_display_label.grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=(2, 0))
+        
         # Set up auto-save traces for all workflow fields
         self.setup_workflow_autosave()
     
@@ -631,6 +673,9 @@ class ProjectsApp:
             self.other_notes_var.trace('w', self.auto_save)
         if hasattr(self, 'other_date_entry'):
             self.other_date_entry.var.trace('w', self.auto_save)
+        if hasattr(self, 'release_due_date_entry'):
+            self.release_due_date_entry.var.trace('w', self.auto_save)
+            self.release_due_date_entry.var.trace('w', self.update_release_due_display)
     
     def create_quick_access_panel(self):
         """Create the quick access panel for files and folders"""
@@ -1762,6 +1807,8 @@ class ProjectsApp:
         self.d365_updates_date_entry.set("")
         self.other_notes_var.set("")
         self.other_date_entry.set("")
+        self.release_due_date_entry.set("")
+        self.release_due_display_var.set("")
 
     def load_project_details(self, job_number):
         """Load details for selected project"""
@@ -1919,18 +1966,21 @@ class ProjectsApp:
         # Load release to Dee
         cursor.execute("""
             SELECT release_date, missing_prints_date, d365_updates_date, 
-                   other_notes, other_date, is_completed
+                   other_notes, other_date, due_date, is_completed
             FROM release_to_dee
             WHERE project_id = ?
         """, (project_id,))
         release_data = cursor.fetchone()
         
         if release_data:
-            self.release_fixed_errors_var.set(bool(release_data[5]))
+            self.release_fixed_errors_var.set(bool(release_data[6]))
             self.missing_prints_date_entry.set(release_data[1] or "")
             self.d365_updates_date_entry.set(release_data[2] or "")
             self.other_notes_var.set(release_data[3] or "")
             self.other_date_entry.set(release_data[4] or "")
+            self.release_due_date_entry.set(release_data[5] or "")
+            # Update the due date display
+            self.update_release_due_display()
     
     def new_project(self):
         """Clear form for new project"""
@@ -2135,13 +2185,15 @@ class ProjectsApp:
         cursor.execute("""
             INSERT OR REPLACE INTO release_to_dee 
             (project_id, release_date, missing_prints_date, d365_updates_date, 
-             other_notes, other_date, is_completed)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+             other_notes, other_date, due_date, is_completed)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (project_id, self.released_to_dee_entry.get() or None,
              self.missing_prints_date_entry.get() or None,
              self.d365_updates_date_entry.get() or None,
              self.other_notes_var.get() or None,
-             self.other_date_entry.get() or None, self.release_fixed_errors_var.get()))
+             self.other_date_entry.get() or None,
+             self.release_due_date_entry.get() or None,
+             self.release_fixed_errors_var.get()))
     
     def delete_project(self):
         """Delete selected project"""
