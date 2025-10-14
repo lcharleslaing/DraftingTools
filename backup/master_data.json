@@ -20,19 +20,19 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 836
+      "seq": 848
     },
     {
       "name": "engineers",
-      "seq": 627
+      "seq": 636
     },
     {
       "name": "app_order",
-      "seq": 418
+      "seq": 424
     },
     {
       "name": "projects",
-      "seq": 463
+      "seq": 465
     },
     {
       "name": "heater_models",
@@ -116,23 +116,27 @@
     },
     {
       "name": "initial_redline",
-      "seq": 146
+      "seq": 148
     },
     {
       "name": "redline_updates",
-      "seq": 584
+      "seq": 592
     },
     {
       "name": "ops_review",
-      "seq": 146
+      "seq": 148
     },
     {
       "name": "peter_weck_review",
-      "seq": 146
+      "seq": 148
     },
     {
       "name": "release_to_dee",
-      "seq": 146
+      "seq": 148
+    },
+    {
+      "name": "d365_bom_entry",
+      "seq": 2
     }
   ],
   "engineers": [
@@ -277,7 +281,7 @@
       "project_engineer_id": null
     },
     {
-      "id": 463,
+      "id": 465,
       "job_number": "35354",
       "assigned_to_id": 1,
       "assignment_date": "2025-10-09",
@@ -290,7 +294,7 @@
       "customer_location": "PLYMOUTH, IN",
       "customer_name_directory": "F:/Ozinga Concrete Products, Inc",
       "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
-      "last_cover_sheet_date": null,
+      "last_cover_sheet_date": "2025-10-14 10:21:17",
       "due_date": null,
       "project_engineer_id": 1
     }
@@ -5551,6 +5555,78 @@
       "update_type": null,
       "update_cycle": 4,
       "is_completed": 0
+    },
+    {
+      "id": 585,
+      "project_id": 464,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 586,
+      "project_id": 464,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 587,
+      "project_id": 464,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 588,
+      "project_id": 464,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 589,
+      "project_id": 465,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 590,
+      "project_id": 465,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 591,
+      "project_id": 465,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 592,
+      "project_id": 465,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
     }
   ],
   "ops_review": [
@@ -6427,6 +6503,18 @@
     {
       "id": 146,
       "project_id": 463,
+      "review_date": "2025-10-10",
+      "is_completed": 1
+    },
+    {
+      "id": 147,
+      "project_id": 464,
+      "review_date": "2025-10-10",
+      "is_completed": 1
+    },
+    {
+      "id": 148,
+      "project_id": 465,
       "review_date": "2025-10-10",
       "is_completed": 1
     }
@@ -7307,6 +7395,18 @@
       "project_id": 463,
       "fixed_errors_date": "2025-10-14",
       "is_completed": 0
+    },
+    {
+      "id": 147,
+      "project_id": 464,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 148,
+      "project_id": 465,
+      "fixed_errors_date": null,
+      "is_completed": 0
     }
   ],
   "release_to_dee": [
@@ -7318,7 +7418,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 2,
@@ -7328,7 +7429,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 3,
@@ -7338,7 +7440,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 4,
@@ -7348,7 +7451,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 5,
@@ -7358,7 +7462,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 6,
@@ -7368,7 +7473,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 7,
@@ -7378,7 +7484,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 8,
@@ -7388,7 +7495,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 9,
@@ -7398,7 +7506,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 10,
@@ -7408,7 +7517,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 11,
@@ -7418,7 +7528,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 12,
@@ -7428,7 +7539,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 13,
@@ -7438,7 +7550,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 14,
@@ -7448,7 +7561,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 15,
@@ -7458,7 +7572,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 16,
@@ -7468,7 +7583,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 17,
@@ -7478,7 +7594,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 18,
@@ -7488,7 +7605,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 19,
@@ -7498,7 +7616,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 20,
@@ -7508,7 +7627,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 21,
@@ -7518,7 +7638,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 22,
@@ -7528,7 +7649,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 23,
@@ -7538,7 +7660,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 24,
@@ -7548,7 +7671,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 25,
@@ -7558,7 +7682,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 26,
@@ -7568,7 +7693,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 27,
@@ -7578,7 +7704,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 28,
@@ -7588,7 +7715,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 29,
@@ -7598,7 +7726,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 30,
@@ -7608,7 +7737,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 31,
@@ -7618,7 +7748,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 32,
@@ -7628,7 +7759,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 33,
@@ -7638,7 +7770,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 34,
@@ -7648,7 +7781,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 35,
@@ -7658,7 +7792,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 36,
@@ -7668,7 +7803,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 37,
@@ -7678,7 +7814,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 38,
@@ -7688,7 +7825,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 39,
@@ -7698,7 +7836,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 40,
@@ -7708,7 +7847,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 41,
@@ -7718,7 +7858,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 42,
@@ -7728,7 +7869,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 43,
@@ -7738,7 +7880,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 44,
@@ -7748,7 +7891,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 45,
@@ -7758,7 +7902,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 46,
@@ -7768,7 +7913,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 47,
@@ -7778,7 +7924,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 48,
@@ -7788,7 +7935,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 49,
@@ -7798,7 +7946,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 50,
@@ -7808,7 +7957,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 51,
@@ -7818,7 +7968,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 52,
@@ -7828,7 +7979,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 53,
@@ -7838,7 +7990,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 54,
@@ -7848,7 +8001,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 55,
@@ -7858,7 +8012,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 56,
@@ -7868,7 +8023,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 57,
@@ -7878,7 +8034,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 58,
@@ -7888,7 +8045,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 59,
@@ -7898,7 +8056,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 60,
@@ -7908,7 +8067,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 61,
@@ -7918,7 +8078,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 62,
@@ -7928,7 +8089,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 63,
@@ -7938,7 +8100,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 64,
@@ -7948,7 +8111,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 65,
@@ -7958,7 +8122,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 66,
@@ -7968,7 +8133,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 67,
@@ -7978,7 +8144,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 68,
@@ -7988,7 +8155,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 69,
@@ -7998,7 +8166,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 70,
@@ -8008,7 +8177,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 71,
@@ -8018,7 +8188,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 72,
@@ -8028,7 +8199,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 73,
@@ -8038,7 +8210,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 74,
@@ -8048,7 +8221,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 75,
@@ -8058,7 +8232,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 76,
@@ -8068,7 +8243,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 77,
@@ -8078,7 +8254,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 78,
@@ -8088,7 +8265,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 79,
@@ -8098,7 +8276,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 80,
@@ -8108,7 +8287,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 81,
@@ -8118,7 +8298,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 82,
@@ -8128,7 +8309,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 83,
@@ -8138,7 +8320,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 84,
@@ -8148,7 +8331,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 85,
@@ -8158,7 +8342,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 86,
@@ -8168,7 +8353,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 87,
@@ -8178,7 +8364,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 88,
@@ -8188,7 +8375,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 89,
@@ -8198,7 +8386,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 90,
@@ -8208,7 +8397,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 91,
@@ -8218,7 +8408,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 92,
@@ -8228,7 +8419,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 93,
@@ -8238,7 +8430,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 94,
@@ -8248,7 +8441,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 95,
@@ -8258,7 +8452,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 96,
@@ -8268,7 +8463,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 97,
@@ -8278,7 +8474,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 98,
@@ -8288,7 +8485,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 99,
@@ -8298,7 +8496,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 100,
@@ -8308,7 +8507,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 101,
@@ -8318,7 +8518,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 102,
@@ -8328,7 +8529,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 103,
@@ -8338,7 +8540,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 104,
@@ -8348,7 +8551,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 105,
@@ -8358,7 +8562,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 106,
@@ -8368,7 +8573,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 107,
@@ -8378,7 +8584,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 108,
@@ -8388,7 +8595,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 109,
@@ -8398,7 +8606,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 110,
@@ -8408,7 +8617,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 111,
@@ -8418,7 +8628,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 112,
@@ -8428,7 +8639,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 113,
@@ -8438,7 +8650,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 114,
@@ -8448,7 +8661,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 115,
@@ -8458,7 +8672,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 116,
@@ -8468,7 +8683,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 117,
@@ -8478,7 +8694,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 118,
@@ -8488,7 +8705,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 119,
@@ -8498,7 +8716,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 120,
@@ -8508,7 +8727,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 121,
@@ -8518,7 +8738,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 122,
@@ -8528,7 +8749,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 123,
@@ -8538,7 +8760,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 124,
@@ -8548,7 +8771,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 125,
@@ -8558,7 +8782,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 126,
@@ -8568,7 +8793,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 127,
@@ -8578,7 +8804,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 128,
@@ -8588,7 +8815,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 129,
@@ -8598,7 +8826,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 130,
@@ -8608,7 +8837,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 131,
@@ -8618,7 +8848,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 132,
@@ -8628,7 +8859,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 133,
@@ -8638,7 +8870,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 134,
@@ -8648,7 +8881,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 135,
@@ -8658,7 +8892,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 136,
@@ -8668,7 +8903,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 137,
@@ -8678,7 +8914,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 138,
@@ -8688,7 +8925,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 139,
@@ -8698,7 +8936,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 140,
@@ -8708,7 +8947,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 141,
@@ -8718,7 +8958,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 142,
@@ -8728,7 +8969,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 143,
@@ -8738,7 +8980,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 144,
@@ -8748,7 +8991,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 145,
@@ -8758,7 +9002,8 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
     },
     {
       "id": 146,
@@ -8768,7 +9013,30 @@
       "d365_updates_date": null,
       "other_notes": null,
       "other_date": null,
-      "is_completed": 0
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 147,
+      "project_id": 464,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 148,
+      "project_id": 465,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": "2025-10-03"
     }
   ],
   "app_order": [
@@ -9804,6 +10072,20 @@
     {
       "id": 146,
       "project_id": 463,
+      "engineer_id": 1,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
+    },
+    {
+      "id": 147,
+      "project_id": 464,
+      "engineer_id": 1,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
+    },
+    {
+      "id": 148,
+      "project_id": 465,
       "engineer_id": 1,
       "redline_date": "2025-10-07",
       "is_completed": 1
@@ -11075,6 +11357,20 @@
       "orientation": "Landscape",
       "created_date": "2025-10-10 09:55:37",
       "updated_date": "2025-10-10 09:55:37"
+    }
+  ],
+  "d365_bom_entry": [
+    {
+      "id": 1,
+      "project_id": 464,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 2,
+      "project_id": 465,
+      "entry_date": null,
+      "is_completed": 0
     }
   ]
 }
