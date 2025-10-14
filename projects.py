@@ -627,10 +627,11 @@ class ProjectsApp:
         if customer_name_dir:  # Use directory picker value first
             if os.path.exists(customer_name_dir):
                 icon = "📁" if os.path.isdir(customer_name_dir) else "📄"
-                button_text = f"{icon} {customer_name} ({os.path.basename(customer_name_dir)})"
+                # Just show the customer name from the text field, not the folder basename
+                button_text = f"{icon} {customer_name}"
             else:
                 icon = "📁"
-                button_text = f"{icon} {customer_name} ({os.path.basename(customer_name_dir)})"
+                button_text = f"{icon} {customer_name}"
         elif customer_name:  # Fall back to text field value
             if os.path.exists(customer_name):
                 icon = "📁" if os.path.isdir(customer_name) else "📄"
@@ -656,10 +657,11 @@ class ProjectsApp:
         if customer_location_dir:  # Use directory picker value first
             if os.path.exists(customer_location_dir):
                 icon = "📁" if os.path.isdir(customer_location_dir) else "📄"
-                button_text = f"{icon} {customer_location} ({os.path.basename(customer_location_dir)})"
+                # Just show the customer location from the text field, not the folder basename
+                button_text = f"{icon} {customer_location}"
             else:
                 icon = "📁"
-                button_text = f"{icon} {customer_location} ({os.path.basename(customer_location_dir)})"
+                button_text = f"{icon} {customer_location}"
         elif customer_location:  # Fall back to text field value
             if os.path.exists(customer_location):
                 icon = "📁" if os.path.isdir(customer_location) else "📄"
@@ -714,8 +716,9 @@ class ProjectsApp:
                         filename = os.path.basename(doc_path)
                         # Remove file extension and truncate if too long
                         name_without_ext = os.path.splitext(filename)[0]
-                        if len(name_without_ext) > 25:
-                            display_name = name_without_ext[:22] + "..."
+                        # Increase max length to 35 to show more of the filename
+                        if len(name_without_ext) > 35:
+                            display_name = name_without_ext[:32] + "..."
                         else:
                             display_name = name_without_ext
                         
