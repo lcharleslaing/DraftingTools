@@ -55,11 +55,16 @@ class ProjectsApp:
             lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         )
         
-        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
         
         self.canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Make canvas window expand to fill canvas width
+        def _configure_canvas(event):
+            self.canvas.itemconfig(self.canvas_window, width=event.width)
+        self.canvas.bind('<Configure>', _configure_canvas)
         
         # Bind mousewheel to canvas
         def _on_mousewheel(event):
