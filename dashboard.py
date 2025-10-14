@@ -598,6 +598,34 @@ Developed for CECO Environmental Corp
         """Run the dashboard application"""
         self.root.mainloop()
 
+def is_dashboard_running():
+    """Check if Dashboard is already running"""
+    try:
+        current_pid = os.getpid()
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                if proc.info['name'] and 'python' in proc.info['name'].lower():
+                    cmdline = proc.info.get('cmdline', [])
+                    if cmdline:
+                        cmdline_str = ' '.join(cmdline).lower()
+                        if 'dashboard.py' in cmdline_str and proc.info['pid'] != current_pid:
+                            return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
+                continue
+        return False
+    except Exception as e:
+        print(f"Error checking if dashboard is running: {e}")
+        return False
+
 if __name__ == "__main__":
+    # Check if dashboard is already running
+    if is_dashboard_running():
+        root = tk.Tk()
+        root.withdraw()  # Hide the window
+        messagebox.showwarning("Already Running", 
+                              "Dashboard is already open.\n\nPlease use the existing Dashboard window.")
+        root.destroy()
+        sys.exit(0)
+    
     app = DashboardApp()
     app.run()
