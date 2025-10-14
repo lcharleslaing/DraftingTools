@@ -34,14 +34,16 @@ class DashboardApp:
         """Setup custom styles for the dashboard"""
         style = ttk.Style()
         
-        # Configure button styles
-        style.configure('Dashboard.TButton', 
-                       font=('Arial', 12, 'bold'),
-                       padding=(20, 15))
+        # Configure control button styles (bottom buttons)
+        style.configure('Control.TButton', 
+                       font=('Arial', 11),
+                       padding=(15, 8),
+                       width=15)
         
-        style.configure('App.TButton',
-                       font=('Arial', 14, 'bold'),
-                       padding=(30, 20))
+        # Configure app tile styles
+        style.configure('AppTile.TFrame',
+                       relief='raised',
+                       borderwidth=2)
         
         # Configure frame styles
         style.configure('Title.TLabel',
@@ -51,6 +53,16 @@ class DashboardApp:
         style.configure('Subtitle.TLabel',
                        font=('Arial', 16),
                        foreground='darkgray')
+        
+        # App tile title style
+        style.configure('TileTitle.TLabel',
+                       font=('Arial', 14, 'bold'),
+                       foreground='#2c3e50')
+        
+        # App tile description style
+        style.configure('TileDesc.TLabel',
+                       font=('Arial', 11),
+                       foreground='#7f8c8d')
     
     def create_widgets(self):
         """Create the main dashboard widgets"""
@@ -87,56 +99,111 @@ class DashboardApp:
         self.create_control_buttons(main_frame)
     
     def create_app_buttons(self, parent):
-        """Create application launch buttons"""
+        """Create application launch buttons as custom tiles"""
+        # Configure grid to have 3 columns
+        for i in range(3):
+            parent.columnconfigure(i, weight=1, uniform="tile")
+        
         # Projects Management
-        projects_btn = ttk.Button(parent, text="📋 Projects Management\n\nTrack project workflows,\njob numbers, and\ncustomer details", 
-                                 command=self.launch_projects, style='App.TButton')
-        projects_btn.grid(row=0, column=0, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.create_app_tile(parent, 0, 0, "📋", "Projects Management", 
+                           "Track project workflows,\njob numbers, and customer details", 
+                           self.launch_projects)
         
         # Product Configurations
-        config_btn = ttk.Button(parent, text="⚙️ Product Configurations\n\nHeater, Tank & Pump\nconfiguration management\nand specifications", 
-                               command=self.launch_configurations, style='App.TButton')
-        config_btn.grid(row=0, column=1, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.create_app_tile(parent, 0, 1, "⚙️", "Product Configurations", 
+                           "Heater, Tank & Pump configuration\nmanagement and specifications", 
+                           self.launch_configurations)
         
         # Print Package Management
-        print_btn = ttk.Button(parent, text="🖨️ Print Package Management\n\nManage drawing print\npackages with global\nsearch and print queue", 
-                              command=self.launch_print_package, style='App.TButton')
-        print_btn.grid(row=0, column=2, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.create_app_tile(parent, 0, 2, "🖨️", "Print Package Management", 
+                           "Manage drawing print packages\nwith global search and print queue", 
+                           self.launch_print_package)
         
-        # Placeholder for future apps
-        future_btn = ttk.Button(parent, text="🔧 Additional Tools\n\nMore drafting tools\ncoming soon...", 
-                               command=self.show_coming_soon, style='App.TButton')
-        future_btn.grid(row=1, column=0, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Additional Tools
+        self.create_app_tile(parent, 1, 0, "🔧", "Additional Tools", 
+                           "More drafting tools\ncoming soon...", 
+                           self.show_coming_soon)
         
         # Database Management
-        db_btn = ttk.Button(parent, text="🗄️ Database Management\n\nBackup, restore, and\nmaintain database", 
-                           command=self.launch_db_management, style='App.TButton')
-        db_btn.grid(row=1, column=1, padx=20, pady=20, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.create_app_tile(parent, 1, 1, "🗄️", "Database Management", 
+                           "Backup, restore, and\nmaintain database", 
+                           self.launch_db_management)
+    
+    def create_app_tile(self, parent, row, col, icon, title, description, command):
+        """Create a consistent app tile with icon, title, and description"""
+        # Create tile frame with consistent size
+        tile_frame = tk.Frame(parent, relief='raised', borderwidth=2, 
+                             bg='white', highlightthickness=1, highlightbackground='#d0d0d0')
+        tile_frame.grid(row=row, column=col, padx=15, pady=15, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Set minimum size for consistency
+        tile_frame.grid_propagate(False)
+        tile_frame.config(width=280, height=180)
+        
+        # Create clickable button that fills the tile
+        btn = tk.Button(tile_frame, relief='flat', bg='white', 
+                       activebackground='#f0f0f0', bd=0, cursor='hand2',
+                       command=command)
+        btn.pack(fill=tk.BOTH, expand=True)
+        
+        # Icon
+        icon_label = tk.Label(btn, text=icon, font=('Arial', 32), 
+                            bg='white', fg='#3498db')
+        icon_label.pack(pady=(20, 10))
+        
+        # Title
+        title_label = tk.Label(btn, text=title, font=('Arial', 14, 'bold'), 
+                             bg='white', fg='#2c3e50')
+        title_label.pack(pady=(0, 8))
+        
+        # Description
+        desc_label = tk.Label(btn, text=description, font=('Arial', 11), 
+                            bg='white', fg='#7f8c8d', justify='center')
+        desc_label.pack(pady=(0, 20))
+        
+        # Hover effects
+        def on_enter(e):
+            btn.config(bg='#f0f0f0')
+            icon_label.config(bg='#f0f0f0')
+            title_label.config(bg='#f0f0f0')
+            desc_label.config(bg='#f0f0f0')
+        
+        def on_leave(e):
+            btn.config(bg='white')
+            icon_label.config(bg='white')
+            title_label.config(bg='white')
+            desc_label.config(bg='white')
+        
+        btn.bind('<Enter>', on_enter)
+        btn.bind('<Leave>', on_leave)
+        icon_label.bind('<Enter>', on_enter)
+        icon_label.bind('<Leave>', on_leave)
+        title_label.bind('<Enter>', on_enter)
+        title_label.bind('<Leave>', on_leave)
+        desc_label.bind('<Enter>', on_enter)
+        desc_label.bind('<Leave>', on_leave)
     
     def create_control_buttons(self, parent):
-        """Create control buttons at the bottom"""
+        """Create control buttons at the bottom - right-aligned, evenly spaced"""
         control_frame = ttk.Frame(parent)
-        control_frame.pack(fill=tk.X, pady=(20, 0))
+        control_frame.pack(fill=tk.X, pady=(30, 0))
         
-        # Exit fullscreen button
-        exit_fullscreen_btn = ttk.Button(control_frame, text="Exit Fullscreen", 
-                                        command=self.toggle_fullscreen, style='Dashboard.TButton')
-        exit_fullscreen_btn.pack(side=tk.LEFT, padx=(0, 10))
+        # Create a right-aligned container for buttons
+        button_container = ttk.Frame(control_frame)
+        button_container.pack(side=tk.RIGHT)
         
-        # Exit application button
-        exit_btn = ttk.Button(control_frame, text="Exit Application", 
-                             command=self.exit_application, style='Dashboard.TButton')
-        exit_btn.pack(side=tk.RIGHT)
+        # All buttons right-aligned with consistent sizing and spacing
+        about_btn = ttk.Button(button_container, text="About", 
+                              command=self.show_about, style='Control.TButton')
+        about_btn.pack(side=tk.LEFT, padx=5)
         
-        # Show running apps button
-        running_btn = ttk.Button(control_frame, text="Show Running Apps", 
-                                command=self.show_running_apps, style='Dashboard.TButton')
-        running_btn.pack(side=tk.RIGHT, padx=(0, 10))
+        running_btn = ttk.Button(button_container, text="Show Running Apps", 
+                                command=self.show_running_apps, style='Control.TButton')
+        running_btn.pack(side=tk.LEFT, padx=5)
         
-        # About button
-        about_btn = ttk.Button(control_frame, text="About", 
-                              command=self.show_about, style='Dashboard.TButton')
-        about_btn.pack(side=tk.RIGHT, padx=(0, 10))
+        exit_btn = ttk.Button(button_container, text="Exit Application", 
+                             command=self.exit_application, style='Control.TButton')
+        exit_btn.pack(side=tk.LEFT, padx=5)
     
     def launch_projects(self):
         """Launch the Projects Management application"""
