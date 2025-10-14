@@ -37,11 +37,21 @@ python restore_projects.py C:\Projects
 
 **Replace `C:\Projects` with your chosen base path.**
 
-### Step 4: Verify the Restoration
-After running the script, you should see:
+### Step 4: Update Database Paths
+After restoration, update the database to point to the new paths:
+
+```cmd
+python update_database_paths.py C:\Projects
+```
+
+**Replace `C:\Projects` with your chosen base path.**
+
+### Step 5: Verify the Restoration
+After running both scripts, you should see:
 - A new directory structure under your chosen base path
 - All 8 project folders with complete contents
-- A confirmation message showing successful restoration
+- Database paths updated to new locations
+- Drafting tools ready to use
 
 ## Expected Directory Structure After Restoration
 
