@@ -601,18 +601,32 @@ Developed for CECO Environmental Corp
 def is_dashboard_running():
     """Check if Dashboard is already running"""
     try:
+        import time
+        # Small delay to ensure process list is stable
+        time.sleep(0.1)
+        
         current_pid = os.getpid()
-        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+        dashboard_count = 0
+        
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'create_time']):
             try:
                 if proc.info['name'] and 'python' in proc.info['name'].lower():
                     cmdline = proc.info.get('cmdline', [])
                     if cmdline:
                         cmdline_str = ' '.join(cmdline).lower()
-                        if 'dashboard.py' in cmdline_str and proc.info['pid'] != current_pid:
-                            return True
+                        if 'dashboard.py' in cmdline_str:
+                            # Only count processes that are NOT this one
+                            if proc.info['pid'] != current_pid:
+                                # Verify it's actually running and has a window
+                                if proc.is_running() and proc.status() != psutil.STATUS_ZOMBIE:
+                                    dashboard_count += 1
+                                    print(f"DEBUG: Found existing dashboard: PID {proc.info['pid']}")
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
                 continue
-        return False
+        
+        print(f"DEBUG: Current PID: {current_pid}, Dashboard instances found: {dashboard_count}")
+        return dashboard_count > 0
+        
     except Exception as e:
         print(f"Error checking if dashboard is running: {e}")
         return False
