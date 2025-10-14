@@ -4,6 +4,7 @@ import subprocess
 import os
 import sys
 import psutil
+import sqlite3
 
 class DashboardApp:
     def __init__(self):
@@ -130,11 +131,15 @@ class DashboardApp:
                            self.launch_db_management)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
-        """Create a consistent app tile with icon, title, and description"""
+        """Create a consistent app tile with icon, title, description, and counter"""
+        # Create outer container for scale effect
+        container = tk.Frame(parent, bg='#f5f5f5')
+        container.grid(row=row, column=col, padx=15, pady=15, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
         # Create tile frame with consistent size
-        tile_frame = tk.Frame(parent, relief='raised', borderwidth=2, 
+        tile_frame = tk.Frame(container, relief='raised', borderwidth=2, 
                              bg='white', highlightthickness=1, highlightbackground='#d0d0d0')
-        tile_frame.grid(row=row, column=col, padx=15, pady=15, sticky=(tk.W, tk.E, tk.N, tk.S))
+        tile_frame.pack(fill=tk.BOTH, expand=True)
         
         # Set minimum size for consistency
         tile_frame.grid_propagate(False)
@@ -142,14 +147,14 @@ class DashboardApp:
         
         # Create clickable button that fills the tile
         btn = tk.Button(tile_frame, relief='flat', bg='white', 
-                       activebackground='#f0f0f0', bd=0, cursor='hand2',
+                       activebackground='#E8F0FE', bd=0, cursor='hand2',
                        command=command)
         btn.pack(fill=tk.BOTH, expand=True)
         
         # Icon
         icon_label = tk.Label(btn, text=icon, font=('Arial', 32), 
                             bg='white', fg='#3498db')
-        icon_label.pack(pady=(20, 10))
+        icon_label.pack(pady=(15, 10))
         
         # Title
         title_label = tk.Label(btn, text=title, font=('Arial', 14, 'bold'), 
@@ -159,29 +164,73 @@ class DashboardApp:
         # Description
         desc_label = tk.Label(btn, text=description, font=('Arial', 11), 
                             bg='white', fg='#7f8c8d', justify='center')
-        desc_label.pack(pady=(0, 20))
+        desc_label.pack(pady=(0, 5))
         
-        # Hover effects
+        # Counter at bottom-right
+        counter_text = self.get_tile_counter(title)
+        counter_label = tk.Label(btn, text=counter_text, font=('Arial', 10, 'normal'), 
+                               bg='white', fg='#555555', anchor='e')
+        counter_label.pack(side=tk.BOTTOM, anchor='se', padx=8, pady=8)
+        
+        # Store references for hover effects
+        all_widgets = [btn, icon_label, title_label, desc_label, counter_label]
+        
+        # Hover effects with scale and color change
         def on_enter(e):
-            btn.config(bg='#f0f0f0')
-            icon_label.config(bg='#f0f0f0')
-            title_label.config(bg='#f0f0f0')
-            desc_label.config(bg='#f0f0f0')
+            # Change background to light accent
+            for widget in all_widgets:
+                widget.config(bg='#E8F0FE')
+            # Scale up effect (simulated by changing relief and border)
+            tile_frame.config(relief='raised', borderwidth=3, highlightbackground='#3498db')
         
         def on_leave(e):
-            btn.config(bg='white')
-            icon_label.config(bg='white')
-            title_label.config(bg='white')
-            desc_label.config(bg='white')
+            # Restore original background
+            for widget in all_widgets:
+                widget.config(bg='white')
+            # Restore original relief and border
+            tile_frame.config(relief='raised', borderwidth=2, highlightbackground='#d0d0d0')
         
-        btn.bind('<Enter>', on_enter)
-        btn.bind('<Leave>', on_leave)
-        icon_label.bind('<Enter>', on_enter)
-        icon_label.bind('<Leave>', on_leave)
-        title_label.bind('<Enter>', on_enter)
-        title_label.bind('<Leave>', on_leave)
-        desc_label.bind('<Enter>', on_enter)
-        desc_label.bind('<Leave>', on_leave)
+        # Bind hover events to all widgets
+        for widget in all_widgets:
+            widget.bind('<Enter>', on_enter)
+            widget.bind('<Leave>', on_leave)
+    
+    def get_tile_counter(self, tile_title):
+        """Get dynamic counter for each tile"""
+        try:
+            conn = sqlite3.connect('drafting_tools.db')
+            cursor = conn.cursor()
+            
+            if "Projects Management" in tile_title:
+                # Count active projects (not completed)
+                cursor.execute("""
+                    SELECT COUNT(*) FROM projects 
+                    WHERE completion_date IS NULL OR completion_date = ''
+                """)
+                count = cursor.fetchone()[0]
+                conn.close()
+                return f"{count} Active Project{'s' if count != 1 else ''}"
+            
+            elif "Product Configurations" in tile_title:
+                # Count configurations
+                cursor.execute("SELECT COUNT(DISTINCT job_number) FROM heater_configurations")
+                count = cursor.fetchone()[0]
+                conn.close()
+                return f"{count} Configuration{'s' if count != 1 else ''}"
+            
+            elif "Print Package" in tile_title:
+                # Count jobs with print packages
+                cursor.execute("SELECT COUNT(DISTINCT job_number) FROM print_packages")
+                count = cursor.fetchone()[0]
+                conn.close()
+                return f"{count} Print Package{'s' if count != 1 else ''}"
+            
+            else:
+                conn.close()
+                return ""
+        except Exception as e:
+            print(f"Error getting counter: {e}")
+            return ""
     
     def create_control_buttons(self, parent):
         """Create control buttons at the bottom - right-aligned, evenly spaced"""
