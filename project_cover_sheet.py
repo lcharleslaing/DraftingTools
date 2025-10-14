@@ -220,27 +220,27 @@ class ProjectCoverSheet:
                 next_pending = ("1. Drafting Drawing Package to Engineering for Initial Review", None)
                 found_pending = True
         
-        # 2. Redline Updates (only show the latest completed one)
+        # 2. Redline Updates (show latest completed OR next pending based on OPS Review status)
         redline_updates = self.workflow_data.get('redline_updates', [])
-        latest_redline = None
+        ops_review = self.workflow_data.get('ops_review')
+        ops_review_completed = ops_review and isinstance(ops_review, (list, tuple)) and len(ops_review) >= 2 and ops_review[1]
+        
         if redline_updates and isinstance(redline_updates, list):
-            for update in reversed(redline_updates):  # Start from latest
-                if isinstance(update, (list, tuple)) and len(update) >= 4:
-                    if update[3]:  # is_completed
-                        latest_redline = (f"2. Redline Updates", update[1])
-                        break
-            
-            # Add the latest completed redline if found
-            if latest_redline:
-                completed_steps.append(latest_redline)
-            
-            # Check if there's a pending redline update
-            for update in redline_updates:
-                if isinstance(update, (list, tuple)) and len(update) >= 4:
-                    if not update[3] and not found_pending:  # Not completed
-                        next_pending = ("2. Redline Updates", None)
-                        found_pending = True
-                        break
+            if ops_review_completed:
+                # OPS Review is completed, show the latest completed Redline Update
+                for update in reversed(redline_updates):  # Start from latest
+                    if isinstance(update, (list, tuple)) and len(update) >= 4:
+                        if update[3]:  # is_completed
+                            completed_steps.append((f"2. Redline Updates", update[1]))
+                            break
+            else:
+                # OPS Review is NOT completed, check if there's a pending redline update
+                for update in redline_updates:
+                    if isinstance(update, (list, tuple)) and len(update) >= 4:
+                        if not update[3] and not found_pending:  # Not completed
+                            next_pending = ("2. Redline Updates", None)
+                            found_pending = True
+                            break
         
         # 3. OPS Review
         ops_review = self.workflow_data.get('ops_review')
