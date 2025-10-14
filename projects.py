@@ -9,6 +9,47 @@ from database_setup import DatabaseManager
 from date_picker import DateEntry
 from directory_picker import DirectoryPicker, FilePicker
 
+class CollapsibleFrame(ttk.Frame):
+    """A collapsible frame widget"""
+    def __init__(self, parent, text="", **kwargs):
+        super().__init__(parent, **kwargs)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        
+        # Header frame with toggle button
+        self.header = ttk.Frame(self, relief='raised', style='CollapsibleHeader.TFrame')
+        self.header.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 2))
+        self.header.columnconfigure(1, weight=1)
+        
+        # Toggle button (arrow)
+        self.toggle_var = tk.StringVar(value="▼")
+        self.toggle_btn = ttk.Button(self.header, textvariable=self.toggle_var, 
+                                     width=3, command=self.toggle)
+        self.toggle_btn.grid(row=0, column=0, padx=(5, 5))
+        
+        # Title label
+        self.title_label = ttk.Label(self.header, text=text, 
+                                     font=('Arial', 11, 'bold'))
+        self.title_label.grid(row=0, column=1, sticky=tk.W, pady=5)
+        
+        # Content frame
+        self.content = ttk.Frame(self, padding="10")
+        self.content.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.content.columnconfigure(0, weight=1)
+        
+        self.collapsed = False
+    
+    def toggle(self):
+        """Toggle the collapsed state"""
+        if self.collapsed:
+            self.content.grid()
+            self.toggle_var.set("▼")
+            self.collapsed = False
+        else:
+            self.content.grid_remove()
+            self.toggle_var.set("▶")
+            self.collapsed = True
+
 class ProjectsApp:
     def __init__(self, root):
         self.root = root
@@ -154,6 +195,9 @@ class ProjectsApp:
         columns = ('Job Number', 'Customer', 'Due Date', 'Due in', 'Status')
         self.tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=18)
         
+        # Configure tags for row highlighting
+        self.tree.tag_configure('selected', background='#E8F0FE', font=('Arial', 9, 'bold'))
+        
         # Set column widths
         self.tree.heading('Job Number', text='Job Number')
         self.tree.column('Job Number', width=80, minwidth=80)
@@ -281,31 +325,70 @@ class ProjectsApp:
         self.customer_location_picker.var.trace('w', self.auto_save)
     
     def create_workflow_panel(self):
-        """Create the workflow tracking panel"""
-        workflow_frame = ttk.LabelFrame(self.workflow_container, text="Project Workflow", padding="10")
-        workflow_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
+        """Create the workflow tracking panel with collapsible sections"""
+        # Main container
+        main_container = ttk.Frame(self.workflow_container)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
+        main_container.columnconfigure(0, weight=1)
+        
+        # Toolbar at the top
+        self.create_workflow_toolbar(main_container)
+        
+        # Scrollable workflow content
+        canvas = tk.Canvas(main_container, bg='white', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=canvas.yview)
+        workflow_frame = ttk.Frame(canvas)
+        
+        workflow_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas_window = canvas.create_window((0, 0), window=workflow_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        scrollbar.grid(row=1, column=1, sticky=(tk.N, tk.S))
+        
+        # Make canvas expand to fill width
+        def _configure_canvas(event):
+            canvas.itemconfig(canvas_window, width=event.width)
+        canvas.bind('<Configure>', _configure_canvas)
+        
+        main_container.rowconfigure(1, weight=1)
         workflow_frame.columnconfigure(0, weight=1)
         
-        # Cover Sheet Print Button at the top
-        self.create_cover_sheet_button(workflow_frame)
+        # Section 1: Drafting & Redline Updates
+        self.drafting_section = CollapsibleFrame(workflow_frame, "Drafting & Redline Updates")
+        self.drafting_section.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+        self.create_drafting_redline_content(self.drafting_section.content)
         
-        # 1. Initial Redline
-        self.create_initial_redline_section(workflow_frame, 1)
+        # Section 2: Production & OPS Review  
+        self.production_section = CollapsibleFrame(workflow_frame, "Production & OPS Review")
+        self.production_section.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+        self.create_production_ops_content(self.production_section.content)
         
-        # 2. Redline Updates (multiple cycles)
-        self.create_redline_updates_section(workflow_frame, 2)
+        # Section 3: D365 & Release
+        self.release_section = CollapsibleFrame(workflow_frame, "D365 & Release")
+        self.release_section.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+        self.create_d365_release_content(self.release_section.content)
+    
+    def create_workflow_toolbar(self, parent):
+        """Create toolbar with print button"""
+        toolbar = ttk.Frame(parent, relief='raised', padding="5")
+        toolbar.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        toolbar.columnconfigure(0, weight=1)
         
-        # 3. OPS Review
-        self.create_ops_review_section(workflow_frame, 3)
+        # Title on the left
+        title_label = ttk.Label(toolbar, text="Project Workflow", 
+                               font=('Arial', 12, 'bold'))
+        title_label.grid(row=0, column=0, sticky=tk.W)
         
-        # 4. D365 BOM Entry
-        self.create_d365_bom_section(workflow_frame, 4)
-        
-        # 5. Peter Weck Review
-        self.create_peter_weck_section(workflow_frame, 5)
-        
-        # 6. Release to Dee
-        self.create_release_to_dee_section(workflow_frame, 6)
+        # Print button on the right
+        self.cover_sheet_btn = ttk.Button(toolbar, text="🖨️ Print Status Report", 
+                                         command=self.print_cover_sheet,
+                                         style='Accent.TButton')
+        self.cover_sheet_btn.grid(row=0, column=1, sticky=tk.E, padx=(10, 0))
     
     def create_cover_sheet_button(self, parent):
         """Create the cover sheet print button"""
@@ -619,6 +702,155 @@ class ProjectsApp:
         self.release_due_display_label.grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=(2, 0))
         
         # Set up auto-save traces for all workflow fields
+        self.setup_workflow_autosave()
+    
+    def create_drafting_redline_content(self, parent):
+        """Create content for Drafting & Redline Updates section"""
+        parent.columnconfigure(1, weight=1)
+        row = 0
+        
+        # Initial Redline
+        ttk.Label(parent, text="Initial Redline:", font=('Arial', 10, 'bold')).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
+        row += 1
+        
+        self.initial_redline_var = tk.BooleanVar()
+        ttk.Checkbutton(parent, text="Completed", variable=self.initial_redline_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Engineer:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.initial_engineer_var = tk.StringVar()
+        self.initial_engineer_combo = ttk.Combobox(parent, textvariable=self.initial_engineer_var, state="readonly", width=25)
+        self.initial_engineer_combo.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Date:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.initial_date_entry = DateEntry(parent, width=25)
+        self.initial_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        # Redline Updates
+        ttk.Separator(parent, orient='horizontal').grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=10)
+        row += 1
+        ttk.Label(parent, text="Redline Updates:", font=('Arial', 10, 'bold')).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
+        row += 1
+        
+        for i in range(1, 5):
+            checkbox_var = tk.BooleanVar()
+            setattr(self, f"redline_update_{i}_var", checkbox_var)
+            ttk.Checkbutton(parent, text=f"Update {i}", variable=checkbox_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=6)
+            row += 1
+            
+            ttk.Label(parent, text="Engineer:").grid(row=row, column=0, sticky=tk.W, pady=6)
+            engineer_var = tk.StringVar()
+            setattr(self, f"redline_update_{i}_engineer_var", engineer_var)
+            combo = ttk.Combobox(parent, textvariable=engineer_var, state="readonly", width=25)
+            setattr(self, f"redline_update_{i}_engineer_combo", combo)
+            combo.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+            row += 1
+            
+            ttk.Label(parent, text="Date:").grid(row=row, column=0, sticky=tk.W, pady=6)
+            date_entry = DateEntry(parent, width=25)
+            setattr(self, f"redline_update_{i}_date_entry", date_entry)
+            date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+            row += 1
+            
+            if i < 4:
+                ttk.Separator(parent, orient='horizontal').grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=6)
+                row += 1
+    
+    def create_production_ops_content(self, parent):
+        """Create content for Production & OPS Review section"""
+        parent.columnconfigure(1, weight=1)
+        row = 0
+        
+        # OPS Review
+        ttk.Label(parent, text="OPS Review:", font=('Arial', 10, 'bold')).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
+        row += 1
+        
+        self.ops_review_var = tk.BooleanVar()
+        ttk.Checkbutton(parent, text="OPS Review Updates", variable=self.ops_review_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Updated:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.ops_review_date_entry = DateEntry(parent, width=25)
+        self.ops_review_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        # Peter Weck Review
+        ttk.Separator(parent, orient='horizontal').grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=10)
+        row += 1
+        ttk.Label(parent, text="Peter Weck Review:", font=('Arial', 10, 'bold')).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
+        row += 1
+        
+        self.peter_weck_var = tk.BooleanVar()
+        ttk.Checkbutton(parent, text="Fixed Errors", variable=self.peter_weck_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Date:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.peter_weck_date_entry = DateEntry(parent, width=25)
+        self.peter_weck_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+    
+    def create_d365_release_content(self, parent):
+        """Create content for D365 & Release section"""
+        parent.columnconfigure(1, weight=1)
+        row = 0
+        
+        # D365 BOM Entry
+        ttk.Label(parent, text="D365 BOM Entry:", font=('Arial', 10, 'bold')).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
+        row += 1
+        
+        self.d365_bom_var = tk.BooleanVar()
+        ttk.Checkbutton(parent, text="D365 BOM Entry", variable=self.d365_bom_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Date:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.d365_bom_date_entry = DateEntry(parent, width=25)
+        self.d365_bom_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        # Release to Dee
+        ttk.Separator(parent, orient='horizontal').grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=10)
+        row += 1
+        ttk.Label(parent, text="Release to Dee:", font=('Arial', 10, 'bold')).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(0, 6))
+        row += 1
+        
+        self.release_fixed_errors_var = tk.BooleanVar()
+        ttk.Checkbutton(parent, text="Fixed Errors", variable=self.release_fixed_errors_var).grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Missing Prints:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.missing_prints_date_entry = DateEntry(parent, width=25)
+        self.missing_prints_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="D365 Updates:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.d365_updates_date_entry = DateEntry(parent, width=25)
+        self.d365_updates_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Other:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.other_notes_var = tk.StringVar()
+        self.other_notes_entry = ttk.Entry(parent, textvariable=self.other_notes_var, width=25)
+        self.other_notes_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Date:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.other_date_entry = DateEntry(parent, width=25)
+        self.other_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        ttk.Label(parent, text="Due Date:").grid(row=row, column=0, sticky=tk.W, pady=6)
+        self.release_due_date_entry = DateEntry(parent, width=25)
+        self.release_due_date_entry.grid(row=row, column=1, sticky=(tk.W, tk.E), padx=(10, 0), pady=6)
+        row += 1
+        
+        # Due date display
+        self.release_due_display_var = tk.StringVar()
+        self.release_due_display_label = ttk.Label(parent, textvariable=self.release_due_display_var, 
+                                                   foreground="blue", font=('Arial', 9, 'italic'))
+        self.release_due_display_label.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=(2, 0))
+        
+        # Set up auto-save
         self.setup_workflow_autosave()
     
     def setup_workflow_autosave(self):
@@ -1755,11 +1987,18 @@ class ProjectsApp:
         self.sort_due_date_btn.config(text=f"Due Date {direction}")
     
     def on_project_select(self, event):
-        """Handle project selection"""
+        """Handle project selection with row highlighting"""
         selection = self.tree.selection()
         if not selection:
             print("DEBUG: No selection")
             return
+        
+        # Remove 'selected' tag from all items
+        for item in self.tree.get_children():
+            self.tree.item(item, tags=())
+        
+        # Add 'selected' tag to selected item
+        self.tree.item(selection[0], tags=('selected',))
         
         item = self.tree.item(selection[0])
         job_number = item['values'][0]
