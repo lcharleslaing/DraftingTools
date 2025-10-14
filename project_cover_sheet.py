@@ -206,85 +206,92 @@ class ProjectCoverSheet:
         else:
             current_row = 7  # Start workflow content normally
         
-        # Find latest completed and next pending
-        latest_completed = None
+        # Build complete workflow list
+        completed_steps = []
         next_pending = None
+        found_pending = False
         
-        # Check redline updates for latest completed
+        # 1. Initial Redline
+        initial_redline = self.workflow_data.get('initial_redline')
+        if initial_redline and isinstance(initial_redline, (list, tuple)) and len(initial_redline) >= 3:
+            if initial_redline[2]:  # is_completed
+                completed_steps.append(("1. Drafting Drawing Package to Engineering for Initial Review", initial_redline[0]))
+            elif not found_pending:
+                next_pending = ("1. Drafting Drawing Package to Engineering for Initial Review", None)
+                found_pending = True
+        
+        # 2. Redline Updates
         redline_updates = self.workflow_data.get('redline_updates', [])
         if redline_updates and isinstance(redline_updates, list):
-            for update in reversed(redline_updates):  # Check from latest to earliest
+            for update in redline_updates:
                 if isinstance(update, (list, tuple)) and len(update) >= 4:
                     if update[3]:  # is_completed
-                        latest_completed = ("Redline Update", update[0], update[2], update[1])
+                        completed_steps.append((f"2. Redline Updates", update[1]))
+                    elif not found_pending:
+                        next_pending = ("2. Redline Updates", None)
+                        found_pending = True
                         break
         
-        # Check other workflow steps
-        workflow_steps = [
-            ("Initial Redline", self.workflow_data.get('initial_redline')),
-            ("OPS Review", self.workflow_data.get('ops_review')),
-            ("D365 BOM Entry", self.workflow_data.get('d365_bom')),
-            ("Peter Weck Review", self.workflow_data.get('peter_weck')),
-            ("Release to Dee", self.workflow_data.get('release_to_dee'))
-        ]
+        # 3. OPS Review
+        ops_review = self.workflow_data.get('ops_review')
+        if ops_review and isinstance(ops_review, (list, tuple)) and len(ops_review) >= 2:
+            if ops_review[1]:  # is_completed
+                completed_steps.append(("3. To Production ofr OPS Review", ops_review[0]))
+            elif not found_pending:
+                next_pending = ("3. To Production ofr OPS Review", None)
+                found_pending = True
         
-        for step_name, step_data in workflow_steps:
-            if step_data and isinstance(step_data, (list, tuple)) and len(step_data) >= 2:
-                if step_data[1]:  # is_completed
-                    if not latest_completed:  # Only set if no redline update is completed
-                        latest_completed = (step_name, None, step_data[1] if len(step_data) > 2 else None, step_data[0])
-                else:  # Not completed
-                    if not next_pending:
-                        next_pending = (step_name, None, step_data[1] if len(step_data) > 2 else None, step_data[0])
+        # 4. D365 BOM Entry
+        d365_bom = self.workflow_data.get('d365_bom')
+        if d365_bom and isinstance(d365_bom, (list, tuple)) and len(d365_bom) >= 2:
+            if d365_bom[1]:  # is_completed
+                completed_steps.append(("4. D365 BOM Entry", d365_bom[0]))
+            elif not found_pending:
+                next_pending = ("4. D365 BOM Entry", None)
+                found_pending = True
         
-        # current_row is already set above based on whether warning is shown
+        # 5. Peter Weck Review
+        peter_weck = self.workflow_data.get('peter_weck')
+        if peter_weck and isinstance(peter_weck, (list, tuple)) and len(peter_weck) >= 2:
+            if peter_weck[1]:  # is_completed
+                completed_steps.append(("5. Pete Weck Review", peter_weck[0]))
+            elif not found_pending:
+                next_pending = ("5. Pete Weck Review", None)
+                found_pending = True
         
-        # Display latest completed - Centered
-        if latest_completed:
-            step_name, step_num, engineer, date = latest_completed
-            if step_num:
-                ws[f'D{current_row}'] = f"Update {step_num}: [COMPLETED]"
-            else:
-                ws[f'D{current_row}'] = f"{step_name}: [COMPLETED]"
-            ws[f'D{current_row}'].font = normal_font
-            ws[f'D{current_row}'].alignment = center_alignment
-            current_row += 1
-            
-            if engineer:
-                ws[f'D{current_row}'] = f"Engineer: {engineer}"
+        # 6. Release to Dee
+        release_to_dee = self.workflow_data.get('release_to_dee')
+        if release_to_dee and isinstance(release_to_dee, (list, tuple)) and len(release_to_dee) >= 6:
+            if release_to_dee[5]:  # is_completed
+                completed_steps.append(("6. Release to DEE", release_to_dee[0] if release_to_dee[0] else None))
+            elif not found_pending:
+                next_pending = ("6. Release to DEE", None)
+                found_pending = True
+        
+        # Display all completed steps with checkmark
+        for step_name, date in completed_steps:
+            if date:
+                ws[f'D{current_row}'] = f"{step_name} ✅"
                 ws[f'D{current_row}'].font = normal_font
                 ws[f'D{current_row}'].alignment = center_alignment
                 current_row += 1
-            if date:
                 ws[f'D{current_row}'] = f"Date: {self.format_date(date)}"
                 ws[f'D{current_row}'].font = normal_font
                 ws[f'D{current_row}'].alignment = center_alignment
                 current_row += 1
+            else:
+                ws[f'D{current_row}'] = f"{step_name} ✅"
+                ws[f'D{current_row}'].font = normal_font
+                ws[f'D{current_row}'].alignment = center_alignment
+                current_row += 1
         
-        # Add space between sections
-        current_row += 1
-        
-        # Display next pending - Centered
+        # Display next pending with unchecked box
         if next_pending:
-            step_name, step_num, engineer, date = next_pending
-            if step_num:
-                ws[f'D{current_row}'] = f"Update {step_num}: [PENDING]"
-            else:
-                ws[f'D{current_row}'] = f"{step_name}: [PENDING]"
+            step_name, date = next_pending
+            ws[f'D{current_row}'] = f"{step_name}: [PENDING]"
             ws[f'D{current_row}'].font = normal_font
             ws[f'D{current_row}'].alignment = center_alignment
             current_row += 1
-            
-            if engineer:
-                ws[f'D{current_row}'] = f"Engineer: {engineer}"
-                ws[f'D{current_row}'].font = normal_font
-                ws[f'D{current_row}'].alignment = center_alignment
-                current_row += 1
-            if date:
-                ws[f'D{current_row}'] = f"Date: {self.format_date(date)}"
-                ws[f'D{current_row}'].font = normal_font
-                ws[f'D{current_row}'].alignment = center_alignment
-                current_row += 1
         
         # Footer with generation date - Row 20 - Centered on page
         ws['D20'] = f"Generated: {datetime.now().strftime('%m/%d/%Y %I:%M %p')}"
