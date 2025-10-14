@@ -140,8 +140,8 @@ class ProjectsApp:
         self.sort_due_date_btn = ttk.Button(sort_btn_frame, text="Due Date ↑", command=self.sort_by_due_date, width=12)
         self.sort_due_date_btn.grid(row=0, column=2, padx=(0, 0), sticky=tk.W)
         
-        # Treeview for projects - show start and completion dates for debugging
-        columns = ('Job Number', 'Customer', 'Start Date', 'Completion Date', 'Status')
+        # Treeview for projects - show due date, days until due, and status
+        columns = ('Job Number', 'Customer', 'Due Date', 'Due in', 'Status')
         self.tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=18)
         
         # Set column widths
@@ -151,11 +151,11 @@ class ProjectsApp:
         self.tree.heading('Customer', text='Customer')
         self.tree.column('Customer', width=150, minwidth=100)
         
-        self.tree.heading('Start Date', text='Start Date')
-        self.tree.column('Start Date', width=100, minwidth=80)
+        self.tree.heading('Due Date', text='Due Date')
+        self.tree.column('Due Date', width=100, minwidth=80)
         
-        self.tree.heading('Completion Date', text='Completion Date')
-        self.tree.column('Completion Date', width=100, minwidth=80)
+        self.tree.heading('Due in', text='Due in (Days)')
+        self.tree.column('Due in', width=100, minwidth=80)
         
         self.tree.heading('Status', text='Status')
         self.tree.column('Status', width=100, minwidth=80)
@@ -210,37 +210,44 @@ class ProjectsApp:
                                             state="readonly", width=22)
         self.assigned_to_combo.grid(row=4, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
+        # Project Engineer
+        ttk.Label(details_frame, text="Project Engineer:").grid(row=5, column=0, sticky=tk.W, pady=2)
+        self.project_engineer_var = tk.StringVar()
+        self.project_engineer_combo = ttk.Combobox(details_frame, textvariable=self.project_engineer_var, 
+                                                  state="readonly", width=22)
+        self.project_engineer_combo.grid(row=5, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
         # Assignment Date
-        ttk.Label(details_frame, text="Assignment Date:").grid(row=5, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Assignment Date:").grid(row=6, column=0, sticky=tk.W, pady=2)
         self.assignment_date_entry = DateEntry(details_frame, width=25)
-        self.assignment_date_entry.grid(row=5, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Start Date
-        ttk.Label(details_frame, text="Start Date:").grid(row=6, column=0, sticky=tk.W, pady=2)
-        self.start_date_entry = DateEntry(details_frame, width=25)
-        self.start_date_entry.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        
-        # Completion Date
-        ttk.Label(details_frame, text="Completion Date:").grid(row=7, column=0, sticky=tk.W, pady=2)
-        self.completion_date_entry = DateEntry(details_frame, width=25)
-        self.completion_date_entry.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.assignment_date_entry.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Due Date
-        ttk.Label(details_frame, text="Due Date:").grid(row=8, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Due Date:").grid(row=7, column=0, sticky=tk.W, pady=2)
         self.due_date_entry = DateEntry(details_frame, width=25)
-        self.due_date_entry.grid(row=8, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.due_date_entry.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Start Date
+        ttk.Label(details_frame, text="Start Date:").grid(row=8, column=0, sticky=tk.W, pady=2)
+        self.start_date_entry = DateEntry(details_frame, width=25)
+        self.start_date_entry.grid(row=8, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Completion Date
+        ttk.Label(details_frame, text="Completion Date:").grid(row=9, column=0, sticky=tk.W, pady=2)
+        self.completion_date_entry = DateEntry(details_frame, width=25)
+        self.completion_date_entry.grid(row=9, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Total Duration
-        ttk.Label(details_frame, text="Total Project Duration:").grid(row=9, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Total Project Duration:").grid(row=10, column=0, sticky=tk.W, pady=2)
         self.duration_var = tk.StringVar()
         self.duration_label = ttk.Label(details_frame, textvariable=self.duration_var, 
                                        foreground="blue", font=('Arial', 10, 'bold'))
-        self.duration_label.grid(row=9, column=1, sticky=tk.W, pady=2, padx=(5, 0))
+        self.duration_label.grid(row=10, column=1, sticky=tk.W, pady=2, padx=(5, 0))
         
         # Released to Dee
-        ttk.Label(details_frame, text="Released to Dee:").grid(row=10, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Released to Dee:").grid(row=11, column=0, sticky=tk.W, pady=2)
         self.released_to_dee_entry = DateEntry(details_frame, width=25)
-        self.released_to_dee_entry.grid(row=10, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.released_to_dee_entry.grid(row=11, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Bind events
         self.start_date_entry.var.trace('w', self.calculate_duration)
@@ -252,6 +259,7 @@ class ProjectsApp:
         self.customer_name_var.trace('w', self.auto_save)
         self.customer_location_var.trace('w', self.auto_save)
         self.assigned_to_var.trace('w', self.auto_save)
+        self.project_engineer_var.trace('w', self.auto_save)
         self.start_date_entry.var.trace('w', self.auto_save)
         self.completion_date_entry.var.trace('w', self.auto_save)
         self.due_date_entry.var.trace('w', self.auto_save)
@@ -1379,6 +1387,14 @@ class ProjectsApp:
                 if result:
                     designer_id = result[0]
             
+            # Get project engineer ID
+            project_engineer_id = None
+            if self.project_engineer_var.get():
+                cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.project_engineer_var.get(),))
+                result = cursor.fetchone()
+                if result:
+                    project_engineer_id = result[0]
+            
             # Calculate duration
             duration = None
             if self.start_date_entry.get() and self.completion_date_entry.get():
@@ -1393,10 +1409,10 @@ class ProjectsApp:
             cursor.execute("""
                 INSERT OR REPLACE INTO projects 
                 (job_number, job_directory, customer_name, customer_name_directory, 
-                 customer_location, customer_location_directory, assigned_to_id, 
+                 customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
                  assignment_date, start_date, completion_date, 
                  total_duration_days, released_to_dee, due_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 job_number,
                 self.job_directory_picker.get() or None,
@@ -1405,6 +1421,7 @@ class ProjectsApp:
                 self.customer_location_var.get().upper() or None,
                 self.customer_location_picker.get() or None,
                 designer_id,
+                project_engineer_id,
                 self.assignment_date_entry.get() or None,
                 self.start_date_entry.get() or None,
                 self.completion_date_entry.get() or None,
@@ -1444,6 +1461,10 @@ class ProjectsApp:
         if hasattr(self, 'initial_engineer_combo'):
             self.initial_engineer_combo['values'] = engineers
         
+        # Set engineers for project engineer combo
+        if hasattr(self, 'project_engineer_combo'):
+            self.project_engineer_combo['values'] = engineers
+        
         # Set engineers for all redline update combos
         for i in range(1, 5):
             combo_name = f"redline_update_{i}_engineer_combo"
@@ -1458,7 +1479,7 @@ class ProjectsApp:
         cursor = conn.cursor()
         
         query = """
-        SELECT p.job_number, p.customer_name, p.start_date, p.completion_date,
+        SELECT p.job_number, p.customer_name, p.due_date, p.completion_date,
                CASE 
                    WHEN p.completion_date IS NOT NULL THEN 'Completed'
                    WHEN p.start_date IS NOT NULL THEN 'In Progress'
@@ -1477,16 +1498,34 @@ class ProjectsApp:
         
         # Insert projects
         for project in projects:
-            # Format dates for display
-            start_date = project[2] if project[2] else ""
-            completion_date = project[3] if project[3] else ""
+            job_number = project[0]
+            customer_name = project[1]
+            due_date = project[2] if project[2] else ""
+            completion_date = project[3]
             status = project[4]
             
+            # Calculate days until due
+            days_until_due = ""
+            if due_date and not completion_date:
+                try:
+                    due = datetime.strptime(due_date, "%Y-%m-%d")
+                    today = datetime.now()
+                    days_diff = (due - today).days
+                    
+                    if days_diff < 0:
+                        days_until_due = f"{abs(days_diff)} overdue"
+                    elif days_diff == 0:
+                        days_until_due = "Today"
+                    else:
+                        days_until_due = str(days_diff)
+                except:
+                    days_until_due = ""
+            
             self.tree.insert('', 'end', values=(
-                project[0],  # job_number
-                project[1],  # customer_name
-                start_date,
-                completion_date,
+                job_number,
+                customer_name,
+                due_date,
+                days_until_due,
                 status
             ))
         
@@ -1577,7 +1616,7 @@ class ProjectsApp:
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT job_number, customer_name, start_date, completion_date, due_date,
+            SELECT job_number, customer_name, due_date, completion_date,
                    CASE 
                        WHEN completion_date IS NOT NULL AND completion_date != '' THEN 'Completed'
                        WHEN start_date IS NOT NULL AND start_date != '' THEN 'In Progress'
@@ -1602,9 +1641,27 @@ class ProjectsApp:
         
         # Add sorted items back
         for project in projects:
-            job_num, customer, start_date, completion_date, due_date, status = project
-            self.tree.insert('', 'end', values=(job_num, customer or '', start_date or '', 
-                                               completion_date or '', status))
+            job_num, customer, due_date, completion_date, status = project
+            
+            # Calculate days until due
+            days_until_due = ""
+            if due_date and not completion_date:
+                try:
+                    due = datetime.strptime(due_date, "%Y-%m-%d")
+                    today = datetime.now()
+                    days_diff = (due - today).days
+                    
+                    if days_diff < 0:
+                        days_until_due = f"{abs(days_diff)} overdue"
+                    elif days_diff == 0:
+                        days_until_due = "Today"
+                    else:
+                        days_until_due = str(days_diff)
+                except:
+                    days_until_due = ""
+            
+            self.tree.insert('', 'end', values=(job_num, customer or '', due_date or '', 
+                                               days_until_due, status))
         
         # Toggle direction for next time
         self.due_date_sort_ascending = not self.due_date_sort_ascending
@@ -1691,11 +1748,12 @@ class ProjectsApp:
         # Load main project data
         query = """
         SELECT p.job_number, p.job_directory, p.customer_name, p.customer_name_directory,
-               p.customer_location, p.customer_location_directory, d.name, 
+               p.customer_location, p.customer_location_directory, d.name, e.name,
                p.assignment_date, p.start_date, p.completion_date, 
                p.total_duration_days, p.released_to_dee, p.due_date
         FROM projects p
         LEFT JOIN designers d ON p.assigned_to_id = d.id
+        LEFT JOIN engineers e ON p.project_engineer_id = e.id
         WHERE p.job_number = ?
         """
         
@@ -1712,12 +1770,13 @@ class ProjectsApp:
             self.customer_location_var.set(project[4] or "")
             self.customer_location_picker.set(project[5] or "")
             self.assigned_to_var.set(project[6] or "")
-            self.assignment_date_entry.set(project[7] or "")
-            self.start_date_entry.set(project[8] or "")
-            self.completion_date_entry.set(project[9] or "")
-            self.duration_var.set(f"{project[10]} days" if project[10] else "N/A")
-            self.released_to_dee_entry.set(project[11] or "")
-            self.due_date_entry.set(project[12] or "")
+            self.project_engineer_var.set(project[7] or "")
+            self.assignment_date_entry.set(project[8] or "")
+            self.start_date_entry.set(project[9] or "")
+            self.completion_date_entry.set(project[10] or "")
+            self.duration_var.set(f"{project[11]} days" if project[11] else "N/A")
+            self.released_to_dee_entry.set(project[12] or "")
+            self.due_date_entry.set(project[13] or "")
         
         # Load workflow data
         self.load_workflow_data(clean_job_number, cursor)
@@ -1893,6 +1952,14 @@ class ProjectsApp:
                 if result:
                     designer_id = result[0]
             
+            # Get project engineer ID
+            project_engineer_id = None
+            if self.project_engineer_var.get():
+                cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.project_engineer_var.get(),))
+                result = cursor.fetchone()
+                if result:
+                    project_engineer_id = result[0]
+            
             # Calculate duration
             duration = None
             if self.start_date_entry.get() and self.completion_date_entry.get():
@@ -1907,10 +1974,10 @@ class ProjectsApp:
             cursor.execute("""
                 INSERT OR REPLACE INTO projects 
                 (job_number, job_directory, customer_name, customer_name_directory, 
-                 customer_location, customer_location_directory, assigned_to_id, 
+                 customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
                  assignment_date, start_date, completion_date, 
                  total_duration_days, released_to_dee, due_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 job_number,
                 self.job_directory_picker.get() or None,
@@ -1919,6 +1986,7 @@ class ProjectsApp:
                 self.customer_location_var.get().upper() or None,
                 self.customer_location_picker.get() or None,
                 designer_id,
+                project_engineer_id,
                 self.assignment_date_entry.get() or None,
                 self.start_date_entry.get() or None,
                 self.completion_date_entry.get() or None,
