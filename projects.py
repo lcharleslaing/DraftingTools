@@ -214,64 +214,68 @@ class ProjectsApp:
         # Customer Name
         ttk.Label(details_frame, text="Customer Name:").grid(row=2, column=0, sticky=tk.W, pady=2)
         self.customer_name_var = tk.StringVar()
-        self.customer_name_entry = ttk.Entry(details_frame, textvariable=self.customer_name_var, width=25)
+        self.customer_name_entry = ttk.Entry(details_frame, textvariable=self.customer_name_var, width=50)
         self.customer_name_entry.grid(row=2, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        self.customer_name_picker = DirectoryPicker(details_frame, width=25)
-        self.customer_name_picker.grid(row=2, column=2, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Customer Name Path (moved below)
+        self.customer_name_picker = DirectoryPicker(details_frame, width=50)
+        self.customer_name_picker.grid(row=3, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Customer Location
-        ttk.Label(details_frame, text="Customer Location:").grid(row=3, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Customer Location:").grid(row=4, column=0, sticky=tk.W, pady=2)
         self.customer_location_var = tk.StringVar()
-        self.customer_location_entry = ttk.Entry(details_frame, textvariable=self.customer_location_var, width=25)
-        self.customer_location_entry.grid(row=3, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
-        self.customer_location_picker = DirectoryPicker(details_frame, width=25)
-        self.customer_location_picker.grid(row=3, column=2, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.customer_location_entry = ttk.Entry(details_frame, textvariable=self.customer_location_var, width=50)
+        self.customer_location_entry.grid(row=4, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
+        # Customer Location Path (moved below)
+        self.customer_location_picker = DirectoryPicker(details_frame, width=50)
+        self.customer_location_picker.grid(row=5, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Assigned To
-        ttk.Label(details_frame, text="Assigned to:").grid(row=4, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Assigned to:").grid(row=6, column=0, sticky=tk.W, pady=2)
         self.assigned_to_var = tk.StringVar()
         self.assigned_to_combo = ttk.Combobox(details_frame, textvariable=self.assigned_to_var, 
                                             state="readonly", width=22)
-        self.assigned_to_combo.grid(row=4, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.assigned_to_combo.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Project Engineer
-        ttk.Label(details_frame, text="Project Engineer:").grid(row=5, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Project Engineer:").grid(row=7, column=0, sticky=tk.W, pady=2)
         self.project_engineer_var = tk.StringVar()
         self.project_engineer_combo = ttk.Combobox(details_frame, textvariable=self.project_engineer_var, 
-                                                  state="readonly", width=22)
-        self.project_engineer_combo.grid(row=5, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+                                                 state="readonly", width=22)
+        self.project_engineer_combo.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Assignment Date
-        ttk.Label(details_frame, text="Assignment Date:").grid(row=6, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Assignment Date:").grid(row=8, column=0, sticky=tk.W, pady=2)
         self.assignment_date_entry = DateEntry(details_frame, width=25)
-        self.assignment_date_entry.grid(row=6, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.assignment_date_entry.grid(row=8, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Due Date
-        ttk.Label(details_frame, text="Due Date:").grid(row=7, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Due Date:").grid(row=9, column=0, sticky=tk.W, pady=2)
         self.due_date_entry = DateEntry(details_frame, width=25)
-        self.due_date_entry.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.due_date_entry.grid(row=9, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Start Date
-        ttk.Label(details_frame, text="Start Date:").grid(row=8, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Start Date:").grid(row=10, column=0, sticky=tk.W, pady=2)
         self.start_date_entry = DateEntry(details_frame, width=25)
-        self.start_date_entry.grid(row=8, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.start_date_entry.grid(row=10, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Completion Date
-        ttk.Label(details_frame, text="Completion Date:").grid(row=9, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Completion Date:").grid(row=11, column=0, sticky=tk.W, pady=2)
         self.completion_date_entry = DateEntry(details_frame, width=25)
-        self.completion_date_entry.grid(row=9, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.completion_date_entry.grid(row=11, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Total Duration
-        ttk.Label(details_frame, text="Total Project Duration:").grid(row=10, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Total Project Duration:").grid(row=12, column=0, sticky=tk.W, pady=2)
         self.duration_var = tk.StringVar()
         self.duration_label = ttk.Label(details_frame, textvariable=self.duration_var, 
                                        foreground="blue", font=('Arial', 10, 'bold'))
-        self.duration_label.grid(row=10, column=1, sticky=tk.W, pady=2, padx=(5, 0))
+        self.duration_label.grid(row=12, column=1, sticky=tk.W, pady=2, padx=(5, 0))
         
         # Released to Dee
-        ttk.Label(details_frame, text="Released to Dee:").grid(row=11, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Released to Dee:").grid(row=13, column=0, sticky=tk.W, pady=2)
         self.released_to_dee_entry = DateEntry(details_frame, width=25)
-        self.released_to_dee_entry.grid(row=11, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.released_to_dee_entry.grid(row=13, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Bind events
         self.start_date_entry.var.trace('w', self.calculate_duration)
@@ -301,7 +305,7 @@ class ProjectsApp:
         """Create the specifications section below project details"""
         # Add separator
         separator = ttk.Separator(parent_frame, orient='horizontal')
-        separator.grid(row=12, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 5))
+        separator.grid(row=14, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 5))
         
         # Configure parent frame columns to use full width
         parent_frame.columnconfigure(0, weight=3)  # Buttons take 3/4 of space
@@ -309,7 +313,7 @@ class ProjectsApp:
         
         # Specifications label
         specs_label = ttk.Label(parent_frame, text="Specifications", font=('Arial', 12, 'bold'))
-        specs_label.grid(row=13, column=0, columnspan=2, sticky=tk.W, pady=(5, 10))
+        specs_label.grid(row=15, column=0, columnspan=2, sticky=tk.W, pady=(5, 10))
         
         # Initialize specifications buttons list and input fields
         self.spec_buttons = []
@@ -386,7 +390,7 @@ class ProjectsApp:
                                 cursor='hand2' if can_size_button_state == "normal" else 'arrow',
                                 bg=button_color, fg=button_text_color,
                                 activebackground=button_color, activeforeground=button_text_color)
-        can_size_btn.grid(row=14, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
+        can_size_btn.grid(row=16, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
         self.spec_buttons.append(can_size_btn)
         
         # Add Heater Specs group
@@ -396,7 +400,7 @@ class ProjectsApp:
         """Create the Heater Specs group with dimension buttons"""
         # Heater Specs label
         heater_specs_label = ttk.Label(parent_frame, text="Heater Specs", font=('Arial', 11, 'bold'), foreground="darkblue")
-        heater_specs_label.grid(row=15, column=0, columnspan=2, sticky=tk.W, pady=(15, 5))
+        heater_specs_label.grid(row=17, column=0, columnspan=2, sticky=tk.W, pady=(15, 5))
         self.spec_buttons.append(heater_specs_label)
         
         # Define the heater dimension specifications
@@ -469,21 +473,21 @@ class ProjectsApp:
                 button_state = "disabled"
                 cursor_type = "arrow"
             
-            # Create button (wider to fill more space)
+            # Create button (much wider to fill all available space)
             spec_btn = tk.Button(parent_frame, 
                                text=f"{spec_name}: {spec_value or 'No Data'}",
                                state=button_state,
                                command=lambda file=heater_design_file: self.open_heater_design_file(file) if file else None,
-                               width=45, height=1,
+                               width=60, height=1,
                                font=('Arial', 9),
                                relief='raised', bd=1,
                                cursor=cursor_type,
                                bg=button_color, fg="black",
                                activebackground=button_color, activeforeground="black")
-            spec_btn.grid(row=16+i, column=0, sticky=(tk.W, tk.E), pady=1, padx=(0, 10))
+            spec_btn.grid(row=18+i, column=0, sticky=(tk.W, tk.E), pady=1, padx=(0, 10))
             
             # Add right-click context menu
-            self.create_spec_context_menu(spec_btn, spec_name, parent_frame, 16+i)
+            self.create_spec_context_menu(spec_btn, spec_name, parent_frame, 18+i)
             
             self.spec_buttons.append(spec_btn)
             
@@ -588,15 +592,15 @@ class ProjectsApp:
         input_frame = tk.Frame(parent_frame)
         input_frame.grid(row=row, column=column, sticky=(tk.W, tk.E), pady=1, padx=(0, 0))
         
-        # Input field (compact, no label)
+        # Input field (wider to use more space)
         input_var = tk.StringVar()
-        input_entry = ttk.Entry(input_frame, textvariable=input_var, width=20, font=('Arial', 9))
+        input_entry = ttk.Entry(input_frame, textvariable=input_var, width=25, font=('Arial', 9))
         input_entry.pack(side=tk.LEFT, padx=(0, 5))
         
-        # Save button (compact but visible)
+        # Save button (wider for better visibility)
         save_btn = tk.Button(input_frame, text="Save", 
                            command=lambda: self.save_manual_spec(spec_name, input_var.get()),
-                           width=6, height=1, font=('Arial', 8, 'bold'),
+                           width=8, height=1, font=('Arial', 9, 'bold'),
                            bg='#4CAF50', fg='white', relief='raised', bd=1)
         save_btn.pack(side=tk.LEFT, padx=(0, 0))
         
