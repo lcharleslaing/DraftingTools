@@ -601,12 +601,7 @@ Developed for CECO Environmental Corp
 def is_dashboard_running():
     """Check if Dashboard is already running"""
     try:
-        import time
-        # Small delay to ensure process list is stable
-        time.sleep(0.1)
-        
         current_pid = os.getpid()
-        dashboard_count = 0
         
         for proc in psutil.process_iter(['pid', 'name', 'cmdline', 'create_time']):
             try:
@@ -614,18 +609,17 @@ def is_dashboard_running():
                     cmdline = proc.info.get('cmdline', [])
                     if cmdline:
                         cmdline_str = ' '.join(cmdline).lower()
-                        if 'dashboard.py' in cmdline_str:
-                            # Only count processes that are NOT this one
-                            if proc.info['pid'] != current_pid:
-                                # Verify it's actually running and has a window
-                                if proc.is_running() and proc.status() != psutil.STATUS_ZOMBIE:
-                                    dashboard_count += 1
-                                    print(f"DEBUG: Found existing dashboard: PID {proc.info['pid']}")
+                        if 'dashboard.py' in cmdline_str and proc.info['pid'] != current_pid:
+                            # Check if process has been running for more than 1 second
+                            # This ensures it's a real dashboard, not just starting up
+                            import time
+                            process_age = time.time() - proc.info['create_time']
+                            if process_age > 1.0 and proc.is_running():
+                                return True
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
                 continue
         
-        print(f"DEBUG: Current PID: {current_pid}, Dashboard instances found: {dashboard_count}")
-        return dashboard_count > 0
+        return False
         
     except Exception as e:
         print(f"Error checking if dashboard is running: {e}")
