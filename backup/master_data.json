@@ -20,15 +20,15 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 824
+      "seq": 832
     },
     {
       "name": "engineers",
-      "seq": 618
+      "seq": 624
     },
     {
       "name": "app_order",
-      "seq": 412
+      "seq": 416
     },
     {
       "name": "projects",
@@ -36,71 +36,71 @@
     },
     {
       "name": "heater_models",
-      "seq": 48
+      "seq": 52
     },
     {
       "name": "locations",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "heater_diameters",
-      "seq": 48
+      "seq": 52
     },
     {
       "name": "heater_heights",
-      "seq": 132
+      "seq": 143
     },
     {
       "name": "heater_stack_diameters",
-      "seq": 36
+      "seq": 39
     },
     {
       "name": "applications",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "materials",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "burner_models",
-      "seq": 72
+      "seq": 78
     },
     {
       "name": "gas_train_positions",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "heater_mounting_types",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "gauge_cocks_types",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "temperature_switch_types",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "packaging_types",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "mod_piping_transducer_materials",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "hose_materials",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "media_frame_heights",
-      "seq": 36
+      "seq": 39
     },
     {
       "name": "gas_types",
-      "seq": 24
+      "seq": 26
     },
     {
       "name": "heater_configurations",
