@@ -40,7 +40,7 @@ class ProductConfigurationsApp:
         """Create the project list panel on the left side"""
         # Project list frame
         project_frame = ttk.LabelFrame(parent, text="Projects", padding=10)
-        project_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        project_frame.pack(fill=tk.BOTH, expand=True)
         
         # Search frame
         search_frame = ttk.Frame(project_frame)
@@ -84,7 +84,7 @@ class ProductConfigurationsApp:
         """Create the configuration panel on the right side"""
         # Configuration frame
         config_frame = ttk.LabelFrame(parent, text="Product Configuration", padding=10)
-        config_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        config_frame.pack(fill=tk.BOTH, expand=True)
         
         # Product selection and job number area
         self.create_product_selection_area(config_frame)
@@ -529,15 +529,23 @@ class ProductConfigurationsApp:
                                font=('Arial', 18, 'bold'))
         title_label.pack(pady=(0, 10))
         
-        # Create main content area with project list and configurations
-        content_frame = ttk.Frame(main_frame)
-        content_frame.pack(fill=tk.BOTH, expand=True)
+        # Create resizable paned window for adjustable panels
+        paned_window = ttk.PanedWindow(main_frame, orient=tk.HORIZONTAL)
+        paned_window.pack(fill=tk.BOTH, expand=True)
+        
+        # Create frames for each panel
+        project_list_container = ttk.Frame(paned_window)
+        configuration_container = ttk.Frame(paned_window)
+        
+        # Add frames to paned window
+        paned_window.add(project_list_container, weight=1)
+        paned_window.add(configuration_container, weight=3)
         
         # Left side - Project list
-        self.create_project_list_panel(content_frame)
+        self.create_project_list_panel(project_list_container)
         
         # Right side - Product selection and configurations
-        self.create_configuration_panel(content_frame)
+        self.create_configuration_panel(configuration_container)
         
         # Heater configuration tab
         self.create_heater_tab()
@@ -621,7 +629,7 @@ class ProductConfigurationsApp:
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
         
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        canvas_window = canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
         
         # Configure scrollable frame for full width
@@ -643,6 +651,16 @@ class ProductConfigurationsApp:
         # Pack canvas and scrollbar - full width
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
+        
+        # Bind mousewheel to canvas for scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        # Make canvas expand to fill available space
+        def _configure_canvas(event):
+            canvas.itemconfig(canvas_window, width=event.width)
+        canvas.bind('<Configure>', _configure_canvas)
     
     def create_heater_parameters_section(self):
         """Create the heater parameters section"""

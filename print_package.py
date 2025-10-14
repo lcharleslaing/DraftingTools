@@ -48,21 +48,29 @@ class PrintPackageApp:
                                font=('Arial', 18, 'bold'))
         title_label.pack(pady=(0, 10))
         
-        # Create main content area with project list and drawings
-        content_frame = ttk.Frame(main_frame)
-        content_frame.pack(fill=tk.BOTH, expand=True)
+        # Create resizable paned window for adjustable panels
+        paned_window = ttk.PanedWindow(main_frame, orient=tk.HORIZONTAL)
+        paned_window.pack(fill=tk.BOTH, expand=True)
+        
+        # Create frames for each panel
+        project_list_container = ttk.Frame(paned_window)
+        drawings_container = ttk.Frame(paned_window)
+        
+        # Add frames to paned window
+        paned_window.add(project_list_container, weight=1)
+        paned_window.add(drawings_container, weight=3)
         
         # Left side - Project list
-        self.create_project_list_panel(content_frame)
+        self.create_project_list_panel(project_list_container)
         
         # Right side - Drawings management
-        self.create_drawings_panel(content_frame)
+        self.create_drawings_panel(drawings_container)
         
     def create_project_list_panel(self, parent):
         """Create the project list panel on the left side"""
         # Project list frame
         project_frame = ttk.LabelFrame(parent, text="Projects", padding=10)
-        project_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        project_frame.pack(fill=tk.BOTH, expand=True)
         
         # Search frame
         search_frame = ttk.Frame(project_frame)
@@ -106,7 +114,7 @@ class PrintPackageApp:
         """Create the drawings management panel on the right side"""
         # Drawings frame
         drawings_frame = ttk.LabelFrame(parent, text="Drawings Management", padding=10)
-        drawings_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        drawings_frame.pack(fill=tk.BOTH, expand=True)
         
         # Current job display
         job_frame = ttk.Frame(drawings_frame)
