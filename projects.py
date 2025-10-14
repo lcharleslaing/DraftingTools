@@ -304,8 +304,8 @@ class ProjectsApp:
         separator.grid(row=12, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 5))
         
         # Configure parent frame columns to use full width
-        parent_frame.columnconfigure(0, weight=2)  # Buttons take 2/3 of space
-        parent_frame.columnconfigure(1, weight=1)  # Inputs take 1/3 of space
+        parent_frame.columnconfigure(0, weight=3)  # Buttons take 3/4 of space
+        parent_frame.columnconfigure(1, weight=1)  # Inputs take 1/4 of space
         
         # Specifications label
         specs_label = ttk.Label(parent_frame, text="Specifications", font=('Arial', 12, 'bold'))
