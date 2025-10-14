@@ -1,3 +1,6 @@
 /.venv
 /ProjectBackup
 *.zip
+*.db
+drafting_tools.db
+backup/master_drafting_tools.db

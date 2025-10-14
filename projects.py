@@ -218,17 +218,22 @@ class ProjectsApp:
         self.completion_date_entry = DateEntry(details_frame, width=25)
         self.completion_date_entry.grid(row=7, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
+        # Due Date
+        ttk.Label(details_frame, text="Due Date:").grid(row=8, column=0, sticky=tk.W, pady=2)
+        self.due_date_entry = DateEntry(details_frame, width=25)
+        self.due_date_entry.grid(row=8, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        
         # Total Duration
-        ttk.Label(details_frame, text="Total Project Duration:").grid(row=8, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Total Project Duration:").grid(row=9, column=0, sticky=tk.W, pady=2)
         self.duration_var = tk.StringVar()
         self.duration_label = ttk.Label(details_frame, textvariable=self.duration_var, 
                                        foreground="blue", font=('Arial', 10, 'bold'))
-        self.duration_label.grid(row=8, column=1, sticky=tk.W, pady=2, padx=(5, 0))
+        self.duration_label.grid(row=9, column=1, sticky=tk.W, pady=2, padx=(5, 0))
         
         # Released to Dee
-        ttk.Label(details_frame, text="Released to Dee:").grid(row=9, column=0, sticky=tk.W, pady=2)
+        ttk.Label(details_frame, text="Released to Dee:").grid(row=10, column=0, sticky=tk.W, pady=2)
         self.released_to_dee_entry = DateEntry(details_frame, width=25)
-        self.released_to_dee_entry.grid(row=9, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
+        self.released_to_dee_entry.grid(row=10, column=1, sticky=(tk.W, tk.E), pady=2, padx=(5, 0))
         
         # Bind events
         self.start_date_entry.var.trace('w', self.calculate_duration)
@@ -242,6 +247,7 @@ class ProjectsApp:
         self.assigned_to_var.trace('w', self.auto_save)
         self.start_date_entry.var.trace('w', self.auto_save)
         self.completion_date_entry.var.trace('w', self.auto_save)
+        self.due_date_entry.var.trace('w', self.auto_save)
         self.released_to_dee_entry.var.trace('w', self.auto_save)
         
         # Auto-save for directory pickers
