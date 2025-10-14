@@ -9,6 +9,7 @@ from tkinter import ttk, messagebox, filedialog
 import sqlite3
 import os
 import subprocess
+import sys
 from datetime import datetime
 import json
 
@@ -218,6 +219,10 @@ class PrintPackageApp:
         # Action buttons
         action_frame = ttk.Frame(drawings_frame)
         action_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        # Dashboard button
+        dashboard_btn = ttk.Button(action_frame, text="🏠 Dashboard", command=self.open_dashboard)
+        dashboard_btn.pack(side=tk.LEFT, padx=(0, 15))
         
         print_all_btn = ttk.Button(action_frame, text="Print All Current Job", command=self.print_all_current)
         print_all_btn.pack(side=tk.LEFT, padx=(0, 5))
@@ -1631,6 +1636,16 @@ Y
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add drawing: {str(e)}")
+    
+    def open_dashboard(self):
+        """Open the dashboard application"""
+        try:
+            if os.path.exists('dashboard.py'):
+                subprocess.Popen([sys.executable, 'dashboard.py'])
+            else:
+                messagebox.showerror("Error", "dashboard.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Dashboard:\n{str(e)}")
     
     def export_package(self):
         """Export the current job's print package to a file"""

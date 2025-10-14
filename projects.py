@@ -75,25 +75,33 @@ class ProjectsApp:
         # Title
         title_label = ttk.Label(self.scrollable_frame, text="Project Management - Complete Workflow", 
                                font=('Arial', 18, 'bold'))
-        title_label.grid(row=0, column=0, columnspan=4, pady=(0, 20), sticky=(tk.W, tk.E))
+        title_label.grid(row=0, column=0, columnspan=1, pady=(0, 20), sticky=(tk.W, tk.E))
         
-        # Left panel - Project list
+        # Create main paned window container (horizontal - splits 4 sections)
+        main_paned = ttk.PanedWindow(self.scrollable_frame, orient=tk.HORIZONTAL)
+        main_paned.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        
+        # Container frames for each section
+        self.project_list_container = ttk.Frame(main_paned)
+        self.project_details_container = ttk.Frame(main_paned)
+        self.workflow_container = ttk.Frame(main_paned)
+        self.quick_access_container = ttk.Frame(main_paned)
+        
+        # Add containers to paned window
+        main_paned.add(self.project_list_container, weight=1)
+        main_paned.add(self.project_details_container, weight=1)
+        main_paned.add(self.workflow_container, weight=1)
+        main_paned.add(self.quick_access_container, weight=1)
+        
+        # Create panels inside containers
         self.create_project_list_panel()
-        
-        # Middle panel - Project details
         self.create_project_details_panel()
-        
-        # Right panel - Workflow tracking
         self.create_workflow_panel()
-        
-        # Far right panel - Quick access
         self.create_quick_access_panel()
         
-        # Configure grid weights for better layout
-        self.scrollable_frame.columnconfigure(0, weight=1)  # Project list
-        self.scrollable_frame.columnconfigure(1, weight=1)  # Project details
-        self.scrollable_frame.columnconfigure(2, weight=1)  # Workflow
-        self.scrollable_frame.columnconfigure(3, weight=1)  # Quick access
+        # Configure grid weights
+        self.scrollable_frame.columnconfigure(0, weight=1)
+        self.scrollable_frame.rowconfigure(1, weight=1)
         
         # Bottom panel - Action buttons
         self.create_action_buttons()
@@ -103,8 +111,8 @@ class ProjectsApp:
     
     def create_project_list_panel(self):
         """Create the project list panel"""
-        list_frame = ttk.LabelFrame(self.scrollable_frame, text="Projects", padding="10")
-        list_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        list_frame = ttk.LabelFrame(self.project_list_container, text="Projects", padding="10")
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(1, weight=1)
         
@@ -169,8 +177,8 @@ class ProjectsApp:
     
     def create_project_details_panel(self):
         """Create the project details panel"""
-        details_frame = ttk.LabelFrame(self.scrollable_frame, text="Project Details", padding="10")
-        details_frame.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        details_frame = ttk.LabelFrame(self.project_details_container, text="Project Details", padding="10")
+        details_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
         details_frame.columnconfigure(1, weight=1)
         
         # Job Number
@@ -269,8 +277,8 @@ class ProjectsApp:
     
     def create_workflow_panel(self):
         """Create the workflow tracking panel"""
-        workflow_frame = ttk.LabelFrame(self.scrollable_frame, text="Project Workflow", padding="10")
-        workflow_frame.grid(row=1, column=2, sticky=(tk.W, tk.E, tk.N, tk.S))
+        workflow_frame = ttk.LabelFrame(self.workflow_container, text="Project Workflow", padding="10")
+        workflow_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
         workflow_frame.columnconfigure(0, weight=1)
         
         # Cover Sheet Print Button at the top
@@ -596,8 +604,8 @@ class ProjectsApp:
     
     def create_quick_access_panel(self):
         """Create the quick access panel for files and folders"""
-        self.access_frame = ttk.LabelFrame(self.scrollable_frame, text="Quick Access", padding="10")
-        self.access_frame.grid(row=1, column=3, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(10, 0))
+        self.access_frame = ttk.LabelFrame(self.quick_access_container, text="Quick Access", padding="10")
+        self.access_frame.pack(fill=tk.BOTH, expand=True)
         self.access_frame.columnconfigure(0, weight=1)
         
         # Initialize empty quick access area
@@ -827,7 +835,11 @@ class ProjectsApp:
     def create_action_buttons(self):
         """Create action buttons"""
         button_frame = ttk.Frame(self.scrollable_frame)
-        button_frame.grid(row=2, column=0, columnspan=4, pady=(20, 0))
+        button_frame.grid(row=2, column=0, columnspan=1, pady=(20, 0), sticky=(tk.W, tk.E))
+        
+        # Left side buttons
+        ttk.Button(button_frame, text="🏠 Dashboard", command=self.open_dashboard, 
+                  style='Accent.TButton').pack(side=tk.LEFT, padx=(0, 15))
         
         ttk.Button(button_frame, text="New Project", command=self.new_project).pack(side=tk.LEFT, padx=(0, 5))
         ttk.Button(button_frame, text="Save Project", command=self.save_project).pack(side=tk.LEFT, padx=(0, 5))
@@ -2169,6 +2181,16 @@ class ProjectsApp:
         """Set start date to assignment date if not already set"""
         if not self.start_date_entry.get() and self.assignment_date_entry.get():
             self.start_date_entry.set(self.assignment_date_entry.get())
+    
+    def open_dashboard(self):
+        """Open the dashboard application"""
+        try:
+            if os.path.exists('dashboard.py'):
+                subprocess.Popen([sys.executable, 'dashboard.py'])
+            else:
+                messagebox.showerror("Error", "dashboard.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Dashboard:\n{str(e)}")
     
     def export_data(self):
         """Export data to JSON"""

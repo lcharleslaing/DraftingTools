@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 import os
+import subprocess
+import sys
 from datetime import datetime
 
 class ProductConfigurationsApp:
@@ -896,6 +898,10 @@ class ProductConfigurationsApp:
         button_frame = ttk.Frame(parent)
         button_frame.pack(fill=tk.X, pady=(10, 0))
         
+        # Dashboard button
+        dashboard_btn = ttk.Button(button_frame, text="🏠 Dashboard", command=self.open_dashboard)
+        dashboard_btn.pack(side=tk.LEFT, padx=(0, 15))
+        
         save_btn = ttk.Button(button_frame, text="Save Configuration", command=self.save_configuration)
         save_btn.pack(side=tk.LEFT, padx=(0, 10))
         
@@ -1216,6 +1222,16 @@ class ProductConfigurationsApp:
             self.new_configuration()  # Clear the form
             # Update project list status
             self.update_project_status(job_number)
+    
+    def open_dashboard(self):
+        """Open the dashboard application"""
+        try:
+            if os.path.exists('dashboard.py'):
+                subprocess.Popen([sys.executable, 'dashboard.py'])
+            else:
+                messagebox.showerror("Error", "dashboard.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Dashboard:\n{str(e)}")
     
     def export_configuration(self):
         """Export configuration to JSON"""
