@@ -14,11 +14,8 @@ class ProjectsApp:
         self.root = root
         self.root.title("Project Management - Drafting Tools")
         
-        # Make full screen
-        self.root.state('zoomed')  # Windows full screen
-        # For other platforms, use: self.root.attributes('-zoomed', True)
-        # Make fullscreen the default but keep window controls
-        self.root.attributes('-fullscreen', True)
+        # Maximize window (not fullscreen, keeps controls)
+        self.root.state('zoomed')  # Windows maximized
         
         # Set minimum size
         self.root.minsize(1200, 800)

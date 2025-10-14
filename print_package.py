@@ -16,10 +16,8 @@ class PrintPackageApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Print Package Management - Drafting Tools")
-        self.root.state('zoomed')  # Full screen
+        self.root.state('zoomed')  # Maximized window
         self.root.minsize(1200, 800)
-        # Make fullscreen the default but keep window controls
-        self.root.attributes('-fullscreen', True)
         
         # Initialize database
         self.init_database()

@@ -20,91 +20,91 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 808
+      "seq": 824
     },
     {
       "name": "engineers",
-      "seq": 606
+      "seq": 618
     },
     {
       "name": "app_order",
-      "seq": 404
+      "seq": 412
     },
     {
       "name": "projects",
-      "seq": 462
+      "seq": 463
     },
     {
       "name": "heater_models",
-      "seq": 40
+      "seq": 48
     },
     {
       "name": "locations",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "heater_diameters",
-      "seq": 40
+      "seq": 48
     },
     {
       "name": "heater_heights",
-      "seq": 110
+      "seq": 132
     },
     {
       "name": "heater_stack_diameters",
-      "seq": 30
+      "seq": 36
     },
     {
       "name": "applications",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "materials",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "burner_models",
-      "seq": 60
+      "seq": 72
     },
     {
       "name": "gas_train_positions",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "heater_mounting_types",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "gauge_cocks_types",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "temperature_switch_types",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "packaging_types",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "mod_piping_transducer_materials",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "hose_materials",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "media_frame_heights",
-      "seq": 30
+      "seq": 36
     },
     {
       "name": "gas_types",
-      "seq": 20
+      "seq": 24
     },
     {
       "name": "heater_configurations",
-      "seq": 14
+      "seq": 20
     },
     {
       "name": "drawings",
@@ -116,23 +116,23 @@
     },
     {
       "name": "initial_redline",
-      "seq": 145
+      "seq": 146
     },
     {
       "name": "redline_updates",
-      "seq": 580
+      "seq": 584
     },
     {
       "name": "ops_review",
-      "seq": 145
+      "seq": 146
     },
     {
       "name": "peter_weck_review",
-      "seq": 145
+      "seq": 146
     },
     {
       "name": "release_to_dee",
-      "seq": 145
+      "seq": 146
     }
   ],
   "engineers": [
@@ -241,24 +241,6 @@
       "project_engineer_id": null
     },
     {
-      "id": 438,
-      "job_number": "35354",
-      "assigned_to_id": 1,
-      "assignment_date": "2025-10-09",
-      "start_date": "2025-10-07",
-      "completion_date": null,
-      "total_duration_days": null,
-      "released_to_dee": null,
-      "job_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN/35354",
-      "customer_name": "OZINGA CONCRETE PRODUCTS, INC",
-      "customer_location": "PLYMOUTH, IN",
-      "customer_name_directory": "F:/Ozinga Concrete Products, Inc",
-      "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
-      "last_cover_sheet_date": "2025-10-14 08:03:51",
-      "due_date": null,
-      "project_engineer_id": null
-    },
-    {
       "id": 461,
       "job_number": "35359",
       "assigned_to_id": 1,
@@ -293,6 +275,24 @@
       "last_cover_sheet_date": null,
       "due_date": "10/30/2025",
       "project_engineer_id": null
+    },
+    {
+      "id": 463,
+      "job_number": "35354",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": "2025-10-07",
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN/35354",
+      "customer_name": "OZINGA CONCRETE PRODUCTS, INC",
+      "customer_location": "PLYMOUTH, IN",
+      "customer_name_directory": "F:/Ozinga Concrete Products, Inc",
+      "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
+      "last_cover_sheet_date": null,
+      "due_date": null,
+      "project_engineer_id": 1
     }
   ],
   "redline_updates": [
@@ -5515,6 +5515,42 @@
       "update_type": null,
       "update_cycle": 4,
       "is_completed": 0
+    },
+    {
+      "id": 581,
+      "project_id": 463,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 582,
+      "project_id": 463,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 583,
+      "project_id": 463,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 584,
+      "project_id": 463,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
     }
   ],
   "ops_review": [
@@ -6387,6 +6423,12 @@
       "project_id": 462,
       "review_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 146,
+      "project_id": 463,
+      "review_date": "2025-10-10",
+      "is_completed": 1
     }
   ],
   "peter_weck_review": [
@@ -7258,6 +7300,12 @@
       "id": 145,
       "project_id": 462,
       "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 146,
+      "project_id": 463,
+      "fixed_errors_date": "2025-10-14",
       "is_completed": 0
     }
   ],
@@ -8711,6 +8759,16 @@
       "other_notes": null,
       "other_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 146,
+      "project_id": 463,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0
     }
   ],
   "app_order": [
@@ -9742,6 +9800,13 @@
       "engineer_id": null,
       "redline_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 146,
+      "project_id": 463,
+      "engineer_id": 1,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
     }
   ],
   "heater_configurations": [
@@ -10276,6 +10341,234 @@
       "hose_part_number": "",
       "created_date": "2025-10-09 17:05:34",
       "updated_date": "2025-10-09 17:05:34"
+    },
+    {
+      "id": 15,
+      "job_number": "35042",
+      "heater_model": "",
+      "location": "",
+      "heater_diameter": "42",
+      "heater_height": "",
+      "heater_stack_diameter": "",
+      "application": "",
+      "material": "",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "NATURAL GAS",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-14 09:07:55",
+      "updated_date": "2025-10-14 09:07:55"
+    },
+    {
+      "id": 16,
+      "job_number": "35042",
+      "heater_model": "",
+      "location": "",
+      "heater_diameter": "42",
+      "heater_height": "10",
+      "heater_stack_diameter": "",
+      "application": "",
+      "material": "",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "NATURAL GAS",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-14 09:07:57",
+      "updated_date": "2025-10-14 09:07:57"
+    },
+    {
+      "id": 17,
+      "job_number": "35042",
+      "heater_model": "",
+      "location": "US",
+      "heater_diameter": "42",
+      "heater_height": "10",
+      "heater_stack_diameter": "",
+      "application": "",
+      "material": "",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "NATURAL GAS",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-14 09:08:07",
+      "updated_date": "2025-10-14 09:08:07"
+    },
+    {
+      "id": 18,
+      "job_number": "35042",
+      "heater_model": "TE-100",
+      "location": "US",
+      "heater_diameter": "42",
+      "heater_height": "10",
+      "heater_stack_diameter": "",
+      "application": "",
+      "material": "",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "NATURAL GAS",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-14 09:08:20",
+      "updated_date": "2025-10-14 09:08:20"
+    },
+    {
+      "id": 19,
+      "job_number": "35042",
+      "heater_model": "TE-100",
+      "location": "US",
+      "heater_diameter": "42",
+      "heater_height": "10",
+      "heater_stack_diameter": "",
+      "application": "",
+      "material": "316",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "NATURAL GAS",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-14 09:08:27",
+      "updated_date": "2025-10-14 09:08:27"
+    },
+    {
+      "id": 20,
+      "job_number": "35042",
+      "heater_model": "TE-100",
+      "location": "US",
+      "heater_diameter": "42",
+      "heater_height": "10",
+      "heater_stack_diameter": "18",
+      "application": "",
+      "material": "316",
+      "flanges_316": "",
+      "burner_model": "",
+      "gas_train_position": "",
+      "heater_mounting": "",
+      "gauge_cocks": "",
+      "temperature_switch": "",
+      "packaging_type": "",
+      "mod_piping_transducer_material": "",
+      "hose_material": "",
+      "modulating_valve": "",
+      "media_frame_height": "",
+      "gas_type": "NATURAL GAS",
+      "side_manway_option": "",
+      "side_manway_angle": "",
+      "water_inlet_size": "",
+      "water_inlet_angles": "",
+      "suction_fitting_size": "",
+      "suction_fitting_height": "",
+      "suction_fitting_angle": "",
+      "ballast_packing_rings": "",
+      "ballast_packing_rings_height": "",
+      "float_chamber_angle": "",
+      "heater_final_assembly_part_number": "",
+      "hose_length": "",
+      "hose_part_number": "",
+      "created_date": "2025-10-14 09:10:40",
+      "updated_date": "2025-10-14 09:10:40"
     }
   ],
   "heater_models": [
