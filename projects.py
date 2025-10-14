@@ -67,12 +67,11 @@ class ProjectsApp:
         # Initialize current project tracking
         self.current_project = None
         
-        # Create main frame with scrollbar
-        self.create_scrollable_main_frame()
-        
-        # Configure grid weights
+        # Configure root grid weights for full expansion
         root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)  # Title row
+        root.rowconfigure(1, weight=100)  # Main content (expands)
+        root.rowconfigure(2, weight=0)  # Footer (fixed)
         
         self.create_widgets()
         self.load_projects()
@@ -84,48 +83,21 @@ class ProjectsApp:
         # Bind window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
     
-    def create_scrollable_main_frame(self):
-        """Create scrollable main frame"""
-        # Create canvas and scrollbar
-        self.canvas = tk.Canvas(self.root, bg='white')
-        self.scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
-        self.scrollable_frame = ttk.Frame(self.canvas)
-        
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        )
-        
-        self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
-        
-        self.canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        
-        # Make canvas window expand to fill canvas width
-        def _configure_canvas(event):
-            self.canvas.itemconfig(self.canvas_window, width=event.width)
-        self.canvas.bind('<Configure>', _configure_canvas)
-        
-        # Bind mousewheel to canvas
-        def _on_mousewheel(event):
-            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        self.canvas.bind_all("<MouseWheel>", _on_mousewheel)
     
     def create_widgets(self):
-        """Create all GUI widgets"""
+        """Create all GUI widgets with proper layout"""
         # Initialize redline update BooleanVars FIRST
         for cycle in range(1, 5):
             setattr(self, f"redline_update_{cycle}_var", tk.BooleanVar())
         
-        # Title
-        title_label = ttk.Label(self.scrollable_frame, text="Project Management - Complete Workflow", 
+        # Row 0: Title
+        title_label = ttk.Label(self.root, text="Project Management - Complete Workflow", 
                                font=('Arial', 18, 'bold'))
-        title_label.grid(row=0, column=0, columnspan=1, pady=(0, 20), sticky=(tk.W, tk.E))
+        title_label.grid(row=0, column=0, columnspan=2, pady=(10, 10), padx=20, sticky=(tk.W, tk.E))
         
-        # Create main paned window container (horizontal - splits 4 sections)
-        main_paned = ttk.PanedWindow(self.scrollable_frame, orient=tk.HORIZONTAL)
-        main_paned.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        # Row 1: Main content area (expands to fill space)
+        main_paned = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
+        main_paned.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=10, pady=(0, 10))
         
         # Container frames for each section
         self.project_list_container = ttk.Frame(main_paned)
@@ -133,7 +105,7 @@ class ProjectsApp:
         self.workflow_container = ttk.Frame(main_paned)
         self.quick_access_container = ttk.Frame(main_paned)
         
-        # Add containers to paned window
+        # Add containers to paned window - they will expand vertically
         main_paned.add(self.project_list_container, weight=1)
         main_paned.add(self.project_details_container, weight=1)
         main_paned.add(self.workflow_container, weight=1)
@@ -145,11 +117,7 @@ class ProjectsApp:
         self.create_workflow_panel()
         self.create_quick_access_panel()
         
-        # Configure grid weights
-        self.scrollable_frame.columnconfigure(0, weight=1)
-        self.scrollable_frame.rowconfigure(1, weight=1)
-        
-        # Bottom panel - Action buttons
+        # Row 2: Fixed footer with action buttons
         self.create_action_buttons()
         
         # Load dropdown data after all widgets are created
@@ -1140,22 +1108,23 @@ class ProjectsApp:
             self.quick_access_buttons.append(label)
     
     def create_action_buttons(self):
-        """Create action buttons"""
-        button_frame = ttk.Frame(self.scrollable_frame)
-        button_frame.grid(row=2, column=0, columnspan=1, pady=(20, 0), sticky=(tk.W, tk.E))
+        """Create fixed footer with action buttons"""
+        # Footer frame - docked at bottom (row 2)
+        footer_frame = ttk.Frame(self.root, relief='raised', padding="10")
+        footer_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=0, pady=0)
         
         # Left side buttons
-        ttk.Button(button_frame, text="🏠 Dashboard", command=self.open_dashboard, 
+        ttk.Button(footer_frame, text="🏠 Dashboard", command=self.open_dashboard, 
                   style='Accent.TButton').pack(side=tk.LEFT, padx=(0, 15))
         
-        ttk.Button(button_frame, text="New Project", command=self.new_project).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Save Project", command=self.save_project).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Delete Project", command=self.delete_project).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Clean & Fix Data", command=self.clean_duplicates).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Reset Database", command=self.reset_database).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Refresh", command=self.load_projects).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Export JSON", command=self.export_data).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(button_frame, text="Import JSON", command=self.import_data).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="New Project", command=self.new_project).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Save Project", command=self.save_project).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Delete Project", command=self.delete_project).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Clean & Fix Data", command=self.clean_duplicates).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Reset Database", command=self.reset_database).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Refresh", command=self.load_projects).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Export JSON", command=self.export_data).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(footer_frame, text="Import JSON", command=self.import_data).pack(side=tk.LEFT, padx=(0, 5))
     
     def open_job_directory(self):
         """Open the job directory"""
