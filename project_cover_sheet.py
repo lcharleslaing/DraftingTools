@@ -74,6 +74,15 @@ class ProjectCoverSheet:
         ops_result = cursor.fetchone()
         self.workflow_data['ops_review'] = ops_result if ops_result else None
         
+        # D365 BOM Entry
+        cursor.execute("""
+            SELECT entry_date, is_completed
+            FROM d365_bom_entry
+            WHERE project_id = ?
+        """, (project_id,))
+        d365_bom_result = cursor.fetchone()
+        self.workflow_data['d365_bom'] = d365_bom_result if d365_bom_result else None
+        
         # Peter Weck review
         cursor.execute("""
             SELECT fixed_errors_date, is_completed
@@ -214,6 +223,7 @@ class ProjectCoverSheet:
         workflow_steps = [
             ("Initial Redline", self.workflow_data.get('initial_redline')),
             ("OPS Review", self.workflow_data.get('ops_review')),
+            ("D365 BOM Entry", self.workflow_data.get('d365_bom')),
             ("Peter Weck Review", self.workflow_data.get('peter_weck')),
             ("Release to Dee", self.workflow_data.get('release_to_dee'))
         ]

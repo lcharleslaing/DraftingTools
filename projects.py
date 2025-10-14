@@ -298,11 +298,14 @@ class ProjectsApp:
         # 3. OPS Review
         self.create_ops_review_section(workflow_frame, 3)
         
-        # 4. Peter Weck Review
-        self.create_peter_weck_section(workflow_frame, 4)
+        # 4. D365 BOM Entry
+        self.create_d365_bom_section(workflow_frame, 4)
         
-        # 5. Release to Dee
-        self.create_release_to_dee_section(workflow_frame, 5)
+        # 5. Peter Weck Review
+        self.create_peter_weck_section(workflow_frame, 5)
+        
+        # 6. Release to Dee
+        self.create_release_to_dee_section(workflow_frame, 6)
     
     def create_cover_sheet_button(self, parent):
         """Create the cover sheet print button"""
@@ -510,9 +513,25 @@ class ProjectsApp:
         self.ops_review_date_entry = DateEntry(section_frame, width=20)
         self.ops_review_date_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
     
+    def create_d365_bom_section(self, parent, row):
+        """Create D365 BOM Entry section"""
+        section_frame = ttk.LabelFrame(parent, text="4. D365 BOM Entry", padding="5")
+        section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        section_frame.columnconfigure(1, weight=1)
+        
+        # D365 BOM Entry checkbox
+        self.d365_bom_var = tk.BooleanVar()
+        ttk.Checkbutton(section_frame, text="D365 BOM Entry", 
+                       variable=self.d365_bom_var).grid(row=0, column=0, columnspan=2, sticky=tk.W)
+        
+        # Date
+        ttk.Label(section_frame, text="Date:").grid(row=1, column=0, sticky=tk.W)
+        self.d365_bom_date_entry = DateEntry(section_frame, width=20)
+        self.d365_bom_date_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(5, 0))
+    
     def create_peter_weck_section(self, parent, row):
         """Create Peter Weck review section"""
-        section_frame = ttk.LabelFrame(parent, text="4. PETER WECK Review", padding="5")
+        section_frame = ttk.LabelFrame(parent, text="5. PETER WECK Review", padding="5")
         section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         section_frame.columnconfigure(1, weight=1)
         
@@ -528,7 +547,7 @@ class ProjectsApp:
     
     def create_release_to_dee_section(self, parent, row):
         """Create Release to Dee section"""
-        section_frame = ttk.LabelFrame(parent, text="5. Release to Dee", padding="5")
+        section_frame = ttk.LabelFrame(parent, text="6. Release to Dee", padding="5")
         section_frame.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         section_frame.columnconfigure(1, weight=1)
         
@@ -588,6 +607,12 @@ class ProjectsApp:
             self.ops_review_var.trace('w', self.auto_save)
         if hasattr(self, 'ops_review_date_entry'):
             self.ops_review_date_entry.var.trace('w', self.auto_save)
+        
+        # Auto-save for D365 BOM Entry
+        if hasattr(self, 'd365_bom_var'):
+            self.d365_bom_var.trace('w', self.auto_save)
+        if hasattr(self, 'd365_bom_date_entry'):
+            self.d365_bom_date_entry.var.trace('w', self.auto_save)
         
         # Auto-save for Peter Weck review
         if hasattr(self, 'peter_weck_var'):
@@ -1723,6 +1748,10 @@ class ProjectsApp:
         self.ops_review_var.set(False)
         self.ops_review_date_entry.set("")
         
+        # Clear D365 BOM Entry
+        self.d365_bom_var.set(False)
+        self.d365_bom_date_entry.set("")
+        
         # Clear Peter Weck review
         self.peter_weck_var.set(False)
         self.peter_weck_date_entry.set("")
@@ -1862,6 +1891,18 @@ class ProjectsApp:
         if ops_review:
             self.ops_review_var.set(bool(ops_review[1]))
             self.ops_review_date_entry.set(ops_review[0] or "")
+        
+        # Load D365 BOM Entry
+        cursor.execute("""
+            SELECT entry_date, is_completed
+            FROM d365_bom_entry
+            WHERE project_id = ?
+        """, (project_id,))
+        d365_bom = cursor.fetchone()
+        
+        if d365_bom:
+            self.d365_bom_var.set(bool(d365_bom[1]))
+            self.d365_bom_date_entry.set(d365_bom[0] or "")
         
         # Load Peter Weck review
         cursor.execute("""
@@ -2076,6 +2117,13 @@ class ProjectsApp:
             VALUES (?, ?, ?)
         """, (project_id, self.ops_review_date_entry.get() or None, self.ops_review_var.get()))
         
+        # Save D365 BOM Entry (always save, regardless of checkbox state)
+        cursor.execute("""
+            INSERT OR REPLACE INTO d365_bom_entry 
+            (project_id, entry_date, is_completed)
+            VALUES (?, ?, ?)
+        """, (project_id, self.d365_bom_date_entry.get() or None, self.d365_bom_var.get()))
+        
         # Save Peter Weck review (always save, regardless of checkbox state)
         cursor.execute("""
             INSERT OR REPLACE INTO peter_weck_review 
@@ -2134,6 +2182,7 @@ class ProjectsApp:
                     cursor.execute("DELETE FROM initial_redline WHERE project_id = ?", (project_id,))
                     cursor.execute("DELETE FROM redline_updates WHERE project_id = ?", (project_id,))
                     cursor.execute("DELETE FROM ops_review WHERE project_id = ?", (project_id,))
+                    cursor.execute("DELETE FROM d365_bom_entry WHERE project_id = ?", (project_id,))
                     cursor.execute("DELETE FROM peter_weck_review WHERE project_id = ?", (project_id,))
                     cursor.execute("DELETE FROM release_to_dee WHERE project_id = ?", (project_id,))
                     print("DEBUG: Workflow data deleted")

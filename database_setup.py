@@ -93,6 +93,17 @@ class DatabaseManager:
             )
         ''')
         
+        # Create d365_bom_entry table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS d365_bom_entry (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id INTEGER,
+                entry_date TEXT,
+                is_completed BOOLEAN DEFAULT 0,
+                FOREIGN KEY (project_id) REFERENCES projects (id)
+            )
+        ''')
+        
         # Create peter_weck_review table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS peter_weck_review (
