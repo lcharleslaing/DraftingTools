@@ -126,12 +126,19 @@ class ProjectsApp:
         # Sort buttons row - directly under search (toggle functionality)
         self.job_sort_ascending = True  # Track sort direction for job numbers
         self.customer_sort_ascending = True  # Track sort direction for customers
+        self.due_date_sort_ascending = True  # Track sort direction for due dates
         
-        self.sort_job_btn = ttk.Button(search_sort_frame, text="Job # ↑", command=self.sort_by_job_number, width=10)
-        self.sort_job_btn.grid(row=1, column=0, padx=(0, 3), sticky=tk.W, pady=(3, 0))
+        sort_btn_frame = ttk.Frame(search_sort_frame)
+        sort_btn_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(3, 0))
         
-        self.sort_customer_btn = ttk.Button(search_sort_frame, text="Customer ↑", command=self.sort_by_customer, width=12)
-        self.sort_customer_btn.grid(row=1, column=1, padx=(3, 0), sticky=tk.W, pady=(3, 0))
+        self.sort_job_btn = ttk.Button(sort_btn_frame, text="Job # ↑", command=self.sort_by_job_number, width=10)
+        self.sort_job_btn.grid(row=0, column=0, padx=(0, 3), sticky=tk.W)
+        
+        self.sort_customer_btn = ttk.Button(sort_btn_frame, text="Customer ↑", command=self.sort_by_customer, width=12)
+        self.sort_customer_btn.grid(row=0, column=1, padx=(0, 3), sticky=tk.W)
+        
+        self.sort_due_date_btn = ttk.Button(sort_btn_frame, text="Due Date ↑", command=self.sort_by_due_date, width=12)
+        self.sort_due_date_btn.grid(row=0, column=2, padx=(0, 0), sticky=tk.W)
         
         # Treeview for projects - show start and completion dates for debugging
         columns = ('Job Number', 'Customer', 'Start Date', 'Completion Date', 'Status')
@@ -1385,8 +1392,8 @@ class ProjectsApp:
                 (job_number, job_directory, customer_name, customer_name_directory, 
                  customer_location, customer_location_directory, assigned_to_id, 
                  assignment_date, start_date, completion_date, 
-                 total_duration_days, released_to_dee)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 total_duration_days, released_to_dee, due_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 job_number,
                 self.job_directory_picker.get() or None,
@@ -1399,7 +1406,8 @@ class ProjectsApp:
                 self.start_date_entry.get() or None,
                 self.completion_date_entry.get() or None,
                 duration,
-                self.released_to_dee_entry.get() or None
+                self.released_to_dee_entry.get() or None,
+                self.due_date_entry.get() or None
             ))
             
             # Get project ID
@@ -1559,6 +1567,49 @@ class ProjectsApp:
         for item in sorted_items:
             self.tree.insert('', 'end', values=item)
     
+    def sort_by_due_date(self):
+        """Sort projects by due date - earliest on top when ascending"""
+        # Get all projects with due dates from database
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT job_number, customer_name, start_date, completion_date, due_date,
+                   CASE 
+                       WHEN completion_date IS NOT NULL AND completion_date != '' THEN 'Completed'
+                       WHEN start_date IS NOT NULL AND start_date != '' THEN 'In Progress'
+                       WHEN assignment_date IS NOT NULL AND assignment_date != '' THEN 'Assigned'
+                       ELSE 'Not Assigned'
+                   END as status
+            FROM projects
+            ORDER BY 
+                CASE 
+                    WHEN due_date IS NULL OR due_date = '' THEN 1
+                    ELSE 0
+                END,
+                due_date """ + ("ASC" if self.due_date_sort_ascending else "DESC") + """
+        """)
+        
+        projects = cursor.fetchall()
+        conn.close()
+        
+        # Clear the tree
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        # Add sorted items back
+        for project in projects:
+            job_num, customer, start_date, completion_date, due_date, status = project
+            self.tree.insert('', 'end', values=(job_num, customer or '', start_date or '', 
+                                               completion_date or '', status))
+        
+        # Toggle direction for next time
+        self.due_date_sort_ascending = not self.due_date_sort_ascending
+        
+        # Update button text to show current direction
+        direction = "↑" if self.due_date_sort_ascending else "↓"
+        self.sort_due_date_btn.config(text=f"Due Date {direction}")
+    
     def on_project_select(self, event):
         """Handle project selection"""
         selection = self.tree.selection()
@@ -1639,7 +1690,7 @@ class ProjectsApp:
         SELECT p.job_number, p.job_directory, p.customer_name, p.customer_name_directory,
                p.customer_location, p.customer_location_directory, d.name, 
                p.assignment_date, p.start_date, p.completion_date, 
-               p.total_duration_days, p.released_to_dee
+               p.total_duration_days, p.released_to_dee, p.due_date
         FROM projects p
         LEFT JOIN designers d ON p.assigned_to_id = d.id
         WHERE p.job_number = ?
@@ -1663,6 +1714,7 @@ class ProjectsApp:
             self.completion_date_entry.set(project[9] or "")
             self.duration_var.set(f"{project[10]} days" if project[10] else "N/A")
             self.released_to_dee_entry.set(project[11] or "")
+            self.due_date_entry.set(project[12] or "")
         
         # Load workflow data
         self.load_workflow_data(clean_job_number, cursor)
@@ -1854,8 +1906,8 @@ class ProjectsApp:
                 (job_number, job_directory, customer_name, customer_name_directory, 
                  customer_location, customer_location_directory, assigned_to_id, 
                  assignment_date, start_date, completion_date, 
-                 total_duration_days, released_to_dee)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 total_duration_days, released_to_dee, due_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 job_number,
                 self.job_directory_picker.get() or None,
@@ -1868,7 +1920,8 @@ class ProjectsApp:
                 self.start_date_entry.get() or None,
                 self.completion_date_entry.get() or None,
                 duration,
-                self.released_to_dee_entry.get() or None
+                self.released_to_dee_entry.get() or None,
+                self.due_date_entry.get() or None
             ))
             
             # Get project ID
