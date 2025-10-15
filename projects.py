@@ -168,6 +168,15 @@ class ProjectsApp:
         self.job_sort_ascending = True  # Track sort direction for job numbers
         self.customer_sort_ascending = True  # Track sort direction for customers
         self.due_date_sort_ascending = True  # Track sort direction for due dates
+        # Track visibility of completed projects
+        self.show_completed = False
+        # Save column widths on close
+        try:
+            self.root.protocol("WM_DELETE_WINDOW", self._on_close)
+            # Global mouse release to catch column resize releases anywhere
+            self.root.bind('<ButtonRelease-1>', lambda e: self._debounce_save_columns())
+        except Exception:
+            pass
         
         sort_btn_frame = ttk.Frame(search_sort_frame)
         sort_btn_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(3, 0))
@@ -179,7 +188,11 @@ class ProjectsApp:
         self.sort_customer_btn.grid(row=0, column=1, padx=(0, 3), sticky=tk.W)
         
         self.sort_due_date_btn = ttk.Button(sort_btn_frame, text="Due Date ↑", command=self.sort_by_due_date, width=12)
-        self.sort_due_date_btn.grid(row=0, column=2, padx=(0, 0), sticky=tk.W)
+        self.sort_due_date_btn.grid(row=0, column=2, padx=(0, 6), sticky=tk.W)
+
+        # Toggle show/hide completed button
+        self.toggle_completed_btn = ttk.Button(sort_btn_frame, text="Show Completed", command=self.toggle_completed, width=16)
+        self.toggle_completed_btn.grid(row=0, column=3, padx=(0, 0), sticky=tk.W)
         
         # Treeview for projects - show due date, days until due, and status
         columns = ('Job Number', 'Customer', 'Due Date', 'Due in', 'Status')
@@ -213,6 +226,105 @@ class ProjectsApp:
         
         # Bind selection event
         self.tree.bind('<<TreeviewSelect>>', self.on_project_select)
+        
+        # Job Notes area below the projects table
+        notes_frame = ttk.LabelFrame(list_frame, text="Job Notes", padding="5")
+        notes_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(10, 0))
+        notes_frame.columnconfigure(0, weight=1)
+        notes_frame.rowconfigure(0, weight=1)
+        
+        # Notes text area
+        self.notes_text = tk.Text(notes_frame, height=8, wrap=tk.WORD, font=('Arial', 10))
+        notes_scrollbar = ttk.Scrollbar(notes_frame, orient=tk.VERTICAL, command=self.notes_text.yview)
+        self.notes_text.configure(yscrollcommand=notes_scrollbar.set)
+        
+        self.notes_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        notes_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        
+        # Save notes button
+        save_notes_btn = ttk.Button(notes_frame, text="Save Notes", command=self.save_job_notes)
+        save_notes_btn.grid(row=1, column=0, sticky=tk.W, pady=(5, 0))
+        
+        # Initialize notes
+        self.current_job_notes = ""
+
+        # Restore saved tree column widths and persist on change (per-user)
+        try:
+            self.apply_tree_column_widths()
+        except Exception:
+            pass
+        # Save on left-button release and after resize motion
+        self.tree.bind('<ButtonRelease-1>', lambda e: self._debounce_save_columns())
+        self.tree.bind('<B1-Motion>', lambda e: self._debounce_save_columns())
+
+    def _get_user_prefs_path(self):
+        import json
+        base = os.path.join(os.path.expanduser('~'), '.drafting_tools')
+        os.makedirs(base, exist_ok=True)
+        return os.path.join(base, 'ui_prefs.json')
+
+    def apply_tree_column_widths(self):
+        import json
+        path = self._get_user_prefs_path()
+        if not os.path.exists(path):
+            return
+        try:
+            with open(path, 'r') as f:
+                data = json.load(f)
+            widths = data.get('projects_tree_columns')
+            if widths:
+                for col, w in widths.items():
+                    if col in self.tree['columns']:
+                        try:
+                            self.tree.column(col, width=int(w))
+                        except Exception:
+                            continue
+        except Exception:
+            pass
+
+    def _debounce_save_columns(self):
+        # Debounce rapid events
+        if hasattr(self, '_save_cols_after_id') and self._save_cols_after_id:
+            try:
+                self.root.after_cancel(self._save_cols_after_id)
+            except Exception:
+                pass
+        self._save_cols_after_id = self.root.after(300, self.save_tree_column_widths)
+
+    def save_tree_column_widths(self):
+        import json
+        widths = {}
+        for col in self.tree['columns']:
+            try:
+                widths[col] = int(self.tree.column(col, option='width'))
+            except Exception:
+                continue
+        path = self._get_user_prefs_path()
+        data = {}
+        if os.path.exists(path):
+            try:
+                with open(path, 'r') as f:
+                    data = json.load(f)
+            except Exception:
+                data = {}
+        data['projects_tree_columns'] = widths
+        try:
+            with open(path, 'w') as f:
+                json.dump(data, f)
+        except Exception:
+            pass
+        self._last_saved_widths = widths
+
+    def _on_close(self):
+        # Ensure widths are saved before exit
+        try:
+            self.save_tree_column_widths()
+        except Exception:
+            pass
+        try:
+            self.root.destroy()
+        except Exception:
+            self.root.quit()
     
     def create_project_details_panel(self):
         """Create the project details panel"""
@@ -3090,14 +3202,22 @@ class ProjectsApp:
         cursor = conn.cursor()
         
         query = """
-        SELECT p.job_number, p.customer_name, p.due_date, p.completion_date,
-               CASE 
-                   WHEN p.completion_date IS NOT NULL AND p.completion_date != '' THEN 'Completed'
-                   WHEN p.start_date IS NOT NULL AND p.start_date != '' THEN 'In Progress'
-                   WHEN p.assignment_date IS NOT NULL AND p.assignment_date != '' THEN 'Assigned'
-                   ELSE 'Not Assigned'
-               END as status
+        SELECT 
+            p.job_number,
+            p.customer_name,
+            p.due_date,
+            p.completion_date,
+            COALESCE(p.released_to_dee, rd.release_date) AS release_date,
+            CASE 
+                WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
+                     OR (rd.is_completed = 1)
+                     OR (p.completion_date IS NOT NULL AND p.completion_date != '') THEN 'Completed'
+                WHEN p.start_date IS NOT NULL AND p.start_date != '' THEN 'In Progress'
+                WHEN p.assignment_date IS NOT NULL AND p.assignment_date != '' THEN 'Assigned'
+                ELSE 'Not Assigned'
+            END as status
         FROM projects p
+        LEFT JOIN release_to_dee rd ON rd.project_id = p.id
         ORDER BY 
             CASE WHEN p.due_date IS NULL OR p.due_date = '' THEN 1 ELSE 0 END,
             p.due_date ASC
@@ -3116,7 +3236,7 @@ class ProjectsApp:
             customer_name = project[1]
             due_date = project[2] if project[2] else ""
             completion_date = project[3]
-            status = project[4]
+            status = project[5]
             
             # Calculate days until due
             days_until_due = ""
@@ -3142,6 +3262,12 @@ class ProjectsApp:
                 days_until_due,
                 status
             ))
+
+        # Apply current visibility (hide completed if needed)
+        try:
+            self.filter_projects()
+        except Exception:
+            pass
         
         conn.close()
     
@@ -3151,10 +3277,27 @@ class ProjectsApp:
         
         for item in self.tree.get_children():
             values = self.tree.item(item)['values']
-            if any(search_term in str(value).lower() for value in values):
+            matches_search = any(search_term in str(value).lower() for value in values)
+            is_completed = str(values[4]).lower() == 'completed'
+            should_show = matches_search and (self.show_completed or not is_completed)
+            if should_show:
                 self.tree.reattach(item, '', 'end')
             else:
                 self.tree.detach(item)
+
+    def toggle_completed(self):
+        """Toggle showing/hiding completed projects in the list"""
+        self.show_completed = not getattr(self, 'show_completed', False)
+        self.toggle_completed_btn.config(text=('Hide Completed' if self.show_completed else 'Show Completed'))
+        # If we're showing completed, repopulate the list so any previously-detached
+        # rows are restored immediately. Otherwise, just apply the filter to hide them.
+        if self.show_completed:
+            try:
+                self.load_projects()
+            except Exception:
+                self.filter_projects()
+        else:
+            self.filter_projects()
     
     def sort_by_job_number(self):
         """Sort projects by job number (toggle ascending/descending)"""
@@ -3417,6 +3560,9 @@ class ProjectsApp:
         # Update cover sheet button
         self.update_cover_sheet_button()
         
+        # Load job notes
+        self.load_job_notes(clean_job_number)
+        
         # Re-enable auto-save
         self._loading_project = False
         
@@ -3521,6 +3667,19 @@ class ProjectsApp:
             self.release_due_date_entry.set(release_data[5] or "")
             # Update the due date display
             self.update_release_due_display()
+            
+            # Sync the released_to_dee field in the main projects table
+            if release_data[0]:  # If there's a release date
+                cursor.execute("""
+                    UPDATE projects 
+                    SET released_to_dee = ?
+                    WHERE id = ?
+                """, (release_data[0], project_id))
+                # Ensure the update is persisted immediately
+                try:
+                    cursor.connection.commit()
+                except Exception:
+                    pass
     
     def new_project(self):
         """Clear form for new project"""
@@ -3722,18 +3881,26 @@ class ProjectsApp:
         """, (project_id, self.peter_weck_date_entry.get() or None, self.peter_weck_var.get()))
         
         # Save release to Dee (always save, regardless of checkbox state)
+        release_date = self.released_to_dee_entry.get() or None
         cursor.execute("""
             INSERT OR REPLACE INTO release_to_dee 
             (project_id, release_date, missing_prints_date, d365_updates_date, 
              other_notes, other_date, due_date, is_completed)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (project_id, self.released_to_dee_entry.get() or None,
+        """, (project_id, release_date,
              self.missing_prints_date_entry.get() or None,
              self.d365_updates_date_entry.get() or None,
              self.other_notes_var.get() or None,
              self.other_date_entry.get() or None,
              self.release_due_date_entry.get() or None,
              self.release_fixed_errors_var.get()))
+        
+        # Update the main projects table with the release date
+        cursor.execute("""
+            UPDATE projects 
+            SET released_to_dee = ?
+            WHERE id = ?
+        """, (release_date, project_id))
     
     def delete_project(self):
         """Delete selected project"""
@@ -3879,6 +4046,74 @@ class ProjectsApp:
         # Unbind when mouse leaves
         canvas.bind('<Leave>', _unbind_from_mousewheel)
         frame.bind('<Leave>', _unbind_from_mousewheel)
+    
+    def load_job_notes(self, job_number):
+        """Load notes for the selected job"""
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cursor = conn.cursor()
+            
+            # Create notes table if it doesn't exist
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS job_notes (
+                    job_number TEXT PRIMARY KEY,
+                    notes TEXT
+                )
+            """)
+            
+            # Load notes for this job
+            cursor.execute("SELECT notes FROM job_notes WHERE job_number = ?", (job_number,))
+            result = cursor.fetchone()
+            
+            if result:
+                self.notes_text.delete(1.0, tk.END)
+                self.notes_text.insert(1.0, result[0] or "")
+            else:
+                self.notes_text.delete(1.0, tk.END)
+                self.notes_text.insert(1.0, "")
+            
+            self.current_job_notes = job_number
+            conn.close()
+            
+        except Exception as e:
+            print(f"Error loading job notes: {e}")
+            self.notes_text.delete(1.0, tk.END)
+            self.notes_text.insert(1.0, "")
+    
+    def save_job_notes(self):
+        """Save notes for the current job"""
+        if not self.current_job_notes:
+            messagebox.showwarning("Warning", "No job selected!")
+            return
+            
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cursor = conn.cursor()
+            
+            # Create notes table if it doesn't exist
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS job_notes (
+                    job_number TEXT PRIMARY KEY,
+                    notes TEXT
+                )
+            """)
+            
+            # Get notes text
+            notes_content = self.notes_text.get(1.0, tk.END).strip()
+            
+            # Save notes
+            cursor.execute("""
+                INSERT OR REPLACE INTO job_notes (job_number, notes) 
+                VALUES (?, ?)
+            """, (self.current_job_notes, notes_content))
+            
+            conn.commit()
+            conn.close()
+            
+            messagebox.showinfo("Success", "Job notes saved successfully!")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save job notes: {str(e)}")
     
     def on_closing(self):
         """Handle application closing"""

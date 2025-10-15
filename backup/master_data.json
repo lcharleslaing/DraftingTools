@@ -20,19 +20,19 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 1064
+      "seq": 1116
     },
     {
       "name": "engineers",
-      "seq": 798
+      "seq": 837
     },
     {
       "name": "app_order",
-      "seq": 532
+      "seq": 558
     },
     {
       "name": "projects",
-      "seq": 595
+      "seq": 599
     },
     {
       "name": "heater_models",
@@ -116,27 +116,27 @@
     },
     {
       "name": "initial_redline",
-      "seq": 278
+      "seq": 282
     },
     {
       "name": "redline_updates",
-      "seq": 1112
+      "seq": 1128
     },
     {
       "name": "ops_review",
-      "seq": 278
+      "seq": 282
     },
     {
       "name": "peter_weck_review",
-      "seq": 278
+      "seq": 282
     },
     {
       "name": "release_to_dee",
-      "seq": 278
+      "seq": 282
     },
     {
       "name": "d365_bom_entry",
-      "seq": 132
+      "seq": 136
     }
   ],
   "engineers": [
@@ -263,24 +263,6 @@
       "project_engineer_id": 2
     },
     {
-      "id": 593,
-      "job_number": "35354",
-      "assigned_to_id": 1,
-      "assignment_date": "2025-10-09",
-      "start_date": "2025-10-07",
-      "completion_date": null,
-      "total_duration_days": null,
-      "released_to_dee": null,
-      "job_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN/35354",
-      "customer_name": "OZINGA CONCRETE PRODUCTS, INC",
-      "customer_location": "PLYMOUTH, IN",
-      "customer_name_directory": "F:/Ozinga Concrete Products, Inc",
-      "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
-      "last_cover_sheet_date": "2025-10-15 10:22:28",
-      "due_date": "2025-10-07",
-      "project_engineer_id": 1
-    },
-    {
       "id": 594,
       "job_number": "35042",
       "assigned_to_id": 1,
@@ -314,6 +296,24 @@
       "customer_location_directory": "F:/McCurdy's Laundry/Red Wing, MN",
       "last_cover_sheet_date": null,
       "due_date": "2025-10-09",
+      "project_engineer_id": 1
+    },
+    {
+      "id": 599,
+      "job_number": "35354",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": "2025-10-07",
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN/35354",
+      "customer_name": "OZINGA CONCRETE PRODUCTS, INC",
+      "customer_location": "PLYMOUTH, IN",
+      "customer_name_directory": "F:/Ozinga Concrete Products, Inc",
+      "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
+      "last_cover_sheet_date": "2025-10-15 12:07:26",
+      "due_date": "2025-10-07",
       "project_engineer_id": 1
     }
   ],
@@ -10253,6 +10253,150 @@
       "update_type": null,
       "update_cycle": 4,
       "is_completed": 0
+    },
+    {
+      "id": 1113,
+      "project_id": 596,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 1114,
+      "project_id": 596,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 1115,
+      "project_id": 596,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 1116,
+      "project_id": 596,
+      "engineer_id": 3,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1117,
+      "project_id": 597,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 1118,
+      "project_id": 597,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 1119,
+      "project_id": 597,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 1120,
+      "project_id": 597,
+      "engineer_id": 3,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1121,
+      "project_id": 598,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 1122,
+      "project_id": 598,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 1123,
+      "project_id": 598,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 1124,
+      "project_id": 598,
+      "engineer_id": 3,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1125,
+      "project_id": 599,
+      "engineer_id": 1,
+      "update_date": "2025-10-08",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 1
+    },
+    {
+      "id": 1126,
+      "project_id": 599,
+      "engineer_id": 1,
+      "update_date": "2025-10-09",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 1
+    },
+    {
+      "id": 1127,
+      "project_id": 599,
+      "engineer_id": 2,
+      "update_date": "2025-10-10",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 1
+    },
+    {
+      "id": 1128,
+      "project_id": 599,
+      "engineer_id": 1,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
     }
   ],
   "ops_review": [
@@ -11911,6 +12055,30 @@
       "project_id": 595,
       "review_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 279,
+      "project_id": 596,
+      "review_date": "2025-10-10",
+      "is_completed": 1
+    },
+    {
+      "id": 280,
+      "project_id": 597,
+      "review_date": "2025-10-10",
+      "is_completed": 1
+    },
+    {
+      "id": 281,
+      "project_id": 598,
+      "review_date": "2025-10-10",
+      "is_completed": 1
+    },
+    {
+      "id": 282,
+      "project_id": 599,
+      "review_date": "2025-10-10",
+      "is_completed": 1
     }
   ],
   "peter_weck_review": [
@@ -13569,6 +13737,30 @@
       "project_id": 595,
       "fixed_errors_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 279,
+      "project_id": 596,
+      "fixed_errors_date": "2025-10-15",
+      "is_completed": 1
+    },
+    {
+      "id": 280,
+      "project_id": 597,
+      "fixed_errors_date": "2025-10-15",
+      "is_completed": 1
+    },
+    {
+      "id": 281,
+      "project_id": 598,
+      "fixed_errors_date": "2025-10-15",
+      "is_completed": 1
+    },
+    {
+      "id": 282,
+      "project_id": 599,
+      "fixed_errors_date": "2025-10-15",
+      "is_completed": 1
     }
   ],
   "release_to_dee": [
@@ -16607,6 +16799,50 @@
       "other_date": null,
       "is_completed": 0,
       "due_date": null
+    },
+    {
+      "id": 279,
+      "project_id": 596,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": "2025-10-03"
+    },
+    {
+      "id": 280,
+      "project_id": 597,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": "2025-10-15",
+      "is_completed": 0,
+      "due_date": "2025-10-03"
+    },
+    {
+      "id": 281,
+      "project_id": 598,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": "2025-10-15",
+      "is_completed": 1,
+      "due_date": "2025-10-03"
+    },
+    {
+      "id": 282,
+      "project_id": 599,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": "2025-10-15",
+      "is_completed": 1,
+      "due_date": "2025-10-03"
     }
   ],
   "app_order": [
@@ -18555,6 +18791,34 @@
       "engineer_id": null,
       "redline_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 279,
+      "project_id": 596,
+      "engineer_id": 2,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
+    },
+    {
+      "id": 280,
+      "project_id": 597,
+      "engineer_id": 2,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
+    },
+    {
+      "id": 281,
+      "project_id": 598,
+      "engineer_id": 2,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
+    },
+    {
+      "id": 282,
+      "project_id": 599,
+      "engineer_id": 2,
+      "redline_date": "2025-10-07",
+      "is_completed": 1
     }
   ],
   "heater_configurations": [
@@ -20655,6 +20919,30 @@
       "project_id": 595,
       "entry_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 133,
+      "project_id": 596,
+      "entry_date": "2025-10-15",
+      "is_completed": 1
+    },
+    {
+      "id": 134,
+      "project_id": 597,
+      "entry_date": "2025-10-15",
+      "is_completed": 1
+    },
+    {
+      "id": 135,
+      "project_id": 598,
+      "entry_date": "2025-10-15",
+      "is_completed": 1
+    },
+    {
+      "id": 136,
+      "project_id": 599,
+      "entry_date": "2025-10-15",
+      "is_completed": 1
     }
   ],
   "print_packages": [],
@@ -20688,6 +20976,72 @@
       "job_number": "35371",
       "spec_name": "Spray Nozzle Length",
       "value": "9.81"
+    },
+    {
+      "job_number": "35394",
+      "spec_name": "Spray Nozzle P/N",
+      "value": "SCF80W\n - 720-03-050"
+    },
+    {
+      "job_number": "35394",
+      "spec_name": "Spray Nozzle Length",
+      "value": "6.28"
+    },
+    {
+      "job_number": "35394",
+      "spec_name": "Spray Nozzle Size",
+      "value": "2.50"
     }
-  ]
+  ],
+  "file_timestamps": [
+    {
+      "job_number": "35354",
+      "path": "F:/Ozinga Concrete Products, Inc",
+      "last_mtime": 1757102351.43251,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35354",
+      "path": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
+      "last_mtime": 1757102378.250207,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35394",
+      "path": "F:\\Mary Ann's Specialty Foods",
+      "last_mtime": 1757955213.8323884,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35394",
+      "path": "F:\\Mary Ann's Specialty Foods\\Webster City, IA",
+      "last_mtime": 1757955226.6574223,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35332",
+      "path": "F:/McCurdy's Laundry",
+      "last_mtime": 1758667571.3049886,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35332",
+      "path": "F:/McCurdy's Laundry/Red Wing, MN",
+      "last_mtime": 1758667616.3570764,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35371",
+      "path": "F:/Brakebush Brothers",
+      "last_mtime": 1759168048.1097915,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35371",
+      "path": "F:/Brakebush Brothers/Hartwell, GA",
+      "last_mtime": 1759168094.8635073,
+      "acknowledged": 0
+    }
+  ],
+  "job_notes": []
 }

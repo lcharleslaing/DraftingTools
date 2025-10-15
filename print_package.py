@@ -85,6 +85,11 @@ class PrintPackageApp:
         refresh_btn = ttk.Button(search_frame, text="Refresh", command=self.load_projects)
         refresh_btn.pack(side=tk.LEFT, padx=(5, 0))
         
+        # Show/Hide Completed toggle (jobs with drawings considered completed here)
+        self.show_completed = False
+        self.toggle_completed_btn = ttk.Button(search_frame, text="Show Completed", command=self.toggle_completed)
+        self.toggle_completed_btn.pack(side=tk.LEFT, padx=(8, 0))
+        
         # Project list treeview
         columns = ('Job Number', 'Customer', 'Drawings Count')
         self.project_tree = ttk.Treeview(project_frame, columns=columns, show='headings', height=15)
@@ -156,16 +161,18 @@ class PrintPackageApp:
         current_drawings_frame = ttk.LabelFrame(drawings_list_frame, text="Current Job Drawings", padding=5)
         current_drawings_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
         
-        # Current drawings treeview
-        current_columns = ('Drawing Name', 'Type', 'Path', 'Actions')
+        # Current drawings treeview (with Printed column)
+        current_columns = ('Printed', 'Drawing Name', 'Type', 'Path', 'Actions')
         self.current_drawings_tree = ttk.Treeview(current_drawings_frame, columns=current_columns, show='headings', height=8)
         
         # Configure columns
+        self.current_drawings_tree.heading('Printed', text='Printed')
         self.current_drawings_tree.heading('Drawing Name', text='Drawing Name')
         self.current_drawings_tree.heading('Type', text='Type')
         self.current_drawings_tree.heading('Path', text='Path')
         self.current_drawings_tree.heading('Actions', text='Actions')
         
+        self.current_drawings_tree.column('Printed', width=70, anchor='center')
         self.current_drawings_tree.column('Drawing Name', width=200)
         self.current_drawings_tree.column('Type', width=80)
         self.current_drawings_tree.column('Path', width=300)
@@ -179,7 +186,8 @@ class PrintPackageApp:
         self.current_drawings_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         current_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
-        # Bind double-click and right-click events for current drawings
+        # Bind clicks (toggle printed), double-click and right-click events for current drawings
+        self.current_drawings_tree.bind('<Button-1>', self.on_current_drawing_click)
         self.current_drawings_tree.bind('<Double-1>', self.on_current_drawing_double_click)
         self.current_drawings_tree.bind('<Button-3>', self.on_current_drawing_right_click)
         
@@ -265,6 +273,16 @@ class PrintPackageApp:
         else:
             print("ERROR: Failed to create printer configuration table")
         
+        # Ensure drawings table has a 'printed' column for checkbox state
+        try:
+            cursor.execute("PRAGMA table_info(drawings)")
+            cols = [r[1] for r in cursor.fetchall()]
+            if 'printed' not in cols:
+                cursor.execute("ALTER TABLE drawings ADD COLUMN printed INTEGER DEFAULT 0")
+                self.conn.commit()
+        except Exception:
+            pass
+        
     def load_projects(self):
         """Load all projects from the projects table"""
         try:
@@ -278,12 +296,18 @@ class PrintPackageApp:
             drawings_table_exists = cursor.fetchone() is not None
             
             if drawings_table_exists:
-                # Get all projects with drawing counts
+                # Get all projects with drawing counts and completion state
                 cursor.execute("""
                     SELECT p.job_number, p.customer_name, 
-                           COALESCE(COUNT(d.id), 0) as drawing_count
+                           COALESCE(COUNT(d.id), 0) as drawing_count,
+                           CASE 
+                               WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
+                                    OR rd.is_completed = 1
+                                    OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                               THEN 1 ELSE 0 END AS is_completed
                     FROM projects p
                     LEFT JOIN drawings d ON p.job_number = d.job_number
+                    LEFT JOIN release_to_dee rd ON rd.project_id = p.id
                     GROUP BY p.job_number, p.customer_name
                     ORDER BY p.job_number
                 """)
@@ -304,25 +328,20 @@ class PrintPackageApp:
             # Add projects to tree
             for project in projects:
                 if drawings_table_exists:
-                    job_number, customer_name, drawing_count = project
+                    job_number, customer_name, drawing_count, is_completed = project
                     customer = customer_name or "Unknown"
-                    
-                    # Add to tree
-                    self.project_tree.insert('', 'end', values=(
-                        job_number,
-                        customer,
-                        drawing_count
-                    ))
+                    # Hide completed projects unless toggle is on
+                    if self.show_completed or int(is_completed) == 0:
+                        self.project_tree.insert('', 'end', values=(
+                            job_number,
+                            customer,
+                            drawing_count
+                        ))
                 else:
                     job_number, customer_name = project
                     customer = customer_name or "Unknown"
-                    
-                    # Add to tree with 0 drawings
-                    self.project_tree.insert('', 'end', values=(
-                        job_number,
-                        customer,
-                        0
-                    ))
+                    # Without drawings table, always show
+                    self.project_tree.insert('', 'end', values=(job_number, customer, 0))
             
         except Exception as e:
             print(f"Error loading projects: {e}")
@@ -349,9 +368,15 @@ class PrintPackageApp:
             if drawings_table_exists:
                 cursor.execute("""
                     SELECT p.job_number, p.customer_name, 
-                           COALESCE(COUNT(d.id), 0) as drawing_count
+                           COALESCE(COUNT(d.id), 0) as drawing_count,
+                           CASE 
+                               WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
+                                    OR rd.is_completed = 1
+                                    OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                               THEN 1 ELSE 0 END AS is_completed
                     FROM projects p
                     LEFT JOIN drawings d ON p.job_number = d.job_number
+                    LEFT JOIN release_to_dee rd ON rd.project_id = p.id
                     GROUP BY p.job_number, p.customer_name
                     ORDER BY p.job_number
                 """)
@@ -366,18 +391,18 @@ class PrintPackageApp:
             
             for project in projects:
                 if drawings_table_exists:
-                    job_number, customer_name, drawing_count = project
+                    job_number, customer_name, drawing_count, is_completed = project
                     customer = customer_name or "Unknown"
                     
                     # Filter based on search term
                     if (search_term in str(job_number).lower() or 
                         search_term in customer.lower()):
-                        
-                        self.project_tree.insert('', 'end', values=(
-                            job_number,
-                            customer,
-                            drawing_count
-                        ))
+                        if self.show_completed or int(is_completed) == 0:
+                            self.project_tree.insert('', 'end', values=(
+                                job_number,
+                                customer,
+                                drawing_count
+                            ))
                 else:
                     job_number, customer_name = project
                     customer = customer_name or "Unknown"
@@ -385,15 +410,16 @@ class PrintPackageApp:
                     # Filter based on search term
                     if (search_term in str(job_number).lower() or 
                         search_term in customer.lower()):
-                        
-                        self.project_tree.insert('', 'end', values=(
-                            job_number,
-                            customer,
-                            0
-                        ))
+                        self.project_tree.insert('', 'end', values=(job_number, customer, 0))
             
         except Exception as e:
             print(f"Error filtering projects: {e}")
+
+    def toggle_completed(self):
+        """Toggle showing/hiding projects with drawings (completed)"""
+        self.show_completed = not self.show_completed
+        self.toggle_completed_btn.config(text=('Hide Completed' if self.show_completed else 'Show Completed'))
+        self.load_projects()
     
     def on_project_select(self, event):
         """Handle project selection"""
@@ -419,7 +445,7 @@ class PrintPackageApp:
             cursor = self.conn.cursor()
             
             cursor.execute("""
-                SELECT drawing_name, drawing_type, drawing_path, file_extension
+                SELECT drawing_name, drawing_type, drawing_path, file_extension, COALESCE(printed,0)
                 FROM drawings 
                 WHERE job_number = ?
                 ORDER BY drawing_name
@@ -433,11 +459,12 @@ class PrintPackageApp:
             
             # Add drawings to tree
             for drawing in drawings:
-                drawing_name, drawing_type, drawing_path, file_extension = drawing
+                drawing_name, drawing_type, drawing_path, file_extension, printed = drawing
                 display_type = drawing_type or file_extension or "Unknown"
                 
                 # Add to tree with action text
                 item = self.current_drawings_tree.insert('', 'end', values=(
+                    '✅' if printed else '☐',
                     drawing_name,
                     display_type,
                     drawing_path,
@@ -1443,6 +1470,39 @@ Y
                 
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to delete drawing: {str(e)}")
+
+    def on_current_drawing_click(self, event):
+        """Toggle printed state when clicking the Printed column"""
+        try:
+            region = self.current_drawings_tree.identify('region', event.x, event.y)
+            if region != 'cell':
+                return
+            row_id = self.current_drawings_tree.identify_row(event.y)
+            col_id = self.current_drawings_tree.identify_column(event.x)
+            if not row_id or col_id != '#1':  # '#1' corresponds to 'Printed' column
+                return
+            drawing_path = self.current_drawings_tree.set(row_id, 'Path')
+            current = self.current_drawings_tree.set(row_id, 'Printed')
+            new_state = 0 if current == '✅' else 1
+            cursor = self.conn.cursor()
+            cursor.execute("UPDATE drawings SET printed = ? WHERE job_number = ? AND drawing_path = ?", (new_state, self.current_project, drawing_path))
+            self.conn.commit()
+            # Update UI
+            self.current_drawings_tree.set(row_id, 'Printed', '✅' if new_state else '☐')
+        except Exception as e:
+            print(f"Error toggling printed state: {e}")
+
+    def clear_all_printed(self):
+        """Clear all printed checkboxes for the current job"""
+        if not self.current_project:
+            return
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("UPDATE drawings SET printed = 0 WHERE job_number = ?", (self.current_project,))
+            self.conn.commit()
+            self.load_current_drawings()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to clear checkboxes: {str(e)}")
     
     def print_all_current(self):
         """Print all drawings for the current job"""

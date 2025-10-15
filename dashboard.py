@@ -197,10 +197,16 @@ class DashboardApp:
             cursor = conn.cursor()
             
             if "Projects Management" in tile_title:
-                # Count active projects (not completed)
+                # Count active projects (not completed) based on release_to_dee/completion
                 cursor.execute("""
-                    SELECT COUNT(*) FROM projects 
-                    WHERE completion_date IS NULL OR completion_date = ''
+                    SELECT COUNT(*)
+                    FROM projects p
+                    LEFT JOIN release_to_dee rd ON rd.project_id = p.id
+                    WHERE NOT (
+                        (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
+                        OR rd.is_completed = 1
+                        OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                    )
                 """)
                 count = cursor.fetchone()[0]
                 conn.close()

@@ -56,6 +56,11 @@ class ProductConfigurationsApp:
         refresh_btn = ttk.Button(search_frame, text="Refresh", command=self.load_projects)
         refresh_btn.pack(side=tk.LEFT, padx=(5, 0))
         
+        # Show/Hide Completed toggle
+        self.show_completed = False
+        self.toggle_completed_btn = ttk.Button(search_frame, text="Show Completed", command=self.toggle_completed)
+        self.toggle_completed_btn.pack(side=tk.LEFT, padx=(8, 0))
+        
         # Project list treeview
         columns = ('Job Number', 'Customer', 'Config Status')
         self.project_tree = ttk.Treeview(project_frame, columns=columns, show='headings', height=15)
@@ -119,12 +124,16 @@ class ProductConfigurationsApp:
                 # Check if configuration exists for this project
                 config_status = self.check_configuration_status(job_number)
                 
-                # Add to tree
-                self.project_tree.insert('', 'end', values=(
-                    job_number,
-                    customer,
-                    config_status
-                ))
+                # Determine project completion from main projects/workflow
+                project_completed = self.is_project_completed(cursor, job_number)
+                
+                # Honor completed toggle (hide configured when toggle is off)
+                if self.show_completed or not project_completed:
+                    self.project_tree.insert('', 'end', values=(
+                        job_number,
+                        customer,
+                        config_status
+                    ))
             
             conn.close()
             
@@ -181,17 +190,45 @@ class ProductConfigurationsApp:
                     search_term in customer.lower()):
                     
                     config_status = self.check_configuration_status(job_number)
-                    
-                    self.project_tree.insert('', 'end', values=(
-                        job_number,
-                        customer,
-                        config_status
-                    ))
+                    project_completed = self.is_project_completed(cursor, job_number)
+                    # Honor completed toggle based on project completed status
+                    if self.show_completed or not project_completed:
+                        self.project_tree.insert('', 'end', values=(
+                            job_number,
+                            customer,
+                            config_status
+                        ))
             
             conn.close()
             
         except Exception as e:
             print(f"Error filtering projects: {e}")
+
+    def toggle_completed(self):
+        """Toggle showing/hiding configured (completed) projects"""
+        self.show_completed = not self.show_completed
+        self.toggle_completed_btn.config(text=('Hide Completed' if self.show_completed else 'Show Completed'))
+        # Reload to ensure detached rows are restored when showing
+        self.load_projects()
+
+    def is_project_completed(self, cursor, job_number):
+        """Return True if the project is completed based on release/completion dates or workflow"""
+        try:
+            cursor.execute("""
+                SELECT 
+                    CASE 
+                        WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
+                             OR rd.is_completed = 1
+                             OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                        THEN 1 ELSE 0 END
+                FROM projects p
+                LEFT JOIN release_to_dee rd ON rd.project_id = p.id
+                WHERE p.job_number = ?
+            """, (job_number,))
+            row = cursor.fetchone()
+            return bool(row and row[0] == 1)
+        except Exception:
+            return False
     
     def on_project_select(self, event):
         """Handle project selection"""

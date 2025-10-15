@@ -107,7 +107,9 @@ class ProjectCoverSheet:
     
     def get_project_status(self):
         """Determine project status based on dates"""
-        if self.project_data[7]:  # completion_date
+        # Treat 'Released to Dee' as completion as well
+        released_to_dee = self.project_data[9] if len(self.project_data) > 9 else None
+        if self.project_data[7] or released_to_dee:  # completion_date or released_to_dee
             return "Completed"
         elif self.project_data[6]:  # start_date
             return "In Progress"
