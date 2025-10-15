@@ -219,10 +219,31 @@ class DashboardApp:
                 return f"{count} Configuration{'s' if count != 1 else ''}"
             
             elif "Print Package" in tile_title:
-                # Count jobs with print packages
-                cursor.execute("SELECT COUNT(DISTINCT job_number) FROM print_packages")
-                count = cursor.fetchone()[0]
-                conn.close()
+                # Count jobs that have drawings (i.e., print packages)
+                # Prefer the 'drawings' table if it exists; otherwise fall back to 'print_packages'
+                try:
+                    cursor.execute("""
+                        SELECT name FROM sqlite_master 
+                        WHERE type='table' AND name='drawings'
+                    """)
+                    drawings_exists = cursor.fetchone() is not None
+
+                    if drawings_exists:
+                        cursor.execute("SELECT COUNT(DISTINCT job_number) FROM drawings")
+                        count = cursor.fetchone()[0]
+                    else:
+                        cursor.execute("""
+                            SELECT name FROM sqlite_master 
+                            WHERE type='table' AND name='print_packages'
+                        """)
+                        print_packages_exists = cursor.fetchone() is not None
+                        if print_packages_exists:
+                            cursor.execute("SELECT COUNT(DISTINCT job_number) FROM print_packages")
+                            count = cursor.fetchone()[0]
+                        else:
+                            count = 0
+                finally:
+                    conn.close()
                 return f"{count} Print Package{'s' if count != 1 else ''}"
             
             else:
