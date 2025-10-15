@@ -120,10 +120,10 @@ class DashboardApp:
                            "Manage drawing print packages\nwith global search and print queue", 
                            self.launch_print_package)
         
-        # Assist Engineering
-        self.create_app_tile(parent, 1, 1, "🛠️", "Assist Engineering", 
-                           "Utilities to support engineering\n(work in progress)", 
-                           self.launch_assist_engineering)
+        # Drafting Drawing Checklist
+        self.create_app_tile(parent, 1, 1, "✅", "Drafting Drawing Checklist", 
+                               "Quality control checklist for\ncommon drafting mistakes", 
+                               self.launch_drafting_checklist)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a consistent app tile with icon, title, description, and counter"""
@@ -247,6 +247,24 @@ class DashboardApp:
                     conn.close()
                 return f"{count} Print Package{'s' if count != 1 else ''}"
             
+            elif "Drafting Drawing Checklist" in tile_title:
+                # Count active projects with checklist items
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT p.job_number)
+                    FROM projects p
+                    LEFT JOIN release_to_dee rd ON rd.project_id = p.id
+                    LEFT JOIN project_checklist_status pcs ON p.job_number = pcs.job_number
+                    WHERE NOT (
+                        (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
+                        OR rd.is_completed = 1
+                        OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                    )
+                    AND pcs.job_number IS NOT NULL
+                """)
+                count = cursor.fetchone()[0]
+                conn.close()
+                return f"{count} Active Project{'s' if count != 1 else ''}"
+            
             else:
                 conn.close()
                 return ""
@@ -312,17 +330,17 @@ class DashboardApp:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch Print Package Management:\n{str(e)}")
 
-    def launch_assist_engineering(self):
-        """Launch the Assist Engineering application"""
+    def launch_drafting_checklist(self):
+        """Launch the Drafting Drawing Checklist application"""
         try:
-            if os.path.exists('assist_engineering.py'):
-                process = subprocess.Popen([sys.executable, 'assist_engineering.py'])
+            if os.path.exists('drafting_items_to_look_for.py'):
+                process = subprocess.Popen([sys.executable, 'drafting_items_to_look_for.py'])
                 self.child_processes.append(process)
                 self.cleanup_finished_processes()
             else:
-                messagebox.showerror("Error", "assist_engineering.py not found in current directory")
+                messagebox.showerror("Error", "drafting_items_to_look_for.py not found in current directory")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch Assist Engineering:\n{str(e)}")
+                messagebox.showerror("Error", f"Failed to launch Drafting Drawing Checklist:\n{str(e)}")
     
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""
