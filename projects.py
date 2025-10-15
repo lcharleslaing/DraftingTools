@@ -241,9 +241,13 @@ class ProjectsApp:
         self.notes_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         notes_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         
-        # Save notes button
-        save_notes_btn = ttk.Button(notes_frame, text="Save Notes", command=self.save_job_notes)
-        save_notes_btn.grid(row=1, column=0, sticky=tk.W, pady=(5, 0))
+        # Save/Print notes buttons
+        btns = ttk.Frame(notes_frame)
+        btns.grid(row=1, column=0, sticky=tk.W, pady=(5, 0))
+        save_notes_btn = ttk.Button(btns, text="Save Notes", command=self.save_job_notes)
+        save_notes_btn.pack(side=tk.LEFT)
+        print_notes_btn = ttk.Button(btns, text="Print Notes", command=self.print_job_notes)
+        print_notes_btn.pack(side=tk.LEFT, padx=(8, 0))
         
         # Initialize notes
         self.current_job_notes = ""
@@ -325,6 +329,132 @@ class ProjectsApp:
             self.root.destroy()
         except Exception:
             self.root.quit()
+
+    def print_job_notes(self):
+        """Create an Excel sheet with project header and notes, then open it"""
+        try:
+            # Determine selected job
+            selection = self.tree.selection()
+            if not selection:
+                messagebox.showwarning("Warning", "Select a project first")
+                return
+            values = self.tree.item(selection[0])['values']
+            job_number = str(values[0])
+
+            # Fetch project details
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT p.job_number, p.customer_name, p.customer_location,
+                       p.job_directory,
+                       d.name as designer, e.name as engineer,
+                       p.assignment_date, p.start_date, p.due_date,
+                       p.completion_date, COALESCE(p.released_to_dee, rd.release_date) as released_to_dee
+                FROM projects p
+                LEFT JOIN designers d ON p.assigned_to_id = d.id
+                LEFT JOIN engineers e ON p.project_engineer_id = e.id
+                LEFT JOIN release_to_dee rd ON rd.project_id = p.id
+                WHERE p.job_number = ?
+            """, (job_number,))
+            proj = cursor.fetchone()
+            if not proj:
+                conn.close()
+                messagebox.showerror("Error", "Project not found")
+                return
+            (p_job, cust, loc, job_dir, designer, engineer,
+             assign_dt, start_dt, due_dt, comp_dt, rel_dt) = proj
+
+            # Load notes
+            cursor.execute("CREATE TABLE IF NOT EXISTS job_notes (job_number TEXT PRIMARY KEY, notes TEXT)")
+            cursor.execute("SELECT notes FROM job_notes WHERE job_number = ?", (job_number,))
+            row = cursor.fetchone()
+            notes_text = row[0] if row and row[0] else self.notes_text.get("1.0", tk.END).strip()
+
+            # Optional: list drawings for this job
+            drawings = []
+            try:
+                cursor.execute("SELECT drawing_name, added_date FROM drawings WHERE job_number = ? ORDER BY drawing_name", (job_number,))
+                drawings = cursor.fetchall()
+            except Exception:
+                drawings = []
+            conn.close()
+
+            # Create Excel
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, Alignment
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Notes"
+
+            # Header
+            header = f"{p_job} — {cust or ''} — {loc or ''}"
+            ws["A1"] = header
+            ws["A1"].font = Font(name="Calibri", size=16, bold=True)
+            ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=4)
+
+            # Project fields
+            fields = [
+                ("Assigned To", designer or ""),
+                ("Project Engineer", engineer or ""),
+                ("Assignment Date", assign_dt or ""),
+                ("Start Date", start_dt or ""),
+                ("Due Date", due_dt or ""),
+                ("Completion Date", comp_dt or ""),
+                ("Released to Dee", rel_dt or ""),
+            ]
+            row_i = 3
+            ws["A2"] = "Project Info"
+            ws["A2"].font = Font(name="Calibri", size=12, bold=True)
+            for label, val in fields:
+                ws.cell(row=row_i, column=1, value=label)
+                ws.cell(row=row_i, column=2, value=val)
+                row_i += 1
+
+            # Notes section
+            row_i += 1
+            ws.cell(row=row_i, column=1, value="Notes").font = Font(name="Calibri", size=12, bold=True)
+            row_i += 1
+            ws.cell(row=row_i, column=1, value=notes_text)
+            ws.merge_cells(start_row=row_i, start_column=1, end_row=row_i+10, end_column=4)
+            ws.cell(row=row_i, column=1).alignment = Alignment(wrap_text=True, vertical='top')
+            row_i += 12
+
+            # Drawings section
+            ws.cell(row=row_i, column=1, value="Drawings").font = Font(name="Calibri", size=12, bold=True)
+            row_i += 1
+            if drawings:
+                ws.cell(row=row_i, column=1, value="Name")
+                ws.cell(row=row_i, column=2, value="Added/Updated")
+                row_i += 1
+                for name, added in drawings:
+                    ws.cell(row=row_i, column=1, value=name)
+                    ws.cell(row=row_i, column=2, value=added or "")
+                    row_i += 1
+            else:
+                ws.cell(row=row_i, column=1, value="No drawings on record")
+
+            # Column widths
+            ws.column_dimensions['A'].width = 28
+            ws.column_dimensions['B'].width = 30
+            ws.column_dimensions['C'].width = 24
+            ws.column_dimensions['D'].width = 24
+
+            # Save to job directory
+            base_dir = job_dir or os.path.join(os.path.expanduser('~'), 'Documents')
+            target_dir = os.path.join(base_dir, 'Status Reports')
+            os.makedirs(target_dir, exist_ok=True)
+            from datetime import datetime as _dt
+            fname = f"{job_number}-Notes-{_dt.now().strftime('%Y-%m-%d_%I%M%p')}.xlsx"
+            out_path = os.path.join(target_dir, fname)
+            wb.save(out_path)
+
+            # Open for printing
+            try:
+                os.startfile(out_path)
+            except Exception:
+                messagebox.showinfo("Saved", f"Notes saved to\n{out_path}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to print notes: {str(e)}")
     
     def create_project_details_panel(self):
         """Create the project details panel"""

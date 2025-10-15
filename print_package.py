@@ -1602,16 +1602,16 @@ Y
         """Handle double-click on current drawings"""
         selection = self.current_drawings_tree.selection()
         if selection:
-            item = self.current_drawings_tree.item(selection[0])
-            drawing_path = item['values'][2]  # Path is in column 2
+            item_id = selection[0]
+            drawing_path = self.current_drawings_tree.set(item_id, 'Path')
             self.open_drawing(drawing_path)
     
     def on_current_drawing_right_click(self, event):
         """Handle right-click on current drawings"""
         selection = self.current_drawings_tree.selection()
         if selection:
-            item = self.current_drawings_tree.item(selection[0])
-            drawing_path = item['values'][2]  # Path is in column 2
+            item_id = selection[0]
+            drawing_path = self.current_drawings_tree.set(item_id, 'Path')
             
             # Create context menu
             context_menu = tk.Menu(self.root, tearoff=0)
@@ -1630,17 +1630,17 @@ Y
         """Handle double-click on global drawings"""
         selection = self.global_drawings_tree.selection()
         if selection:
-            item = self.global_drawings_tree.item(selection[0])
-            drawing_path = item['values'][3]  # Path is in column 3
+            item_id = selection[0]
+            drawing_path = self.global_drawings_tree.set(item_id, 'Path')
             self.open_drawing(drawing_path)
     
     def on_global_drawing_right_click(self, event):
         """Handle right-click on global drawings"""
         selection = self.global_drawings_tree.selection()
         if selection:
-            item = self.global_drawings_tree.item(selection[0])
-            drawing_path = item['values'][3]  # Path is in column 3
-            job_number = item['values'][0]  # Job number is in column 0
+            item_id = selection[0]
+            drawing_path = self.global_drawings_tree.set(item_id, 'Path')
+            job_number = self.global_drawings_tree.set(item_id, 'Job Number')
             
             # Create context menu
             context_menu = tk.Menu(self.root, tearoff=0)

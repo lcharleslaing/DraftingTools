@@ -20,87 +20,87 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 1116
+      "seq": 1140
     },
     {
       "name": "engineers",
-      "seq": 837
+      "seq": 855
     },
     {
       "name": "app_order",
-      "seq": 558
+      "seq": 570
     },
     {
       "name": "projects",
-      "seq": 599
+      "seq": 604
     },
     {
       "name": "heater_models",
-      "seq": 56
+      "seq": 68
     },
     {
       "name": "locations",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "heater_diameters",
-      "seq": 56
+      "seq": 68
     },
     {
       "name": "heater_heights",
-      "seq": 154
+      "seq": 187
     },
     {
       "name": "heater_stack_diameters",
-      "seq": 42
+      "seq": 51
     },
     {
       "name": "applications",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "materials",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "burner_models",
-      "seq": 84
+      "seq": 102
     },
     {
       "name": "gas_train_positions",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "heater_mounting_types",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "gauge_cocks_types",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "temperature_switch_types",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "packaging_types",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "mod_piping_transducer_materials",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "hose_materials",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "media_frame_heights",
-      "seq": 42
+      "seq": 51
     },
     {
       "name": "gas_types",
-      "seq": 28
+      "seq": 34
     },
     {
       "name": "heater_configurations",
@@ -116,27 +116,27 @@
     },
     {
       "name": "initial_redline",
-      "seq": 282
+      "seq": 287
     },
     {
       "name": "redline_updates",
-      "seq": 1128
+      "seq": 1148
     },
     {
       "name": "ops_review",
-      "seq": 282
+      "seq": 287
     },
     {
       "name": "peter_weck_review",
-      "seq": 282
+      "seq": 287
     },
     {
       "name": "release_to_dee",
-      "seq": 282
+      "seq": 287
     },
     {
       "name": "d365_bom_entry",
-      "seq": 136
+      "seq": 141
     }
   ],
   "engineers": [
@@ -281,24 +281,6 @@
       "project_engineer_id": null
     },
     {
-      "id": 595,
-      "job_number": "35332",
-      "assigned_to_id": 1,
-      "assignment_date": "2025-10-09",
-      "start_date": "2025-10-15",
-      "completion_date": null,
-      "total_duration_days": null,
-      "released_to_dee": null,
-      "job_directory": "F:/McCurdy's Laundry/Red Wing, MN/35332",
-      "customer_name": "MCCURDY'S LAUNDRY",
-      "customer_location": "RED WING, MN",
-      "customer_name_directory": "F:/McCurdy's Laundry",
-      "customer_location_directory": "F:/McCurdy's Laundry/Red Wing, MN",
-      "last_cover_sheet_date": null,
-      "due_date": "2025-10-09",
-      "project_engineer_id": 1
-    },
-    {
       "id": 599,
       "job_number": "35354",
       "assigned_to_id": 1,
@@ -314,6 +296,24 @@
       "customer_location_directory": "F:/Ozinga Concrete Products, Inc/Plymouth, IN",
       "last_cover_sheet_date": "2025-10-15 12:07:26",
       "due_date": "2025-10-07",
+      "project_engineer_id": 1
+    },
+    {
+      "id": 604,
+      "job_number": "35332",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": "2025-10-09",
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/McCurdy's Laundry/Red Wing, MN/35332",
+      "customer_name": "MCCURDY'S LAUNDRY",
+      "customer_location": "RED WING, MN",
+      "customer_name_directory": "F:/McCurdy's Laundry",
+      "customer_location_directory": "F:/McCurdy's Laundry/Red Wing, MN",
+      "last_cover_sheet_date": null,
+      "due_date": "2025-10-09",
       "project_engineer_id": 1
     }
   ],
@@ -10397,6 +10397,186 @@
       "update_type": null,
       "update_cycle": 4,
       "is_completed": 0
+    },
+    {
+      "id": 1129,
+      "project_id": 600,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 1130,
+      "project_id": 600,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 1131,
+      "project_id": 600,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 1132,
+      "project_id": 600,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1133,
+      "project_id": 601,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 1134,
+      "project_id": 601,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 1135,
+      "project_id": 601,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 1136,
+      "project_id": 601,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1137,
+      "project_id": 602,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 1138,
+      "project_id": 602,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 1139,
+      "project_id": 602,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 1140,
+      "project_id": 602,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1141,
+      "project_id": 603,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 1142,
+      "project_id": 603,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 1143,
+      "project_id": 603,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 1144,
+      "project_id": 603,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 1145,
+      "project_id": 604,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 1146,
+      "project_id": 604,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 1147,
+      "project_id": 604,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 1148,
+      "project_id": 604,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
     }
   ],
   "ops_review": [
@@ -12079,6 +12259,36 @@
       "project_id": 599,
       "review_date": "2025-10-10",
       "is_completed": 1
+    },
+    {
+      "id": 283,
+      "project_id": 600,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 284,
+      "project_id": 601,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 285,
+      "project_id": 602,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 286,
+      "project_id": 603,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 287,
+      "project_id": 604,
+      "review_date": null,
+      "is_completed": 0
     }
   ],
   "peter_weck_review": [
@@ -13761,6 +13971,36 @@
       "project_id": 599,
       "fixed_errors_date": "2025-10-15",
       "is_completed": 1
+    },
+    {
+      "id": 283,
+      "project_id": 600,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 284,
+      "project_id": 601,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 285,
+      "project_id": 602,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 286,
+      "project_id": 603,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 287,
+      "project_id": 604,
+      "fixed_errors_date": null,
+      "is_completed": 0
     }
   ],
   "release_to_dee": [
@@ -16843,6 +17083,61 @@
       "other_date": "2025-10-15",
       "is_completed": 1,
       "due_date": "2025-10-03"
+    },
+    {
+      "id": 283,
+      "project_id": 600,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 284,
+      "project_id": 601,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 285,
+      "project_id": 602,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 286,
+      "project_id": 603,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 287,
+      "project_id": 604,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
     }
   ],
   "app_order": [
@@ -18819,6 +19114,41 @@
       "engineer_id": 2,
       "redline_date": "2025-10-07",
       "is_completed": 1
+    },
+    {
+      "id": 283,
+      "project_id": 600,
+      "engineer_id": 1,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 284,
+      "project_id": 601,
+      "engineer_id": 1,
+      "redline_date": "2025-10-09",
+      "is_completed": 0
+    },
+    {
+      "id": 285,
+      "project_id": 602,
+      "engineer_id": 1,
+      "redline_date": "2025-10-09",
+      "is_completed": 1
+    },
+    {
+      "id": 286,
+      "project_id": 603,
+      "engineer_id": 1,
+      "redline_date": "2025-10-09",
+      "is_completed": 1
+    },
+    {
+      "id": 287,
+      "project_id": 604,
+      "engineer_id": 1,
+      "redline_date": "2025-10-09",
+      "is_completed": 1
     }
   ],
   "heater_configurations": [
@@ -19838,7 +20168,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 08:58:16",
-      "added_by": "Import"
+      "added_by": "Import",
+      "printed": 0
     },
     {
       "id": 5,
@@ -19848,7 +20179,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 08:58:16",
-      "added_by": "Import"
+      "added_by": "Import",
+      "printed": 0
     },
     {
       "id": 6,
@@ -19858,7 +20190,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 08:58:16",
-      "added_by": "Import"
+      "added_by": "Import",
+      "printed": 0
     },
     {
       "id": 7,
@@ -19868,7 +20201,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:03:58",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 8,
@@ -19878,7 +20212,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:04:40",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 9,
@@ -19888,7 +20223,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:05:31",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 10,
@@ -19898,7 +20234,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:06:12",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 11,
@@ -19908,7 +20245,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:07:28",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 13,
@@ -19918,7 +20256,8 @@
       "drawing_type": "AutoCAD",
       "file_extension": ".dwg",
       "added_date": "2025-10-10 09:13:05",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 14,
@@ -19928,7 +20267,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:13:47",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 15,
@@ -19938,7 +20278,8 @@
       "drawing_type": "AutoCAD",
       "file_extension": ".dwg",
       "added_date": "2025-10-10 09:15:19",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 16,
@@ -19948,7 +20289,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:15:54",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 17,
@@ -19958,7 +20300,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:17:29",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 18,
@@ -19968,7 +20311,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-10 09:18:28",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 19,
@@ -19978,7 +20322,8 @@
       "drawing_type": "AutoCAD",
       "file_extension": ".dwg",
       "added_date": "2025-10-10 09:20:31",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 20,
@@ -19988,7 +20333,8 @@
       "drawing_type": "AutoCAD",
       "file_extension": ".dwg",
       "added_date": "2025-10-10 09:22:18",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 21,
@@ -19998,7 +20344,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 08:47:17",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 22,
@@ -20008,7 +20355,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 08:48:45",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 23,
@@ -20018,7 +20366,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 08:56:10",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 26,
@@ -20028,7 +20377,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 08:58:24",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 27,
@@ -20038,7 +20388,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 09:01:15",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 28,
@@ -20048,7 +20399,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 09:02:33",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 29,
@@ -20058,7 +20410,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 14:36:31",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 30,
@@ -20068,7 +20421,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 14:36:52",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 31,
@@ -20078,7 +20432,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-14 14:38:04",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 32,
@@ -20088,7 +20443,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-15 09:00:22",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     },
     {
       "id": 33,
@@ -20098,7 +20454,8 @@
       "drawing_type": "Inventor",
       "file_extension": ".idw",
       "added_date": "2025-10-15 09:00:40",
-      "added_by": "User"
+      "added_by": "User",
+      "printed": 0
     }
   ],
   "printer_config": [
@@ -20943,6 +21300,36 @@
       "project_id": 599,
       "entry_date": "2025-10-15",
       "is_completed": 1
+    },
+    {
+      "id": 137,
+      "project_id": 600,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 138,
+      "project_id": 601,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 139,
+      "project_id": 602,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 140,
+      "project_id": 603,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 141,
+      "project_id": 604,
+      "entry_date": null,
+      "is_completed": 0
     }
   ],
   "print_packages": [],
@@ -20991,6 +21378,16 @@
       "job_number": "35394",
       "spec_name": "Spray Nozzle Size",
       "value": "2.50"
+    },
+    {
+      "job_number": "35256",
+      "spec_name": "Heater Diameter",
+      "value": "30.00"
+    },
+    {
+      "job_number": "35256",
+      "spec_name": "Heater Height",
+      "value": "10"
     }
   ],
   "file_timestamps": [
@@ -21041,7 +21438,92 @@
       "path": "F:/Brakebush Brothers/Hartwell, GA",
       "last_mtime": 1759168094.8635073,
       "acknowledged": 0
+    },
+    {
+      "job_number": "35154",
+      "path": "F:/Sunroc",
+      "last_mtime": 1529602196.9020562,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35154",
+      "path": "F:/Sunroc/St George, UT",
+      "last_mtime": 1758916417.933604,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35140",
+      "path": "F:/Geneva Rock",
+      "last_mtime": 1759256637.0328512,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35140",
+      "path": "F:/Geneva Rock/Logan, UT",
+      "last_mtime": 1759256667.4501634,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35359",
+      "path": "F:/Pinty's Delicious Foods",
+      "last_mtime": 1759156008.9848256,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35359",
+      "path": "F:/Pinty's Delicious Foods/Oakville, ON",
+      "last_mtime": 1759156023.670251,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35042",
+      "path": "F:/Whitewater Processing",
+      "last_mtime": 1759263265.624803,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35042",
+      "path": "F:/Whitewater Processing/West Harrison, IN",
+      "last_mtime": 1759263281.2724855,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35256",
+      "path": "F:/Plymate Uniform",
+      "last_mtime": 1412829211.9954977,
+      "acknowledged": 0
+    },
+    {
+      "job_number": "35256",
+      "path": "F:/Plymate Uniform/Shelbyville, IN",
+      "last_mtime": 1759243626.6104343,
+      "acknowledged": 0
     }
   ],
-  "job_notes": []
+  "job_notes": [
+    {
+      "job_number": "35154",
+      "notes": "10/15/2025: Printed Stack Drawings - LL"
+    },
+    {
+      "job_number": "35140",
+      "notes": "10/15/2025: Printed Stack Drawings - LL"
+    },
+    {
+      "job_number": "35359",
+      "notes": "10/10/2025: Printed Stack Drawings - LL"
+    },
+    {
+      "job_number": "35042",
+      "notes": "10/15/2025: Printed Stack Drawings - LL"
+    },
+    {
+      "job_number": "35256",
+      "notes": "10/15/2025: Currently, No Stacks or Pumps Ordered per KOM - LL\n\nHEATER:\n1. Gravity Fed\n2. 304 Material\n\nTANK:\n1. Possible HWT"
+    },
+    {
+      "job_number": "35371",
+      "notes": "10/15/2025: Printed Stack Drawings - LL\n\n1. WW Release is not complete as of 10/15/2025 - LL"
+    }
+  ]
 }
