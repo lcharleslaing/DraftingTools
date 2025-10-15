@@ -101,8 +101,8 @@ class DashboardApp:
     
     def create_app_buttons(self, parent):
         """Create application launch buttons as custom tiles"""
-        # Configure grid to have 3 columns
-        for i in range(3):
+        # Configure grid to have 2 columns
+        for i in range(2):
             parent.columnconfigure(i, weight=1, uniform="tile")
         
         # Projects Management
@@ -116,19 +116,14 @@ class DashboardApp:
                            self.launch_configurations)
         
         # Print Package Management
-        self.create_app_tile(parent, 0, 2, "🖨️", "Print Package Management", 
+        self.create_app_tile(parent, 1, 0, "🖨️", "Print Package Management", 
                            "Manage drawing print packages\nwith global search and print queue", 
                            self.launch_print_package)
         
-        # Additional Tools
-        self.create_app_tile(parent, 1, 0, "🔧", "Additional Tools", 
-                           "More drafting tools\ncoming soon...", 
-                           self.show_coming_soon)
-        
-        # Database Management
-        self.create_app_tile(parent, 1, 1, "🗄️", "Database Management", 
-                           "Backup, restore, and\nmaintain database", 
-                           self.launch_db_management)
+        # Assist Engineering
+        self.create_app_tile(parent, 1, 1, "🛠️", "Assist Engineering", 
+                           "Utilities to support engineering\n(work in progress)", 
+                           self.launch_assist_engineering)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a consistent app tile with icon, title, description, and counter"""
@@ -310,6 +305,18 @@ class DashboardApp:
                 messagebox.showerror("Error", "print_package.py not found in current directory")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch Print Package Management:\n{str(e)}")
+
+    def launch_assist_engineering(self):
+        """Launch the Assist Engineering application"""
+        try:
+            if os.path.exists('assist_engineering.py'):
+                process = subprocess.Popen([sys.executable, 'assist_engineering.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "assist_engineering.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Assist Engineering:\n{str(e)}")
     
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""

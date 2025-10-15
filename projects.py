@@ -77,6 +77,26 @@ class ProjectsApp:
         
         self.create_widgets()
         self.load_projects()
+
+        # Ensure table to track file timestamps per project
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS file_timestamps (
+                    job_number TEXT NOT NULL,
+                    path TEXT NOT NULL,
+                    last_mtime REAL NOT NULL,
+                    acknowledged INTEGER NOT NULL DEFAULT 1,
+                    PRIMARY KEY(job_number, path)
+                )
+                """
+            )
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
         
         # Add keyboard shortcuts for fullscreen toggle
         self.root.bind('<F11>', lambda e: self.toggle_fullscreen())
@@ -379,29 +399,34 @@ class ProjectsApp:
                 button_color = "#FFB6C1"  # Light pink for error
                 button_text_color = "black"
         
-        # Create Can Size button
-        can_size_btn = tk.Button(parent_frame, 
-                                text=f"Can Size: {can_size_value}",
-                                state=can_size_button_state,
-                                command=lambda: self.open_heater_design_file(heater_design_file) if heater_design_file else None,
-                                width=30, height=2,
-                                font=('Arial', 10),
-                                relief='raised', bd=2, 
-                                cursor='hand2' if can_size_button_state == "normal" else 'arrow',
-                                bg=button_color, fg=button_text_color,
-                                activebackground=button_color, activeforeground=button_text_color)
-        can_size_btn.grid(row=16, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
-        self.spec_buttons.append(can_size_btn)
-        
-        # Add Heater Specs group
-        self.create_heater_specs_group(parent_frame, heater_design_file)
+        # Add Heater Specs group (now includes Can Size at the top)
+        self.create_heater_specs_group(parent_frame, heater_design_file, 
+                                       can_size_value, can_size_button_state, 
+                                       button_color, button_text_color)
     
-    def create_heater_specs_group(self, parent_frame, heater_design_file):
+    def create_heater_specs_group(self, parent_frame, heater_design_file, 
+                                  can_size_value=None, can_size_button_state="disabled",
+                                  can_color="#FFB6C1", can_text_color="black"):
         """Create the Heater Specs group with dimension buttons"""
         # Heater Specs label
         heater_specs_label = ttk.Label(parent_frame, text="Heater Specs", font=('Arial', 11, 'bold'), foreground="darkblue")
         heater_specs_label.grid(row=17, column=0, columnspan=2, sticky=tk.W, pady=(15, 5))
         self.spec_buttons.append(heater_specs_label)
+        
+        # Can Size button at top of Heater Specs
+        if can_size_value is not None:
+            can_size_btn = tk.Button(parent_frame, 
+                                    text=f"Can Size: {can_size_value}",
+                                    state=can_size_button_state,
+                                    command=lambda: self.open_heater_design_file(heater_design_file) if heater_design_file else None,
+                                    width=60, height=1,
+                                    font=('Arial', 9),
+                                    relief='raised', bd=1, 
+                                    cursor='hand2' if can_size_button_state == "normal" else 'arrow',
+                                    bg=can_color, fg=can_text_color,
+                                    activebackground=can_color, activeforeground=can_text_color)
+            can_size_btn.grid(row=18, column=0, sticky=(tk.W, tk.E), pady=1, padx=(0, 10))
+            self.spec_buttons.append(can_size_btn)
         
         # Define the heater dimension specifications
         heater_specs = [
@@ -455,6 +480,10 @@ class ProjectsApp:
                 spec_value = self.read_heater_spec_value(heater_design_file, cell_ref_or_value)
                 if not spec_value:
                     spec_value = "No Data"
+                # Prefer saved manual value if present (applies to all heater specs)
+                manual_override = self.get_saved_manual_spec(spec_name)
+                if manual_override:
+                    spec_value = f"Manual: {manual_override}"
             
             # Determine button color and state
             if spec_value and spec_value not in ["No Spray Nozzle Found", "No Size Found", "No Length Found", "No Data"]:
@@ -493,7 +522,7 @@ class ProjectsApp:
             
             # Add input field for missing values (all "No Data" or "No [Item] Found" cases)
             if spec_value in ["No Spray Nozzle Found", "No Size Found", "No Length Found", "No Data"] or not spec_value:
-                self.create_spec_input_field(parent_frame, spec_name, 16+i, 1)  # Column 1 for right side
+                self.create_spec_input_field(parent_frame, spec_name, 18+i, 1)  # Column 1 for right side
     
     def create_spec_context_menu(self, button, spec_name, parent_frame, row):
         """Create right-click context menu for specification buttons"""
@@ -579,12 +608,26 @@ class ProjectsApp:
         window.destroy()
     
     def delete_manual_spec(self, spec_name):
-        """Delete a manual specification value"""
-        if hasattr(self, 'manual_specs') and spec_name in self.manual_specs:
-            del self.manual_specs[spec_name]
-            messagebox.showinfo("Deleted", f"{spec_name} manual value deleted")
-            # Refresh the specifications
-            self.update_specifications(self.project_details_container.winfo_children()[0])
+        """Delete a manual specification value for the current job"""
+        job_number = str(self.job_number_var.get()).strip()
+        if not job_number:
+            return
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS manual_specs (
+                job_number TEXT NOT NULL,
+                spec_name TEXT NOT NULL,
+                value TEXT NOT NULL,
+                PRIMARY KEY(job_number, spec_name)
+            )
+        """)
+        cur.execute("DELETE FROM manual_specs WHERE job_number = ? AND spec_name = ?", (job_number, spec_name))
+        conn.commit()
+        conn.close()
+        messagebox.showinfo("Deleted", f"{spec_name} manual value deleted")
+        # Refresh the specifications
+        self.update_specifications(self.project_details_container.winfo_children()[0])
     
     def create_spec_input_field(self, parent_frame, spec_name, row, column=1):
         """Create an input field for manual entry of missing specifications"""
@@ -618,26 +661,51 @@ class ProjectsApp:
             input_entry.bind('<FocusOut>', lambda e: input_entry.insert(0, f"Enter value...") if not input_entry.get() else None)
     
     def save_manual_spec(self, spec_name, value):
-        """Save a manually entered specification value"""
+        """Save a manually entered specification value for the current job"""
         if not value.strip():
             messagebox.showwarning("Warning", f"Please enter a value for {spec_name}")
             return
-        
-        # Store in a simple way (you could save to database if needed)
-        if not hasattr(self, 'manual_specs'):
-            self.manual_specs = {}
-        
-        self.manual_specs[spec_name] = value.strip()
+        job_number = str(self.job_number_var.get()).strip()
+        if not job_number:
+            messagebox.showwarning("Warning", "No job number selected")
+            return
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS manual_specs (
+                job_number TEXT NOT NULL,
+                spec_name TEXT NOT NULL,
+                value TEXT NOT NULL,
+                PRIMARY KEY(job_number, spec_name)
+            )
+        """)
+        cur.execute("INSERT OR REPLACE INTO manual_specs (job_number, spec_name, value) VALUES (?, ?, ?)",
+                    (job_number, spec_name, value.strip()))
+        conn.commit()
+        conn.close()
         messagebox.showinfo("Saved", f"{spec_name} saved as: {value.strip()}")
-        
         # Update the specifications to show the saved value
         self.update_specifications(self.project_details_container.winfo_children()[0])
     
     def get_saved_manual_spec(self, spec_name):
-        """Get a previously saved manual specification value"""
-        if hasattr(self, 'manual_specs') and spec_name in self.manual_specs:
-            return self.manual_specs[spec_name]
-        return None
+        """Get a previously saved manual specification value for the current job"""
+        job_number = str(self.job_number_var.get()).strip()
+        if not job_number:
+            return None
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS manual_specs (
+                job_number TEXT NOT NULL,
+                spec_name TEXT NOT NULL,
+                value TEXT NOT NULL,
+                PRIMARY KEY(job_number, spec_name)
+            )
+        """)
+        cur.execute("SELECT value FROM manual_specs WHERE job_number = ? AND spec_name = ?", (job_number, spec_name))
+        row = cur.fetchone()
+        conn.close()
+        return row[0] if row else None
     
     def read_heater_spec_value(self, file_path, cell_ref):
         """Read a specific cell value from the Heater Cross Section sheet"""
@@ -1643,6 +1711,56 @@ class ProjectsApp:
         self.quick_access_buttons.clear()
         
         row = 0
+        # Track paths and new/changed flags for this project
+        changed_paths = set()
+        def track_path(path):
+            if not path:
+                return False
+            try:
+                if os.path.exists(path):
+                    mtime = os.path.getmtime(path)
+                else:
+                    return False
+                conn = sqlite3.connect(self.db_manager.db_path)
+                cur = conn.cursor()
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS file_timestamps (
+                        job_number TEXT NOT NULL,
+                        path TEXT NOT NULL,
+                        last_mtime REAL NOT NULL,
+                        acknowledged INTEGER NOT NULL DEFAULT 1,
+                        PRIMARY KEY(job_number, path)
+                    )
+                """)
+                job_num = str(self.job_number_var.get()).strip()
+                cur.execute("SELECT last_mtime, acknowledged FROM file_timestamps WHERE job_number=? AND path=?", (job_num, path))
+                rowx = cur.fetchone()
+                is_changed = False
+                if rowx is None:
+                    cur.execute("INSERT OR REPLACE INTO file_timestamps(job_number, path, last_mtime, acknowledged) VALUES(?,?,?,0)", (job_num, path, mtime))
+                    is_changed = True
+                else:
+                    prev_mtime, acknowledged = rowx
+                    if abs(mtime - prev_mtime) > 1e-6:
+                        cur.execute("UPDATE file_timestamps SET last_mtime=?, acknowledged=0 WHERE job_number=? AND path=?", (mtime, job_num, path))
+                        is_changed = True
+                    elif acknowledged == 0:
+                        is_changed = True
+                conn.commit(); conn.close()
+                if is_changed:
+                    changed_paths.add(path)
+                return is_changed
+            except Exception:
+                return False
+        
+        def style_button(btn, path):
+            if path and path in changed_paths:
+                try:
+                    btn.configure(style='Changed.TButton')
+                except Exception:
+                    s = ttk.Style()
+                    s.configure('Changed.TButton', background='#FFB74D')
+                    btn.configure(style='Changed.TButton')
         
         # Job Directory button - use job number as button text
         job_dir = self.job_directory_picker.get()
@@ -1680,9 +1798,12 @@ class ProjectsApp:
             button_text = None
         
         if button_text:
+            path0 = customer_name_dir or customer_name
+            changed = track_path(path0)
             button = ttk.Button(self.access_frame, text=button_text, 
-                              command=lambda: self.open_customer_name_path(customer_name_dir or customer_name))
+                              command=lambda p=path0: self.open_customer_name_path(p))
             button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            style_button(button, path0 if changed else None)
             self.quick_access_buttons.append(button)
             row += 1
         
@@ -1710,9 +1831,12 @@ class ProjectsApp:
             button_text = None
         
         if button_text:
+            path1 = customer_location_dir or customer_location
+            changed = track_path(path1)
             button = ttk.Button(self.access_frame, text=button_text, 
-                              command=lambda: self.open_customer_location_path(customer_location_dir or customer_location))
+                              command=lambda p=path1: self.open_customer_location_path(p))
             button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            style_button(button, path1 if changed else None)
             self.quick_access_buttons.append(button)
             row += 1
         
@@ -2266,12 +2390,23 @@ class ProjectsApp:
     def open_path(self, path):
         """Open a file or directory path"""
         try:
+            # Mark acknowledged for this file so the orange state clears
+            try:
+                job_num = str(self.job_number_var.get()).strip()
+                conn = sqlite3.connect(self.db_manager.db_path)
+                cur = conn.cursor()
+                cur.execute("UPDATE file_timestamps SET acknowledged=1 WHERE job_number=? AND path=?", (job_num, path))
+                conn.commit(); conn.close()
+            except Exception:
+                pass
             if sys.platform == "win32":
                 os.startfile(path)
             elif sys.platform == "darwin":
                 subprocess.run(["open", path])
             else:
                 subprocess.run(["xdg-open", path])
+            # Refresh to update button styles
+            self.update_quick_access()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open path: {str(e)}")
     
@@ -2957,12 +3092,15 @@ class ProjectsApp:
         query = """
         SELECT p.job_number, p.customer_name, p.due_date, p.completion_date,
                CASE 
-                   WHEN p.completion_date IS NOT NULL THEN 'Completed'
-                   WHEN p.start_date IS NOT NULL THEN 'In Progress'
-                   ELSE 'Assigned'
+                   WHEN p.completion_date IS NOT NULL AND p.completion_date != '' THEN 'Completed'
+                   WHEN p.start_date IS NOT NULL AND p.start_date != '' THEN 'In Progress'
+                   WHEN p.assignment_date IS NOT NULL AND p.assignment_date != '' THEN 'Assigned'
+                   ELSE 'Not Assigned'
                END as status
         FROM projects p
-        ORDER BY p.assignment_date DESC
+        ORDER BY 
+            CASE WHEN p.due_date IS NULL OR p.due_date = '' THEN 1 ELSE 0 END,
+            p.due_date ASC
         """
         
         cursor.execute(query)

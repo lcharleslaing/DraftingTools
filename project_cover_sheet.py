@@ -363,6 +363,42 @@ class ProjectCoverSheet:
             if self.workflow_data['ops_review'][1]:  # is_completed
                 return True
         
+        # New criteria: if Pressure Drop Calculator or Release files exist, consider processed
+        try:
+            if self.has_engineering_artifacts():
+                return True
+        except Exception:
+            pass
+        
+        return False
+
+    def has_engineering_artifacts(self):
+        """Detect engineering files that indicate processing even without workflow flags.
+        - Pressure Drop Calculator in Engineering General Design
+        - Any *Release* files in Engineering Releases
+        """
+        job_dir = self.project_data[1] if self.project_data else None
+        if not job_dir or not os.path.exists(job_dir):
+            return False
+        gen_design = os.path.join(job_dir, '3. Engineering', 'General Design')
+        releases_dir = os.path.join(job_dir, '3. Engineering', 'Releases')
+        # Check Pressure Drop Calculator
+        if os.path.isdir(gen_design):
+            try:
+                for fname in os.listdir(gen_design):
+                    if 'PRESSURE DROP CALCULATOR' in fname.upper():
+                        return True
+            except Exception:
+                pass
+        # Check any Release files
+        if os.path.isdir(releases_dir):
+            try:
+                for fname in os.listdir(releases_dir):
+                    upper = fname.upper()
+                    if 'RELEASE' in upper:  # covers Electrical/Gas/Mechanical/Heater/Tank Release
+                        return True
+            except Exception:
+                pass
         return False
     
     def add_engineering_watermark(self, ws):
