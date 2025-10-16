@@ -20,19 +20,19 @@
   "sqlite_sequence": [
     {
       "name": "designers",
-      "seq": 1156
+      "seq": 1176
     },
     {
       "name": "engineers",
-      "seq": 867
+      "seq": 882
     },
     {
       "name": "app_order",
-      "seq": 578
+      "seq": 588
     },
     {
       "name": "projects",
-      "seq": 623
+      "seq": 624
     },
     {
       "name": "heater_models",
@@ -116,35 +116,35 @@
     },
     {
       "name": "initial_redline",
-      "seq": 306
+      "seq": 307
     },
     {
       "name": "redline_updates",
-      "seq": 1224
+      "seq": 1228
     },
     {
       "name": "ops_review",
-      "seq": 306
+      "seq": 307
     },
     {
       "name": "peter_weck_review",
-      "seq": 306
+      "seq": 307
     },
     {
       "name": "release_to_dee",
-      "seq": 306
+      "seq": 307
     },
     {
       "name": "d365_bom_entry",
-      "seq": 160
+      "seq": 161
     },
     {
       "name": "drafting_checklist_items",
-      "seq": 7
+      "seq": 9
     },
     {
       "name": "project_checklist_status",
-      "seq": 67
+      "seq": 85
     }
   ],
   "engineers": [
@@ -162,24 +162,6 @@
     }
   ],
   "projects": [
-    {
-      "id": 585,
-      "job_number": "35371",
-      "assigned_to_id": 1,
-      "assignment_date": "2025-10-09",
-      "start_date": "2025-10-15",
-      "completion_date": null,
-      "total_duration_days": null,
-      "released_to_dee": null,
-      "job_directory": "F:/Brakebush Brothers/Hartwell, GA/35371",
-      "customer_name": "BRAKEBUSH BROTHERS",
-      "customer_location": "HARTWELL, GA",
-      "customer_name_directory": "F:/Brakebush Brothers",
-      "customer_location_directory": "F:/Brakebush Brothers/Hartwell, GA",
-      "last_cover_sheet_date": "2025-10-15 10:33:44",
-      "due_date": "2025-10-24",
-      "project_engineer_id": null
-    },
     {
       "id": 587,
       "job_number": "35140",
@@ -341,6 +323,24 @@
       "last_cover_sheet_date": "2025-10-15 16:53:43",
       "due_date": "2025-11-04",
       "project_engineer_id": null
+    },
+    {
+      "id": 624,
+      "job_number": "35371",
+      "assigned_to_id": 1,
+      "assignment_date": "2025-10-09",
+      "start_date": "2025-10-15",
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "job_directory": "F:/Brakebush Brothers/Hartwell, GA/35371",
+      "customer_name": "BRAKEBUSH BROTHERS",
+      "customer_location": "HARTWELL, GA",
+      "customer_name_directory": "F:/Brakebush Brothers",
+      "customer_location_directory": "F:/Brakebush Brothers/Hartwell, GA",
+      "last_cover_sheet_date": null,
+      "due_date": "2025-10-24",
+      "project_engineer_id": 2
     }
   ],
   "redline_updates": [
@@ -11287,6 +11287,42 @@
       "update_type": null,
       "update_cycle": 4,
       "is_completed": 0
+    },
+    {
+      "id": 1225,
+      "project_id": 624,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 1226,
+      "project_id": 624,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 1227,
+      "project_id": 624,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 1228,
+      "project_id": 624,
+      "engineer_id": null,
+      "update_date": "",
+      "update_type": null,
+      "update_cycle": 4,
+      "is_completed": 0
     }
   ],
   "ops_review": [
@@ -13113,6 +13149,12 @@
       "project_id": 623,
       "review_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 307,
+      "project_id": 624,
+      "review_date": null,
+      "is_completed": 0
     }
   ],
   "peter_weck_review": [
@@ -14937,6 +14979,12 @@
     {
       "id": 306,
       "project_id": 623,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 307,
+      "project_id": 624,
       "fixed_errors_date": null,
       "is_completed": 0
     }
@@ -18285,6 +18333,17 @@
       "other_date": null,
       "is_completed": 0,
       "due_date": null
+    },
+    {
+      "id": 307,
+      "project_id": 624,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
     }
   ],
   "app_order": [
@@ -20426,6 +20485,13 @@
     {
       "id": 306,
       "project_id": 623,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 307,
+      "project_id": 624,
       "engineer_id": null,
       "redline_date": null,
       "is_completed": 0
@@ -22735,6 +22801,12 @@
       "project_id": 623,
       "entry_date": null,
       "is_completed": 0
+    },
+    {
+      "id": 161,
+      "project_id": 624,
+      "entry_date": null,
+      "is_completed": 0
     }
   ],
   "print_packages": [],
@@ -22939,12 +23011,12 @@
       "notes": "10/15/2025: Currently, No Stacks or Pumps Ordered per KOM - LL\n\nHEATER:\n1. Gravity Fed\n2. 304 Material\n\nTANK:\n1. Possible HWT"
     },
     {
-      "job_number": "35371",
-      "notes": "10/15/2025: Printed Stack Drawings - LL\n\n1. WW Release is not complete as of 10/15/2025 - LL\n2. 890-01-012\tBurner, Maxon EB-7"
-    },
-    {
       "job_number": "35167",
       "notes": "1. NO TANKS"
+    },
+    {
+      "job_number": "35371",
+      "notes": "10/15/2025: Printed Stack Drawings - LL\n\n1. WW Release is not complete as of 10/15/2025 - LL\n2. 890-01-012\tBurner, Maxon EB-7\n\n** 2 TANKS PER 35371R3-L ** ---> COPY DESIGN FOR BOTH TANKS"
     }
   ],
   "drafting_checklist_items": [
@@ -23001,6 +23073,24 @@
       "created_date": "2025-10-15 16:46:19",
       "updated_date": "2025-10-15 16:50:48",
       "tag": "welds, notes, shell,"
+    },
+    {
+      "id": 8,
+      "title": "STACK",
+      "description": "Make sure ALL dimensions are fixed after model configuration updates",
+      "image_path": "checklist_images\\item_20251015_165454_temp_screenshot_20251015_165452.png",
+      "created_date": "2025-10-15 16:54:54",
+      "updated_date": "2025-10-15 16:54:54",
+      "tag": "stack, dimensions"
+    },
+    {
+      "id": 9,
+      "title": "BOM",
+      "description": "Ensure all sheets of Drawing packages have been Sorted and Re-numbered",
+      "image_path": "checklist_images\\item_20251015_165649_temp_screenshot_20251015_165646.png",
+      "created_date": "2025-10-15 16:56:49",
+      "updated_date": "2025-10-15 16:56:49",
+      "tag": "bom, sorted"
     }
   ],
   "project_checklist_status": [
@@ -23435,6 +23525,153 @@
       "is_checked": 0,
       "checked_date": null,
       "does_not_apply": 0
+    },
+    {
+      "id": 68,
+      "job_number": "35371",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 69,
+      "job_number": "35140",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 70,
+      "job_number": "35256",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 71,
+      "job_number": "35154",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 72,
+      "job_number": "35359",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 73,
+      "job_number": "35394",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 74,
+      "job_number": "35042",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 75,
+      "job_number": "35332",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 76,
+      "job_number": "35167",
+      "checklist_item_id": 8,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 77,
+      "job_number": "35371",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 78,
+      "job_number": "35140",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 79,
+      "job_number": "35256",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 80,
+      "job_number": "35154",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 81,
+      "job_number": "35359",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 82,
+      "job_number": "35394",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 83,
+      "job_number": "35042",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 84,
+      "job_number": "35332",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
+    },
+    {
+      "id": 85,
+      "job_number": "35167",
+      "checklist_item_id": 9,
+      "is_checked": 0,
+      "checked_date": null,
+      "does_not_apply": 0
     }
-  ]
+  ],
+  "d365_import_configs": [],
+  "d365_part_numbers": [],
+  "d365_import_params": []
 }

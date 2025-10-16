@@ -92,6 +92,7 @@ class DashboardApp:
         apps_frame.columnconfigure(1, weight=1)
         apps_frame.rowconfigure(0, weight=1)
         apps_frame.rowconfigure(1, weight=1)
+        apps_frame.rowconfigure(2, weight=1)
         
         # Application buttons
         self.create_app_buttons(apps_frame)
@@ -120,8 +121,13 @@ class DashboardApp:
                            "Manage drawing print packages\nwith global search and print queue", 
                            self.launch_print_package)
         
+        # D365 Import Formatter
+        self.create_app_tile(parent, 1, 1, "📊", "D365 Import Formatter", 
+                               "Generate D365 BOM import data\nwith Excel-like calculations", 
+                               self.launch_d365_import)
+        
         # Drafting Drawing Checklist
-        self.create_app_tile(parent, 1, 1, "✅", "Drafting Drawing Checklist", 
+        self.create_app_tile(parent, 2, 0, "✅", "Drafting Drawing Checklist", 
                                "Quality control checklist for\ncommon drafting mistakes", 
                                self.launch_drafting_checklist)
     
@@ -247,6 +253,13 @@ class DashboardApp:
                     conn.close()
                 return f"{count} Print Package{'s' if count != 1 else ''}"
             
+            elif "D365 Import Formatter" in tile_title:
+                # Count D365 import configurations
+                cursor.execute("SELECT COUNT(DISTINCT job_number) FROM d365_import_configs")
+                count = cursor.fetchone()[0]
+                conn.close()
+                return f"{count} Configuration{'s' if count != 1 else ''}"
+            
             elif "Drafting Drawing Checklist" in tile_title:
                 # Count active projects with checklist items
                 cursor.execute("""
@@ -330,6 +343,18 @@ class DashboardApp:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch Print Package Management:\n{str(e)}")
 
+    def launch_d365_import(self):
+        """Launch the D365 Import Formatter application"""
+        try:
+            if os.path.exists('d365_import_formatter.py'):
+                process = subprocess.Popen([sys.executable, 'd365_import_formatter.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "d365_import_formatter.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch D365 Import Formatter:\n{str(e)}")
+    
     def launch_drafting_checklist(self):
         """Launch the Drafting Drawing Checklist application"""
         try:

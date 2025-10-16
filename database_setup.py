@@ -241,6 +241,46 @@ class DatabaseManager:
             )
         ''')
         
+        # Create D365 import configurations table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS d365_import_configs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_number TEXT NOT NULL,
+                config_type TEXT NOT NULL,
+                config_data TEXT,
+                created_date TEXT,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
+        # Create D365 part numbers table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS d365_part_numbers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_number TEXT NOT NULL,
+                part_number TEXT NOT NULL,
+                description TEXT,
+                bom_number TEXT,
+                template TEXT,
+                product_type TEXT,
+                created_date TEXT,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
+        # Create D365 import parameters table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS d365_import_params (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_number TEXT NOT NULL,
+                param_type TEXT NOT NULL,
+                param_name TEXT NOT NULL,
+                param_value TEXT,
+                created_date TEXT,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
         conn.commit()
         conn.close()
     
