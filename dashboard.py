@@ -4,6 +4,7 @@ import subprocess
 import os
 import sys
 import sqlite3
+from settings import SettingsManager
 
 class DashboardApp:
     def __init__(self):
@@ -14,6 +15,9 @@ class DashboardApp:
         
         # Track child processes
         self.child_processes = []
+        
+        # Initialize settings manager
+        self.settings_manager = SettingsManager()
         
         # Configure style
         self.setup_styles()
@@ -29,6 +33,39 @@ class DashboardApp:
         
         # Center the window
         self.center_window()
+    
+    def update_user_display(self):
+        """Update the user display in the header"""
+        current_user = self.settings_manager.current_user
+        current_dept = self.settings_manager.current_department
+        
+        if current_user:
+            display_text = f"User: {current_user}"
+            if current_dept:
+                display_text += f" ({current_dept})"
+            self.user_label.config(text=display_text)
+        else:
+            self.user_label.config(text="User: Not Set")
+    
+    def open_settings(self):
+        """Open the settings window"""
+        from settings import SettingsApp
+        
+        settings_window = tk.Toplevel(self.root)
+        settings_window.title("Settings")
+        settings_window.geometry("900x700")
+        settings_window.transient(self.root)
+        settings_window.grab_set()
+        
+        # Create settings app in the new window
+        settings_app = SettingsApp(settings_window)
+        
+        # Update user display when settings window closes
+        def on_close():
+            self.update_user_display()
+            settings_window.destroy()
+        
+        settings_window.protocol("WM_DELETE_WINDOW", on_close)
     
     def setup_styles(self):
         """Setup custom styles for the dashboard"""
@@ -70,9 +107,13 @@ class DashboardApp:
         main_frame = ttk.Frame(self.root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Title section
-        title_frame = ttk.Frame(main_frame)
-        title_frame.pack(fill=tk.X, pady=(0, 30))
+        # Header section with user info and settings
+        header_frame = ttk.Frame(main_frame)
+        header_frame.pack(fill=tk.X, pady=(0, 20))
+        
+        # Left side - Title
+        title_frame = ttk.Frame(header_frame)
+        title_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         title_label = ttk.Label(title_frame, text="Drafting Tools Dashboard", 
                                style='Title.TLabel')
@@ -81,6 +122,23 @@ class DashboardApp:
         subtitle_label = ttk.Label(title_frame, text="Project Management & Product Configuration Suite", 
                                   style='Subtitle.TLabel')
         subtitle_label.pack(pady=(5, 0))
+        
+        # Right side - User info and settings
+        user_frame = ttk.Frame(header_frame)
+        user_frame.pack(side=tk.RIGHT)
+        
+        # Current user display
+        self.user_label = ttk.Label(user_frame, text="User: Not Set", 
+                                   font=('Arial', 12, 'bold'))
+        self.user_label.pack(side=tk.RIGHT, padx=(10, 0))
+        
+        # Settings button
+        settings_btn = ttk.Button(user_frame, text="⚙️ Settings", 
+                                 command=self.open_settings)
+        settings_btn.pack(side=tk.RIGHT)
+        
+        # Update user display
+        self.update_user_display()
         
         # Applications grid
         apps_frame = ttk.Frame(main_frame)
@@ -131,10 +189,30 @@ class DashboardApp:
                                "Monitor file changes and recreate\nproject structures for testing", 
                                self.launch_project_monitor)
         
+        # Drawing Reviews
+        self.create_app_tile(parent, 1, 2, "📝", "Drawing Reviews", 
+                               "Digital drawing review and markup\nwith tablet support and audit trail", 
+                               self.launch_drawing_reviews)
+        
         # Drafting Drawing Checklist
-        self.create_app_tile(parent, 1, 2, "✅", "Drafting Drawing Checklist", 
+        self.create_app_tile(parent, 2, 0, "✅", "Drafting Drawing Checklist", 
                                "Quality control checklist for\ncommon drafting mistakes", 
                                self.launch_drafting_checklist)
+        
+        # Project Resource Allocation
+        self.create_app_tile(parent, 2, 1, "📊", "Project Resource Allocation", 
+                               "Strategic logging and tracking\nof resource allocation per customer", 
+                               self.launch_resource_allocation)
+        
+        # Workflow Manager
+        self.create_app_tile(parent, 2, 2, "⚙️", "Workflow Manager", 
+                               "Manage Print Package Review\nworkflows and stage transitions", 
+                               self.launch_workflow_manager)
+        
+        # SHIT BRICKS SIDEWAYS (Placeholder for now!)
+        self.create_app_tile(parent, 3, 0, "💩", "SHIT BRICKS SIDEWAYS", 
+                               "Coming soon! (You'll remember\nwhat this was for eventually!)", 
+                               self.launch_shit_bricks_sideways)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a consistent app tile with icon, title, description, and counter"""
@@ -383,6 +461,42 @@ class DashboardApp:
                 messagebox.showerror("Error", "project_monitor.py not found in current directory")
         except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch Project File Monitor:\n{str(e)}")
+    
+    def launch_drawing_reviews(self):
+        """Launch the Drawing Reviews application"""
+        try:
+            if os.path.exists('drawing_reviews.py'):
+                process = subprocess.Popen([sys.executable, 'drawing_reviews.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "drawing_reviews.py not found in current directory")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Drawing Reviews:\n{str(e)}")
+    
+    def launch_resource_allocation(self):
+        """Launch the Project Resource Allocation application"""
+        try:
+            if os.path.exists('resource_allocation.py'):
+                process = subprocess.Popen([sys.executable, 'resource_allocation.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showinfo("Coming Soon", "Project Resource Allocation app is in development!\n\nThis will track:\n• Time spent per customer\n• File-based activity logging\n• Resource allocation analytics\n• Strategic insights")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Resource Allocation:\n{str(e)}")
+    
+    def launch_workflow_manager(self):
+        """Launch the Workflow Manager application"""
+        try:
+            if os.path.exists('workflow_manager.py'):
+                process = subprocess.Popen([sys.executable, 'workflow_manager.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "workflow_manager.py not found in current directory")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Workflow Manager:\n{str(e)}")
     
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""

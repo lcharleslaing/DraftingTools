@@ -2587,6 +2587,34 @@ class ProjectsApp:
                 self.quick_access_buttons.append(placeholder)
                 row += 1
         
+        # Print Package Review button - only show if job directory is loaded
+        if hasattr(self, 'job_directory_picker') and self.job_directory_picker.get() and job_number:
+            # Add separator
+            separator = ttk.Separator(self.access_frame, orient='horizontal')
+            separator.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=(10, 5))
+            self.quick_access_buttons.append(separator)
+            row += 1
+            
+            # Check if Print Package Review already exists
+            pp_review_exists = self.check_print_package_review_exists(job_number)
+            
+            if pp_review_exists:
+                # Show "Open Print Package Folder" button
+                button_text = "📁 Open Print Package Folder"
+                button = ttk.Button(self.access_frame, text=button_text, 
+                                  command=self.open_print_package_folder)
+                button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=5)
+                self.quick_access_buttons.append(button)
+            else:
+                # Show "Initialize Print Package Review" button
+                button_text = "🚀 Initialize Print Package Review"
+                button = ttk.Button(self.access_frame, text=button_text, 
+                                  command=self.initialize_print_package_review)
+                button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=5)
+                self.quick_access_buttons.append(button)
+            
+            row += 1
+        
         # If no quick access items, show a message
         if not self.quick_access_buttons:
             label = ttk.Label(self.access_frame, text="No quick access items\navailable for this project", 
@@ -2599,6 +2627,194 @@ class ProjectsApp:
             self.access_frame.update_idletasks()
             self.quick_access_canvas.configure(scrollregion=self.quick_access_canvas.bbox("all"))
     
+    def initialize_print_package_review(self):
+        """Initialize Print Package Review workflow for the current project"""
+        job_number = self.job_number_var.get()
+        job_directory = self.job_directory_picker.get()
+        
+        if not job_number:
+            messagebox.showwarning("Warning", "Please select a project first")
+            return
+        
+        if not job_directory:
+            messagebox.showwarning("Warning", "Please set the job directory first")
+            return
+        
+        # Check if Print Package Review already exists
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT COUNT(*) FROM print_package_reviews 
+                WHERE job_number = ?
+            ''', (job_number,))
+            
+            if cursor.fetchone()[0] > 0:
+                conn.close()
+                messagebox.showinfo("Info", f"Print Package Review already initialized for job {job_number}")
+                return
+            
+            conn.close()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to check existing reviews: {str(e)}")
+            return
+        
+        # Show file picker for print package files
+        from tkinter import filedialog
+        file_paths = filedialog.askopenfilenames(
+            title="Select Print Package PDF Files",
+            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")]
+        )
+        
+        if not file_paths:
+            messagebox.showinfo("Info", "No files selected. Print Package Review initialization cancelled.")
+            return
+        
+        # Initialize the Print Package Review
+        try:
+            self.create_print_package_structure(job_number, job_directory, file_paths)
+            messagebox.showinfo("Success", f"Print Package Review initialized for job {job_number}!\n\n{len(file_paths)} files added to Stage 0.\n\nButton will now switch to 'Open Print Package Folder'.")
+            self.update_quick_access()  # Refresh to show new button
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to initialize Print Package Review: {str(e)}")
+    
+    def create_print_package_structure(self, job_number, job_directory, file_paths):
+        """Create the Print Package Review folder structure and database records"""
+        import uuid
+        import shutil
+        from datetime import datetime
+        
+        # Generate unique review ID
+        review_id = str(uuid.uuid4())
+        
+        # Create folder structure
+        pp_base_path = os.path.join(job_directory, "4. Drafting", "PP-Print Packages")
+        
+        # Define the 8 stages
+        stages = [
+            "0-Drafting-Print Package",
+            "1-Engineer Review", 
+            "2-Engineering QC Review",
+            "3-Drafting Updates (ENG)",
+            "4-Lead Designer Review",
+            "5-Production OPS Review", 
+            "6-Drafting Updates (OPS)",
+            "7-FINAL Print Package (Approved)"
+        ]
+        
+        # Create all stage directories
+        for stage in stages:
+            stage_path = os.path.join(pp_base_path, stage)
+            os.makedirs(stage_path, exist_ok=True)
+        
+        # Copy files to Stage 0
+        stage_0_path = os.path.join(pp_base_path, "0-Drafting-Print Package")
+        copied_files = []
+        
+        for file_path in file_paths:
+            file_name = os.path.basename(file_path)
+            dest_path = os.path.join(stage_0_path, file_name)
+            shutil.copy2(file_path, dest_path)
+            copied_files.append((file_name, file_path, dest_path))
+        
+        # Save to database
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        
+        # Create review record
+        cursor.execute('''
+            INSERT INTO print_package_reviews 
+            (job_number, review_id, status, current_stage, initialized_by, initialized_date, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (job_number, review_id, 'initialized', 0, 'System', datetime.now().isoformat(), 
+              f'Initialized with {len(file_paths)} files'))
+        
+        # Create file records
+        for file_name, original_path, stage_0_path in copied_files:
+            file_size = os.path.getsize(stage_0_path)
+            
+            cursor.execute('''
+                INSERT INTO print_package_files 
+                (review_id, job_number, file_name, original_path, stage_0_path, file_size, created_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (review_id, job_number, file_name, original_path, stage_0_path, file_size, 
+                  datetime.now().isoformat()))
+        
+        # Create workflow records for all stages
+        stage_names = [
+            "Drafting Print Package",
+            "Engineer Review",
+            "Engineering QC Review", 
+            "Drafting Updates (ENG)",
+            "Lead Designer Review",
+            "Production OPS Review",
+            "Drafting Updates (OPS)",
+            "FINAL Print Package (Approved)"
+        ]
+        
+        for i, (stage, stage_name) in enumerate(zip(stages, stage_names)):
+            cursor.execute('''
+                INSERT INTO print_package_workflow 
+                (review_id, job_number, stage, stage_name, status, notes)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (review_id, job_number, i, stage_name, 'pending' if i > 0 else 'completed', 
+                  f'Stage {i}: {stage_name}'))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"Print Package Review structure created for job {job_number}")
+        print(f"Review ID: {review_id}")
+        print(f"Files copied to Stage 0: {len(copied_files)}")
+    
+    def check_print_package_review_exists(self, job_number):
+        """Check if a Print Package Review already exists for the given job"""
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT COUNT(*) FROM print_package_reviews 
+                WHERE job_number = ?
+            ''', (job_number,))
+            
+            count = cursor.fetchone()[0]
+            conn.close()
+            
+            return count > 0
+            
+        except Exception as e:
+            print(f"Error checking Print Package Review existence: {e}")
+            return False
+    
+    def open_print_package_folder(self):
+        """Open the Print Package Review folder for the current project"""
+        job_number = self.job_number_var.get()
+        job_directory = self.job_directory_picker.get()
+        
+        if not job_number:
+            messagebox.showwarning("Warning", "Please select a project first")
+            return
+        
+        if not job_directory:
+            messagebox.showwarning("Warning", "Please set the job directory first")
+            return
+        
+        # Construct the Print Package Review folder path
+        pp_folder_path = os.path.join(job_directory, "4. Drafting", "PP-Print Packages")
+        
+        if os.path.exists(pp_folder_path):
+            try:
+                os.startfile(pp_folder_path)
+                print(f"Opened Print Package Review folder for job {job_number}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to open Print Package Review folder: {str(e)}")
+        else:
+            messagebox.showerror("Error", f"Print Package Review folder not found:\n{pp_folder_path}")
+
     def create_action_buttons(self):
         """Create compact footer toolbar with uniform buttons"""
         # Separator line above footer

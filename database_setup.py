@@ -281,6 +281,65 @@ class DatabaseManager:
             )
         ''')
         
+        # Create print_package_reviews table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS print_package_reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                job_number TEXT NOT NULL,
+                review_id TEXT UNIQUE NOT NULL,
+                status TEXT DEFAULT 'initialized',
+                current_stage INTEGER DEFAULT 0,
+                initialized_by TEXT NOT NULL,
+                initialized_date TEXT DEFAULT CURRENT_TIMESTAMP,
+                completed_date TEXT,
+                notes TEXT,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
+        # Create print_package_files table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS print_package_files (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                review_id TEXT NOT NULL,
+                job_number TEXT NOT NULL,
+                file_name TEXT NOT NULL,
+                original_path TEXT NOT NULL,
+                stage_0_path TEXT,
+                stage_1_path TEXT,
+                stage_2_path TEXT,
+                stage_3_path TEXT,
+                stage_4_path TEXT,
+                stage_5_path TEXT,
+                stage_6_path TEXT,
+                stage_7_path TEXT,
+                file_size INTEGER,
+                file_type TEXT DEFAULT 'pdf',
+                created_date TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (review_id) REFERENCES print_package_reviews (review_id),
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
+        # Create print_package_workflow table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS print_package_workflow (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                review_id TEXT NOT NULL,
+                job_number TEXT NOT NULL,
+                stage INTEGER NOT NULL,
+                stage_name TEXT NOT NULL,
+                reviewer TEXT,
+                department TEXT,
+                status TEXT DEFAULT 'pending',
+                started_date TEXT,
+                completed_date TEXT,
+                notes TEXT,
+                FOREIGN KEY (review_id) REFERENCES print_package_reviews (review_id),
+                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+            )
+        ''')
+        
         conn.commit()
         conn.close()
     
