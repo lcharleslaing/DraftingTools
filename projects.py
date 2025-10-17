@@ -1944,6 +1944,21 @@ class ProjectsApp:
         # Initialize empty quick access area
         self.quick_access_buttons = []
         self.update_quick_access()
+        
+        # Start periodic refresh to check for Project File Monitor changes
+        self.refresh_quick_access_periodically()
+    
+    def refresh_quick_access_periodically(self):
+        """Refresh Quick Access panel every 10 seconds to check for Project File Monitor changes"""
+        try:
+            # Only refresh if we have a job number
+            if hasattr(self, 'job_number_var') and self.job_number_var.get():
+                self.update_quick_access()
+        except Exception as e:
+            print(f"Error refreshing quick access: {e}")
+        
+        # Schedule next refresh in 10 seconds
+        self.root.after(10000, self.refresh_quick_access_periodically)
     
     def update_quick_access(self):
         """Update the quick access panel based on current project data"""
@@ -1955,6 +1970,44 @@ class ProjectsApp:
         row = 0
         # Track paths and new/changed flags for this project
         changed_paths = set()
+        
+        def get_file_monitor_status(job_number):
+            """Check Project File Monitor for file changes"""
+            try:
+                conn = sqlite3.connect(self.db_manager.db_path)
+                cursor = conn.cursor()
+                
+                # Check for unacknowledged changes in file_changes table
+                cursor.execute('''
+                    SELECT file_path, change_type, COUNT(*) as count
+                    FROM file_changes 
+                    WHERE job_number = ? AND acknowledged = 0
+                    GROUP BY file_path, change_type
+                ''', (job_number,))
+                
+                changes = cursor.fetchall()
+                conn.close()
+                
+                # Debug output
+                print(f"Project Management - Checking file monitor status for job {job_number}:")
+                print(f"  Found {len(changes)} unacknowledged changes")
+                for file_path, change_type, count in changes:
+                    print(f"    {change_type}: {file_path} ({count} records)")
+                
+                # Return status summary
+                status = {
+                    'has_changes': len(changes) > 0,
+                    'new_files': sum(1 for _, change_type, _ in changes if change_type == 'new'),
+                    'updated_files': sum(1 for _, change_type, _ in changes if change_type == 'updated'),
+                    'deleted_files': sum(1 for _, change_type, _ in changes if change_type == 'deleted'),
+                    'total_changes': len(changes)
+                }
+                
+                return status
+            except Exception as e:
+                print(f"Error checking file monitor status: {e}")
+                return {'has_changes': False, 'new_files': 0, 'updated_files': 0, 'deleted_files': 0, 'total_changes': 0}
+        
         def track_path(path):
             if not path:
                 return False
@@ -1995,14 +2048,47 @@ class ProjectsApp:
             except Exception:
                 return False
         
-        def style_button(btn, path):
-            if path and path in changed_paths:
+        def style_button(btn, path, job_number=None):
+            # Check Project File Monitor status first
+            file_monitor_status = get_file_monitor_status(job_number) if job_number else {'has_changes': False}
+            
+            # Debug output for button styling
+            button_text = btn.cget('text')
+            print(f"Styling button '{button_text}' for job {job_number}:")
+            print(f"  File monitor status: {file_monitor_status}")
+            print(f"  Path in changed_paths: {path in changed_paths if path else 'N/A'}")
+            
+            # Determine button style based on Project File Monitor status
+            if file_monitor_status['has_changes']:
+                if file_monitor_status['deleted_files'] > 0:
+                    # Red for deletions
+                    print(f"  -> Applying RED style (deletions)")
+                    try:
+                        btn.configure(style='Deleted.TButton')
+                    except Exception:
+                        s = ttk.Style()
+                        s.configure('Deleted.TButton', background='#F44336', foreground='white')
+                        btn.configure(style='Deleted.TButton')
+                elif file_monitor_status['new_files'] > 0 or file_monitor_status['updated_files'] > 0:
+                    # Green for new/updated files
+                    print(f"  -> Applying GREEN style (new/updated)")
+                    try:
+                        btn.configure(style='NewChanged.TButton')
+                    except Exception:
+                        s = ttk.Style()
+                        s.configure('NewChanged.TButton', background='#4CAF50', foreground='white')
+                        btn.configure(style='NewChanged.TButton')
+            elif path and path in changed_paths:
+                # Fallback to original change detection
+                print(f"  -> Applying ORANGE style (fallback)")
                 try:
                     btn.configure(style='Changed.TButton')
                 except Exception:
                     s = ttk.Style()
                     s.configure('Changed.TButton', background='#FFB74D')
                     btn.configure(style='Changed.TButton')
+            else:
+                print(f"  -> No styling applied (normal)")
         
         # Job Directory button - use job number as button text
         job_dir = self.job_directory_picker.get()
@@ -2013,6 +2099,7 @@ class ProjectsApp:
             button = ttk.Button(self.access_frame, text=button_text, 
                               command=self.open_job_directory)
             button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+            style_button(button, job_dir, job_number)
             self.quick_access_buttons.append(button)
             row += 1
         
@@ -2045,7 +2132,7 @@ class ProjectsApp:
             button = ttk.Button(self.access_frame, text=button_text, 
                               command=lambda p=path0: self.open_customer_name_path(p))
             button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
-            style_button(button, path0 if changed else None)
+            style_button(button, path0 if changed else None, job_number)
             self.quick_access_buttons.append(button)
             row += 1
         
@@ -2078,7 +2165,7 @@ class ProjectsApp:
             button = ttk.Button(self.access_frame, text=button_text, 
                               command=lambda p=path1: self.open_customer_location_path(p))
             button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
-            style_button(button, path1 if changed else None)
+            style_button(button, path1 if changed else None, job_number)
             self.quick_access_buttons.append(button)
             row += 1
         
@@ -2089,6 +2176,7 @@ class ProjectsApp:
                 button = ttk.Button(self.access_frame, text=button_text, 
                                   command=self.open_kom_oc_form)
                 button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                style_button(button, self.kom_oc_form_path, job_number)
                 self.quick_access_buttons.append(button)
                 row += 1
             else:
@@ -2128,6 +2216,7 @@ class ProjectsApp:
                         button = ttk.Button(self.access_frame, text=button_text, 
                                           command=lambda path=doc_path: self.open_proposal_doc(path))
                         button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        style_button(button, doc_path, job_number)
                         self.quick_access_buttons.append(button)
                         row += 1
                 
@@ -2139,6 +2228,7 @@ class ProjectsApp:
                         button = ttk.Button(self.access_frame, text=button_text, 
                                           command=lambda path=file_path: self.open_other_doc(path))
                         button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        style_button(button, file_path, job_number)
                         self.quick_access_buttons.append(button)
                         row += 1
             else:
@@ -2174,6 +2264,7 @@ class ProjectsApp:
                         button = ttk.Button(self.access_frame, text=button_text, 
                                           command=lambda path=file_path: self.open_engineering_doc(path))
                         button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        style_button(button, file_path, job_number)
                         self.quick_access_buttons.append(button)
                         row += 1
                 else:
@@ -2197,6 +2288,7 @@ class ProjectsApp:
                         button = ttk.Button(self.access_frame, text=button_text, 
                                           command=lambda path=file_path: self.open_engineering_doc(path))
                         button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        style_button(button, file_path, job_number)
                         self.quick_access_buttons.append(button)
                         row += 1
                 else:
@@ -2252,6 +2344,7 @@ class ProjectsApp:
                         button = ttk.Button(self.access_frame, text=button_text, 
                                           command=lambda path=file_path: self.open_drafting_doc(path))
                         button.grid(row=row, column=0, sticky=(tk.W, tk.E), pady=2)
+                        style_button(button, file_path, job_number)
                         self.quick_access_buttons.append(button)
                         row += 1
                 else:

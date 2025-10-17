@@ -3,7 +3,6 @@ from tkinter import ttk, messagebox
 import subprocess
 import os
 import sys
-import psutil
 import sqlite3
 
 class DashboardApp:
@@ -87,9 +86,10 @@ class DashboardApp:
         apps_frame = ttk.Frame(main_frame)
         apps_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Configure grid weights
+        # Configure grid weights for 3 columns
         apps_frame.columnconfigure(0, weight=1)
         apps_frame.columnconfigure(1, weight=1)
+        apps_frame.columnconfigure(2, weight=1)
         apps_frame.rowconfigure(0, weight=1)
         apps_frame.rowconfigure(1, weight=1)
         apps_frame.rowconfigure(2, weight=1)
@@ -102,8 +102,8 @@ class DashboardApp:
     
     def create_app_buttons(self, parent):
         """Create application launch buttons as custom tiles"""
-        # Configure grid to have 2 columns
-        for i in range(2):
+        # Configure grid to have 3 columns
+        for i in range(3):
             parent.columnconfigure(i, weight=1, uniform="tile")
         
         # Projects Management
@@ -117,17 +117,22 @@ class DashboardApp:
                            self.launch_configurations)
         
         # Print Package Management
-        self.create_app_tile(parent, 1, 0, "🖨️", "Print Package Management", 
+        self.create_app_tile(parent, 0, 2, "🖨️", "Print Package Management", 
                            "Manage drawing print packages\nwith global search and print queue", 
                            self.launch_print_package)
         
         # D365 Import Formatter
-        self.create_app_tile(parent, 1, 1, "📊", "D365 Import Formatter", 
+        self.create_app_tile(parent, 1, 0, "📊", "D365 Import Formatter", 
                                "Generate D365 BOM import data\nwith Excel-like calculations", 
                                self.launch_d365_import)
         
+        # Project File Monitor
+        self.create_app_tile(parent, 1, 1, "🔍", "Project File Monitor", 
+                               "Monitor file changes and recreate\nproject structures for testing", 
+                               self.launch_project_monitor)
+        
         # Drafting Drawing Checklist
-        self.create_app_tile(parent, 2, 0, "✅", "Drafting Drawing Checklist", 
+        self.create_app_tile(parent, 1, 2, "✅", "Drafting Drawing Checklist", 
                                "Quality control checklist for\ncommon drafting mistakes", 
                                self.launch_drafting_checklist)
     
@@ -142,9 +147,9 @@ class DashboardApp:
                              bg='white', highlightthickness=1, highlightbackground='#d0d0d0')
         tile_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Set minimum size for consistency
+        # Set minimum size for consistency (adjusted for 3-column layout)
         tile_frame.grid_propagate(False)
-        tile_frame.config(width=280, height=180)
+        tile_frame.config(width=250, height=160)
         
         # Create clickable button that fills the tile
         btn = tk.Button(tile_frame, relief='flat', bg='white', 
@@ -367,6 +372,18 @@ class DashboardApp:
         except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch Drafting Drawing Checklist:\n{str(e)}")
     
+    def launch_project_monitor(self):
+        """Launch the Project File Monitor application"""
+        try:
+            if os.path.exists('project_monitor.py'):
+                process = subprocess.Popen([sys.executable, 'project_monitor.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "project_monitor.py not found in current directory")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Project File Monitor:\n{str(e)}")
+    
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""
         self.child_processes = [p for p in self.child_processes if p.poll() is None]
@@ -444,18 +461,10 @@ Developed for CECO Environmental Corp
     def exit_application(self):
         """Exit the application and close all related windows"""
         try:
-            # Get list of currently running related processes
-            running_processes = self.get_running_related_processes()
-            
-            if running_processes:
-                process_list = "\n".join([f"• {proc.info.get('name', 'Unknown')} (PID: {proc.info.get('pid', 'Unknown')})" for proc in running_processes])
-                message = f"Are you sure you want to exit the Drafting Tools Suite?\n\nThis will close all open applications:\n\n{process_list}\n\nContinue?"
-            else:
-                message = "Are you sure you want to exit the Drafting Tools Suite?"
-            
-            if messagebox.askyesno("Exit Application", message):
-                # Find and close all related processes
-                self.close_all_related_processes()
+            # Simple confirmation dialog
+            if messagebox.askyesno("Exit Application", "Are you sure you want to exit the Drafting Tools Suite?"):
+                # Close tracked child processes only (safe approach)
+                self.close_tracked_processes()
                 
                 # Close the main window
                 self.root.quit()
@@ -464,163 +473,26 @@ Developed for CECO Environmental Corp
             # Fallback: just close the main window
             self.root.quit()
     
-    def get_running_related_processes(self):
-        """Get list of currently running related processes"""
+    def close_tracked_processes(self):
+        """Close all tracked child processes (simple and safe approach)"""
         try:
-            current_pid = os.getpid()
-            related_processes = []
-            
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                try:
-                    if proc.info['name'] and 'python' in proc.info['name'].lower():
-                        cmdline = proc.info.get('cmdline', [])
-                        if cmdline:
-                            cmdline_str = ' '.join(cmdline).lower()
-                            # More flexible matching - look for our script names anywhere in the command line
-                            if any(script in cmdline_str for script in ['projects.py', 'product_configurations.py', 'print_package.py', 'dashboard.py']):
-                                if proc.info['pid'] != current_pid:  # Don't include ourselves
-                                    related_processes.append(proc)
-                                    print(f"Found related process: PID {proc.info['pid']} - {cmdline_str}")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
-                    continue
-            
-            return related_processes
-        except Exception as e:
-            print(f"Error getting running processes: {e}")
-            return []
-    
-    def close_all_related_processes(self):
-        """Find and close all related drafting tools processes"""
-        try:
-            # Get current process ID to avoid closing ourselves
-            current_pid = os.getpid()
-            print(f"Current PID: {current_pid}")
-            
-            # Find all Python processes running our scripts
-            related_processes = []
-            all_python_processes = []
-            
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                try:
-                    if proc.info['name'] and 'python' in proc.info['name'].lower():
-                        cmdline = proc.info.get('cmdline', [])
-                        if cmdline:
-                            cmdline_str = ' '.join(cmdline)
-                            all_python_processes.append(f"PID {proc.info['pid']}: {cmdline_str}")
-                            
-                            # More flexible matching - look for our script names anywhere in the command line
-                            if any(script in cmdline_str.lower() for script in ['projects.py', 'product_configurations.py', 'print_package.py', 'dashboard.py']):
-                                if proc.info['pid'] != current_pid:  # Don't close ourselves
-                                    related_processes.append(proc)
-                                    print(f"Found related process: PID {proc.info['pid']} - {cmdline_str}")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
-                    continue
-            
-            # Also try to find by window title (Windows-specific)
-            try:
-                import win32gui
-                import win32process
-                
-                def enum_windows_callback(hwnd, windows):
-                    if win32gui.IsWindowVisible(hwnd):
-                        window_title = win32gui.GetWindowText(hwnd)
-                        if any(title in window_title for title in ['Product Configurations', 'Project Management', 'Print Package Management', 'Drafting Tools']):
-                            _, pid = win32process.GetWindowThreadProcessId(hwnd)
-                            if pid != current_pid:
-                                # Find the process object
-                                for proc in psutil.process_iter(['pid']):
-                                    if proc.info['pid'] == pid:
-                                        if proc not in related_processes:
-                                            related_processes.append(proc)
-                                            print(f"Found by window title: PID {pid} - {window_title}")
-                                        break
-                    return True
-                
-                win32gui.EnumWindows(enum_windows_callback, [])
-            except ImportError:
-                print("win32gui not available, skipping window title detection")
-            except Exception as e:
-                print(f"Error in window title detection: {e}")
-            
-            print(f"All Python processes found:")
-            for proc_info in all_python_processes:
-                print(f"  {proc_info}")
-            
-            print(f"Related processes to close: {len(related_processes)}")
-            
-            # Close all related processes
-            for proc in related_processes:
-                try:
-                    print(f"Attempting to close process: {proc.info['pid']} - {' '.join(proc.info['cmdline'])}")
-                    proc.terminate()
-                    # Give it a moment to close gracefully
-                    try:
-                        proc.wait(timeout=3)
-                        print(f"Successfully closed process: {proc.info['pid']}")
-                    except psutil.TimeoutExpired:
-                        # Force kill if it doesn't close gracefully
-                        print(f"Force killing process: {proc.info['pid']}")
-                        proc.kill()
-                        print(f"Force killed process: {proc.info['pid']}")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-                    print(f"Error closing process {proc.info['pid']}: {e}")
-            
-            print(f"Closed {len(related_processes)} related processes")
-            
-            # If no processes were found, try a more aggressive approach
-            if len(related_processes) == 0:
-                print("No processes found with standard detection, trying aggressive approach...")
-                self.aggressive_process_cleanup(current_pid)
-            
-        except Exception as e:
-            print(f"Error finding related processes: {e}")
-            # Fallback: try to close tracked processes
             for process in self.child_processes:
                 try:
                     if process.poll() is None:  # Process is still running
+                        print(f"Closing tracked process: {process.pid}")
                         process.terminate()
                         try:
                             process.wait(timeout=2)
+                            print(f"Successfully closed tracked process: {process.pid}")
                         except subprocess.TimeoutExpired:
+                            print(f"Force killing tracked process: {process.pid}")
                             process.kill()
                 except Exception as e:
-                    print(f"Error closing tracked process: {e}")
+                    print(f"Error closing tracked process {process.pid}: {e}")
             
             self.child_processes.clear()
-    
-    def aggressive_process_cleanup(self, current_pid):
-        """More aggressive approach to find and close related processes"""
-        try:
-            print("Attempting aggressive process cleanup...")
-            killed_count = 0
-            
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                try:
-                    if proc.info['name'] and 'python' in proc.info['name'].lower():
-                        if proc.info['pid'] != current_pid:
-                            cmdline = proc.info.get('cmdline', [])
-                            if cmdline:
-                                cmdline_str = ' '.join(cmdline)
-                                # Look for any indication this might be our app
-                                if any(indicator in cmdline_str.lower() for indicator in [
-                                    'product_configurations', 'projects', 'print_package', 'dashboard',
-                                    'drafting', 'tkinter', 'gui'
-                                ]):
-                                    print(f"Aggressively closing: PID {proc.info['pid']} - {cmdline_str}")
-                                    proc.terminate()
-                                    try:
-                                        proc.wait(timeout=2)
-                                        killed_count += 1
-                                    except psutil.TimeoutExpired:
-                                        proc.kill()
-                                        killed_count += 1
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError):
-                    continue
-            
-            print(f"Aggressive cleanup killed {killed_count} processes")
-            
         except Exception as e:
-            print(f"Error in aggressive cleanup: {e}")
+            print(f"Error closing tracked processes: {e}")
     
     def center_window(self):
         """Center the window on screen"""
