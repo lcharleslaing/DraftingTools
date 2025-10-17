@@ -47,6 +47,9 @@ class ProjectMonitor:
         
         # Clean up any duplicate file changes records
         self.cleanup_duplicate_changes()
+        
+        # Initialize logging
+        self.setup_logging()
     
     def cleanup_duplicate_deletions(self):
         """Clean up duplicate deletion records in the database"""
@@ -98,6 +101,74 @@ class ProjectMonitor:
             print("Cleaned up duplicate file changes records")
         except Exception as e:
             print(f"Error cleaning up duplicate changes: {e}")
+    
+    def setup_logging(self):
+        """Setup logging for file changes"""
+        import logging
+        from datetime import datetime
+        
+        # Create logs directory if it doesn't exist
+        log_dir = os.path.join(os.path.dirname(__file__), "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # Create log filename with date
+        log_filename = os.path.join(log_dir, f"project_monitor_{datetime.now().strftime('%Y%m%d')}.log")
+        
+        # Setup logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(log_filename),
+                logging.StreamHandler()  # Also log to console
+            ]
+        )
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.info("Project File Monitor started")
+    
+    def log_file_change(self, job_number, file_path, change_type, details=""):
+        """Log a file change event with user-friendly descriptions"""
+        if hasattr(self, 'logger'):
+            # Convert technical details to user-friendly descriptions
+            friendly_details = self.format_change_details(change_type, details)
+            self.logger.info(f"JOB:{job_number} | {change_type.upper()} | {file_path} | {friendly_details}")
+    
+    def format_change_details(self, change_type, details):
+        """Convert technical details to user-friendly descriptions"""
+        if change_type == "updated":
+            if "Hash:" in details and "Time:" in details:
+                hash_changed = "True" in details.split("Hash:")[1].split(",")[0]
+                time_changed = "True" in details.split("Time:")[1]
+                
+                if hash_changed and time_changed:
+                    return "Content changed & File modified"
+                elif hash_changed and not time_changed:
+                    return "Content changed (same time)"
+                elif not hash_changed and time_changed:
+                    return "File modified (same content)"
+                else:
+                    return "File updated"
+            else:
+                return "File updated"
+        
+        elif change_type == "new":
+            if "Size:" in details:
+                size_bytes = int(details.split("Size:")[1].split(" bytes")[0])
+                size_mb = size_bytes / (1024 * 1024)
+                if size_mb >= 1:
+                    return f"New file ({size_mb:.1f} MB)"
+                else:
+                    size_kb = size_bytes / 1024
+                    return f"New file ({size_kb:.1f} KB)"
+            else:
+                return "New file added"
+        
+        elif change_type == "deleted":
+            return "File removed from project"
+        
+        else:
+            return details
     
     def clean_database(self):
         """Manually clean up duplicate records in the database"""
@@ -1001,11 +1072,17 @@ class ProjectMonitor:
                                 # File has been updated (allow 1 second tolerance for timestamp precision)
                                 self.record_file_change(cursor, job_number, relative_path, "updated", old_hash, file_hash)
                                 changes_detected += 1
+                                # Log and show in console
+                                print(f"📝 UPDATED: {file}")
+                                self.log_file_change(job_number, relative_path, "updated", f"Hash: {hash_changed}, Time: {time_changed}")
                         else:
                             # New file (but skip if locked)
                             if file_hash != "locked_file":
                                 self.record_file_change(cursor, job_number, relative_path, "new", None, file_hash)
                                 changes_detected += 1
+                                # Log and show in console
+                                print(f"🆕 NEW FILE: {file}")
+                                self.log_file_change(job_number, relative_path, "new", f"Size: {file_size} bytes")
                         
                         # Update or insert file record (even for locked files, use modification time)
                         cursor.execute('''
@@ -1042,6 +1119,9 @@ class ProjectMonitor:
                     # Only record if not already recorded
                     self.record_file_change(cursor, job_number, deleted_file, "deleted", existing_files[deleted_file][0], None)
                     changes_detected += 1
+                    # Log and show in console
+                    print(f"🗑️  DELETED: {os.path.basename(deleted_file)}")
+                    self.log_file_change(job_number, deleted_file, "deleted", f"Previously: {existing_files[deleted_file][0]}")
                 
                 # Remove from project_structure table
                 cursor.execute('''
@@ -1064,7 +1144,10 @@ class ProjectMonitor:
             conn.close()
             
             # Print scan summary
-            # Scan completed
+            if changes_detected > 0:
+                print(f"\n✅ SCAN COMPLETE: {job_number} - {changes_detected} changes detected")
+            else:
+                print(f"\n✅ SCAN COMPLETE: {job_number} - No changes")
             
         except Exception as e:
             print(f"Error scanning {job_number}: {e}")
