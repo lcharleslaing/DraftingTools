@@ -15,9 +15,11 @@ class CoilVerificationTool:
         self.db_path = "coil_verification.db"
         self.conn = None
         
+        # Connect to database first
+        self.connect_database()
+        
         # Create main interface
         self.create_widgets()
-        self.connect_database()
         
         # Bind window close event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -32,18 +34,157 @@ class CoilVerificationTool:
             messagebox.showerror("Database Error", f"Failed to connect to database:\n{str(e)}")
     
     def get_available_diameters(self):
-        """Get all available diameters from the database"""
+        """Get all available diameters from the database sorted by Heater/Tank, Material, Diameter"""
         if not self.conn:
-            return ["ALL"]
+            print("No database connection available for diameters")
+            return []
         
         try:
             cursor = self.conn.cursor()
-            cursor.execute("SELECT DISTINCT diameter_inches FROM coil_specifications ORDER BY diameter_inches")
-            diameters = [str(row[0]) for row in cursor.fetchall()]
-            return ["ALL"] + diameters
+            
+            # First, check if table exists and has data
+            cursor.execute("SELECT COUNT(*) FROM coil_specifications")
+            count = cursor.fetchone()[0]
+            print(f"Total records in database: {count}")
+            
+            if count == 0:
+                print("No data in coil_specifications table")
+                return []
+            
+            cursor.execute("""
+                SELECT DISTINCT component_type, material_type, diameter_inches 
+                FROM coil_specifications 
+                ORDER BY component_type, material_type, diameter_inches
+            """)
+            results = cursor.fetchall()
+            
+            print(f"Found {len(results)} diameter combinations")
+            
+            # Create formatted diameter list
+            diameter_list = []
+            for row in results:
+                component, material, diameter = row
+                # Format: "HEATER - SS304 - 28.25"
+                formatted = f"{component} - {material} - {diameter}\""
+                diameter_list.append(formatted)
+                print(f"Added diameter: {formatted}")
+            
+            print(f"Total diameter options: {len(diameter_list)}")
+            return diameter_list
         except Exception as e:
             print(f"Error getting diameters: {e}")
-            return ["ALL"]
+            # Fallback - return some basic diameters
+            fallback_diameters = [
+                "HEATER - SS304 - 28.25\"",
+                "HEATER - SS304 - 31.125\"",
+                "TANK - SS304 - 48\"",
+                "TANK - SS304 - 60\"",
+                "TANK - SS316 - 48\"",
+                "TANK - SS316 - 60\""
+            ]
+            print(f"Using fallback diameters: {len(fallback_diameters)}")
+            return fallback_diameters
+    
+    def get_available_materials(self, sheet_size=None):
+        """Get available materials based on sheet size selection"""
+        if not self.conn:
+            return ["SS304", "SS316", "ALL"]
+        
+        try:
+            cursor = self.conn.cursor()
+            if sheet_size and sheet_size != "ALL":
+                # Extract sheet size number (48, 60, 72)
+                sheet_num = int(sheet_size.replace('"', ''))
+                cursor.execute("""
+                    SELECT DISTINCT material_type 
+                    FROM coil_specifications 
+                    WHERE sheet_size = ?
+                    ORDER BY material_type
+                """, (f"{sheet_num}\"",))
+            else:
+                cursor.execute("""
+                    SELECT DISTINCT material_type 
+                    FROM coil_specifications 
+                    ORDER BY material_type
+                """)
+            
+            results = cursor.fetchall()
+            materials = [row[0] for row in results]
+            return ["ALL"] + materials
+        except Exception as e:
+            print(f"Error getting materials: {e}")
+            return ["SS304", "SS316", "ALL"]
+    
+    def get_filtered_diameters(self, sheet_size=None, material_type=None):
+        """Get available diameters based on sheet size and material selection"""
+        if not self.conn:
+            return []
+        
+        try:
+            cursor = self.conn.cursor()
+            query = "SELECT DISTINCT diameter_inches FROM coil_specifications WHERE 1=1"
+            params = []
+            
+            if sheet_size and sheet_size != "ALL":
+                # Extract sheet size number (48, 60, 72)
+                sheet_num = int(sheet_size.replace('"', ''))
+                query += " AND sheet_size = ?"
+                params.append(f"{sheet_num}\"")
+            
+            if material_type and material_type != "ALL":
+                query += " AND material_type = ?"
+                params.append(material_type)
+            
+            query += " ORDER BY diameter_inches"
+            
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            
+            diameter_list = []
+            for row in results:
+                diameter = row[0]
+                # Format: "28.25""
+                formatted = f"{diameter}\""
+                diameter_list.append(formatted)
+            
+            return diameter_list
+        except Exception as e:
+            print(f"Error getting filtered diameters: {e}")
+            return []
+    
+    def on_sheet_size_changed(self, event=None):
+        """Handle sheet size selection change"""
+        sheet_size = self.sheet_size_var.get()
+        print(f"Sheet size changed to: {sheet_size}")
+        
+        # Update materials dropdown
+        materials = self.get_available_materials(sheet_size)
+        self.material_combo['values'] = materials
+        self.material_combo.set("ALL")
+        
+        # Clear and update diameter dropdown
+        self.diameter_var.set("")
+        self.update_diameter_dropdown()
+    
+    def on_material_changed(self, event=None):
+        """Handle material type selection change"""
+        sheet_size = self.sheet_size_var.get()
+        material = self.material_var.get()
+        print(f"Material changed to: {material}")
+        
+        # Update diameter dropdown
+        self.diameter_var.set("")
+        self.update_diameter_dropdown()
+    
+    def update_diameter_dropdown(self):
+        """Update diameter dropdown based on current selections"""
+        sheet_size = self.sheet_size_var.get()
+        material = self.material_var.get()
+        
+        diameters = self.get_filtered_diameters(sheet_size, material)
+        self.diameter_combo['values'] = diameters
+        
+        print(f"Updated diameter dropdown with {len(diameters)} options")
     
     def create_widgets(self):
         """Create the main interface widgets"""
@@ -64,29 +205,31 @@ class CoilVerificationTool:
         params_frame = ttk.Frame(search_frame)
         params_frame.pack(fill=tk.X)
         
-        # Component Type
-        ttk.Label(params_frame, text="Component Type:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
-        self.component_var = tk.StringVar()
-        component_combo = ttk.Combobox(params_frame, textvariable=self.component_var, 
-                                      values=["HEATER", "TANK", "ALL"], state="readonly", width=15)
-        component_combo.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
-        component_combo.set("ALL")
+        # Sheet Size
+        ttk.Label(params_frame, text="Sheet Size:").grid(row=0, column=0, sticky=tk.W, padx=(0, 10))
+        self.sheet_size_var = tk.StringVar()
+        self.sheet_size_combo = ttk.Combobox(params_frame, textvariable=self.sheet_size_var, 
+                                            values=["48\"", "60\"", "72\"", "ALL"], state="readonly", width=15)
+        self.sheet_size_combo.grid(row=0, column=1, sticky=tk.W, padx=(0, 20))
+        self.sheet_size_combo.set("ALL")
+        self.sheet_size_combo.bind('<<ComboboxSelected>>', self.on_sheet_size_changed)
         
         # Material Type
         ttk.Label(params_frame, text="Material:").grid(row=0, column=2, sticky=tk.W, padx=(0, 10))
         self.material_var = tk.StringVar()
-        material_combo = ttk.Combobox(params_frame, textvariable=self.material_var,
-                                     values=["SS304", "SS316", "ALL"], state="readonly", width=15)
-        material_combo.grid(row=0, column=3, sticky=tk.W, padx=(0, 20))
-        material_combo.set("ALL")
+        self.material_combo = ttk.Combobox(params_frame, textvariable=self.material_var,
+                                          values=self.get_available_materials(), state="readonly", width=15)
+        self.material_combo.grid(row=0, column=3, sticky=tk.W, padx=(0, 20))
+        self.material_combo.set("ALL")
+        self.material_combo.bind('<<ComboboxSelected>>', self.on_material_changed)
         
         # Diameter
         ttk.Label(params_frame, text="Diameter:").grid(row=0, column=4, sticky=tk.W, padx=(0, 10))
         self.diameter_var = tk.StringVar()
-        diameter_combo = ttk.Combobox(params_frame, textvariable=self.diameter_var,
-                                     values=self.get_available_diameters(), state="readonly", width=15)
-        diameter_combo.grid(row=0, column=5, sticky=tk.W, padx=(0, 20))
-        diameter_combo.set("ALL")
+        self.diameter_combo = ttk.Combobox(params_frame, textvariable=self.diameter_var,
+                                          values=self.get_available_diameters(), state="readonly", width=25)
+        self.diameter_combo.grid(row=0, column=5, sticky=tk.W, padx=(0, 20))
+        # No default selection - user must choose
         
         # Coil Length
         ttk.Label(params_frame, text="Coil Length:").grid(row=1, column=0, sticky=tk.W, padx=(0, 10))
@@ -111,6 +254,9 @@ class CoilVerificationTool:
         
         clear_btn = ttk.Button(button_frame, text="Clear Search", command=self.clear_search)
         clear_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        refresh_btn = ttk.Button(button_frame, text="Refresh Diameters", command=self.refresh_diameters)
+        refresh_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         # Part number search frame
         part_search_frame = ttk.LabelFrame(search_frame, text="Part Number Lookup", padding="5")
@@ -155,6 +301,9 @@ class CoilVerificationTool:
         results_frame.columnconfigure(0, weight=1)
         results_frame.rowconfigure(0, weight=1)
         
+        # Create right-click context menu
+        self.create_context_menu()
+        
         # Status bar
         self.status_var = tk.StringVar()
         self.status_var.set("Ready - Select search parameters and click Search Coils")
@@ -172,10 +321,12 @@ class CoilVerificationTool:
             query = "SELECT * FROM coil_specifications WHERE 1=1"
             params = []
             
-            component = self.component_var.get()
-            if component != "ALL":
-                query += " AND component_type = ?"
-                params.append(component)
+            sheet_size = self.sheet_size_var.get()
+            if sheet_size != "ALL":
+                # Extract sheet size number (48, 60, 72)
+                sheet_num = int(sheet_size.replace('"', ''))
+                query += " AND sheet_size = ?"
+                params.append(f"{sheet_num}\"")
             
             material = self.material_var.get()
             if material != "ALL":
@@ -183,9 +334,15 @@ class CoilVerificationTool:
                 params.append(material)
             
             diameter = self.diameter_var.get()
-            if diameter != "ALL":
-                query += " AND diameter_inches = ?"
-                params.append(float(diameter))
+            if diameter and diameter.strip():
+                # Parse the diameter string: "28.25""
+                try:
+                    diameter_value = float(diameter.replace('"', ''))
+                    query += " AND diameter_inches = ?"
+                    params.append(diameter_value)
+                except ValueError:
+                    messagebox.showwarning("Warning", "Invalid diameter value selected")
+                    return
             
             # Add coil length search with tolerance
             length_str = self.length_var.get().strip()
@@ -278,18 +435,40 @@ class CoilVerificationTool:
     
     def clear_search(self):
         """Clear search parameters and results"""
-        self.component_var.set("ALL")
+        self.sheet_size_var.set("ALL")
         self.material_var.set("ALL")
-        self.diameter_var.set("ALL")
+        self.diameter_var.set("")  # Clear diameter selection
         self.length_var.set("")
         self.tolerance_var.set("0.25")
         self.part_number_var.set("")
+        
+        # Reset dropdowns to show all options
+        materials = self.get_available_materials()
+        self.material_combo['values'] = materials
+        self.update_diameter_dropdown()
         
         # Clear results
         for item in self.results_tree.get_children():
             self.results_tree.delete(item)
         
         self.status_var.set("Search cleared - Ready for new search")
+    
+    def refresh_diameters(self):
+        """Refresh the diameter dropdown with current database data"""
+        try:
+            # Update diameter dropdown based on current selections
+            self.update_diameter_dropdown()
+            
+            # Also refresh materials dropdown
+            sheet_size = self.sheet_size_var.get()
+            materials = self.get_available_materials(sheet_size)
+            self.material_combo['values'] = materials
+            
+            self.status_var.set("Refreshed all dropdowns with current database data")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to refresh dropdowns:\n{str(e)}")
+            self.status_var.set("Failed to refresh dropdowns")
     
     def get_database_stats(self):
         """Get database statistics"""
@@ -335,6 +514,67 @@ class CoilVerificationTool:
         except Exception as e:
             return f"Error getting statistics: {str(e)}"
     
+    def create_context_menu(self):
+        """Create right-click context menu for the search results"""
+        self.context_menu = tk.Menu(self.root, tearoff=0)
+        self.context_menu.add_command(label="Copy Part Number", command=self.copy_part_number)
+        self.context_menu.add_command(label="Copy Description", command=self.copy_description)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label="Copy All Selected", command=self.copy_all_selected)
+        
+        # Bind right-click event to treeview
+        self.results_tree.bind("<Button-3>", self.show_context_menu)  # Button-3 is right-click on Windows
+        self.results_tree.bind("<Button-2>", self.show_context_menu)  # Button-2 is right-click on Mac/Linux
+    
+    def show_context_menu(self, event):
+        """Show context menu at cursor position"""
+        # Select the item under the cursor
+        item = self.results_tree.identify_row(event.y)
+        if item:
+            self.results_tree.selection_set(item)
+            # Show context menu
+            try:
+                self.context_menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.context_menu.grab_release()
+    
+    def copy_part_number(self):
+        """Copy the part number of the selected row to clipboard"""
+        selection = self.results_tree.selection()
+        if selection:
+            item = selection[0]
+            values = self.results_tree.item(item, 'values')
+            if values:
+                part_number = values[0]  # Part Number is the first column
+                self.root.clipboard_clear()
+                self.root.clipboard_append(part_number)
+                self.status_var.set(f"Copied Part Number: {part_number}")
+    
+    def copy_description(self):
+        """Copy the description of the selected row to clipboard"""
+        selection = self.results_tree.selection()
+        if selection:
+            item = selection[0]
+            values = self.results_tree.item(item, 'values')
+            if values:
+                description = values[1]  # Description is the second column
+                self.root.clipboard_clear()
+                self.root.clipboard_append(description)
+                self.status_var.set(f"Copied Description: {description}")
+    
+    def copy_all_selected(self):
+        """Copy all data from the selected row to clipboard"""
+        selection = self.results_tree.selection()
+        if selection:
+            item = selection[0]
+            values = self.results_tree.item(item, 'values')
+            if values:
+                # Format: Part Number | Description | Material | Diameter | Component | Length | Square Feet | Gauge
+                formatted_text = " | ".join(str(v) for v in values)
+                self.root.clipboard_clear()
+                self.root.clipboard_append(formatted_text)
+                self.status_var.set("Copied all data from selected row")
+
     def on_closing(self):
         """Handle application closing"""
         if self.conn:

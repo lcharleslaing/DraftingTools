@@ -94,27 +94,60 @@ class CoilDataProcessor:
         diameter_values.sort(key=lambda x: x[0])
         
         for row_num, diameter_value in diameter_values:
-            # Calculate values based on formulas
-            length = self._calculate_length_from_diameter(diameter_value)
-            part_number = self._generate_part_number(material, diameter_value, length)
-            description = self._generate_description(material, diameter_value, length)
-            square_feet = self._calculate_square_feet_from_values(diameter_value, length)
+            # Get actual part number and description from JSON
+            part_cell = f"C{row_num}"
+            desc_cell = f"D{row_num}"
+            length_cell = f"B{row_num}"
+            sqft_cell = f"E{row_num}"
+            
+            # Extract actual values from JSON
+            part_number = None
+            description = None
+            length = None
+            square_feet = None
+            
+            # Get part number - calculate from formula
+            if part_cell in sheet_data and 'formula' in sheet_data[part_cell]:
+                part_number = self._calculate_part_number_from_formula(sheet_data[part_cell]['formula'], material, diameter, diameter_value)
+            elif part_cell in sheet_data and 'value' in sheet_data[part_cell]:
+                part_number = sheet_data[part_cell]['value']
+            
+            # Get description - calculate from formula
+            if desc_cell in sheet_data and 'formula' in sheet_data[desc_cell]:
+                description = self._calculate_description_from_formula(sheet_data[desc_cell]['formula'], material, diameter, diameter_value)
+            elif desc_cell in sheet_data and 'value' in sheet_data[desc_cell]:
+                description = sheet_data[desc_cell]['value']
+            
+            # Get length
+            if length_cell in sheet_data and 'value' in sheet_data[length_cell]:
+                length = sheet_data[length_cell]['value']
+            elif length_cell in sheet_data and 'formula' in sheet_data[length_cell]:
+                length = self._calculate_length_from_diameter(diameter_value)
+            
+            # Get square feet
+            if sqft_cell in sheet_data and 'value' in sheet_data[sqft_cell]:
+                square_feet = sheet_data[sqft_cell]['value']
+            elif sqft_cell in sheet_data and 'formula' in sheet_data[sqft_cell]:
+                square_feet = self._calculate_square_feet_from_values(diameter_value, length)
             
             # Determine component type based on diameter
             component_type = self._determine_component_type_from_diameter(diameter_value)
             
-            record = {
-                'part_number': part_number,
-                'description': description,
-                'material_type': material,
-                'diameter_inches': diameter_value,  # Use actual diameter value, not sheet diameter
-                'component_type': component_type,
-                'length_inches': length,
-                'square_feet': square_feet,
-                'gauge': "12GA",
-                'sheet_size': f"{diameter}\""
-            }
-            records.append(record)
+            # Only add record if we have valid part number and description
+            if part_number and description and length and square_feet:
+                record = {
+                    'part_number': part_number,
+                    'description': description,
+                    'material_type': material,
+                    'diameter_inches': diameter_value,
+                    'component_type': component_type,
+                    'length_inches': length,
+                    'square_feet': square_feet,
+                    'gauge': "12GA",
+                    'sheet_size': f"{diameter}\""
+                }
+                records.append(record)
+                print(f"Added record: {part_number} - {description} - Length: {length}")
         
         return records
     
@@ -128,9 +161,10 @@ class CoilDataProcessor:
         try:
             import math
             # Formula: =CEILING((PI()*(A3-0.1094))+2,0.25)
-            length = math.ceil((math.pi * (diameter_value - 0.1094)) + 2)
-            # Round to nearest 0.25
-            return round(length * 4) / 4
+            # CEILING rounds UP to the nearest 0.25
+            raw_length = (math.pi * (diameter_value - 0.1094)) + 2
+            # Round UP to nearest 0.25
+            return math.ceil(raw_length * 4) / 4
         except:
             return 0.0
     
@@ -142,6 +176,28 @@ class CoilDataProcessor:
             return f"{material_code}-12-{diameter}-{length}"
         except:
             return f"{material_code}-12-{diameter}-UNKNOWN"
+    
+    def _calculate_part_number_from_formula(self, formula: str, material: str, sheet_diameter: int, actual_diameter: float) -> str:
+        """Calculate part number from Excel formula"""
+        try:
+            # Formula: =_xlfn.CONCAT($A$1,"-",12,"-",$B$1,"-",$B3)
+            # Where $A$1 = "SS304 48\" SHEET", $B$1 = "48", $B3 = calculated length
+            material_code = "304" if material == "SS304" else "316"
+            length = self._calculate_length_from_diameter(actual_diameter)
+            return f"{material_code}-12-{sheet_diameter}-{length}"
+        except:
+            material_code = "304" if material == "SS304" else "316"
+            return f"{material_code}-12-{sheet_diameter}-UNKNOWN"
+    
+    def _calculate_description_from_formula(self, formula: str, material: str, sheet_diameter: int, actual_diameter: float) -> str:
+        """Calculate description from Excel formula"""
+        try:
+            # Formula: =_xlfn.CONCAT(D$2," X ",$B3)
+            # Where D$2 = "SHEET, 304, 12GA, 48\"", $B3 = calculated length
+            length = self._calculate_length_from_diameter(actual_diameter)
+            return f"SHEET, {material}, 12GA, {sheet_diameter}\" X {length}"
+        except:
+            return f"SHEET, {material}, 12GA, {sheet_diameter}\" X UNKNOWN"
     
     def _generate_description(self, material: str, diameter: float, length: float) -> str:
         """Generate description based on material, diameter, and length"""
@@ -176,6 +232,10 @@ class CoilDataProcessor:
     def insert_coil_data(self, records: List[Dict]):
         """Insert coil records into database"""
         cursor = self.conn.cursor()
+        
+        # Clear existing data first
+        cursor.execute("DELETE FROM coil_specifications")
+        print("Cleared existing data from database")
         
         for record in records:
             try:
