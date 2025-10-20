@@ -22,6 +22,9 @@ class DashboardApp:
         # Configure style
         self.setup_styles()
         
+        # CREATE BUTTONS FIRST - BEFORE ANYTHING ELSE
+        self.create_buttons_immediately()
+        
         # Create main interface
         self.create_widgets()
         
@@ -33,6 +36,30 @@ class DashboardApp:
         
         # Center the window
         self.center_window()
+    
+    def create_buttons_immediately(self):
+        """Create buttons immediately on root window - GUARANTEED TO WORK"""
+        # Create a simple frame for buttons
+        self.button_frame = tk.Frame(self.root, bg='red', height=60)  # Red background to make it visible
+        self.button_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=5)
+        
+        # Create buttons with bright colors to make them visible
+        self.about_btn = tk.Button(self.button_frame, text="ABOUT", 
+                                  command=self.show_about, 
+                                  bg='yellow', fg='black', font=('Arial', 12, 'bold'))
+        self.about_btn.pack(side=tk.RIGHT, padx=5, pady=5)
+        
+        self.running_btn = tk.Button(self.button_frame, text="RUNNING APPS", 
+                                    command=self.show_running_apps, 
+                                    bg='orange', fg='black', font=('Arial', 12, 'bold'))
+        self.running_btn.pack(side=tk.RIGHT, padx=5, pady=5)
+        
+        self.exit_btn = tk.Button(self.button_frame, text="EXIT", 
+                                 command=self.exit_application, 
+                                 bg='red', fg='white', font=('Arial', 12, 'bold'))
+        self.exit_btn.pack(side=tk.RIGHT, padx=5, pady=5)
+        
+        print("IMMEDIATE buttons created with bright colors - they MUST be visible!")
     
     def update_user_display(self):
         """Update the user display in the header"""
@@ -103,60 +130,50 @@ class DashboardApp:
     
     def create_widgets(self):
         """Create the main dashboard widgets"""
-        # Main container
-        main_frame = ttk.Frame(self.root)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Create a simple layout with buttons at the bottom
+        # Header
+        header_frame = ttk.Frame(self.root)
+        header_frame.pack(fill=tk.X, padx=20, pady=(20, 10))
         
-        # Header section with user info and settings
-        header_frame = ttk.Frame(main_frame)
-        header_frame.pack(fill=tk.X, pady=(0, 20))
-        
-        # Left side - Title
-        title_frame = ttk.Frame(header_frame)
-        title_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        title_label = ttk.Label(title_frame, text="Drafting Tools Dashboard", 
+        title_label = ttk.Label(header_frame, text="Drafting Tools Dashboard", 
                                style='Title.TLabel')
         title_label.pack()
         
-        subtitle_label = ttk.Label(title_frame, text="Project Management & Product Configuration Suite", 
+        subtitle_label = ttk.Label(header_frame, text="Project Management & Product Configuration Suite", 
                                   style='Subtitle.TLabel')
         subtitle_label.pack(pady=(5, 0))
         
-        # Right side - User info and settings
+        # User info
         user_frame = ttk.Frame(header_frame)
         user_frame.pack(side=tk.RIGHT)
         
-        # Current user display
         self.user_label = ttk.Label(user_frame, text="User: Not Set", 
                                    font=('Arial', 12, 'bold'))
         self.user_label.pack(side=tk.RIGHT, padx=(10, 0))
         
-        # Settings button
         settings_btn = ttk.Button(user_frame, text="⚙️ Settings", 
                                  command=self.open_settings)
         settings_btn.pack(side=tk.RIGHT)
         
-        # Update user display
         self.update_user_display()
         
-        # Applications grid
-        apps_frame = ttk.Frame(main_frame)
+        # Apps container
+        apps_container = ttk.Frame(self.root)
+        apps_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        # Apps grid
+        apps_frame = ttk.Frame(apps_container)
         apps_frame.pack(fill=tk.BOTH, expand=True)
         
-        # Configure grid weights for 3 columns
-        apps_frame.columnconfigure(0, weight=1)
-        apps_frame.columnconfigure(1, weight=1)
-        apps_frame.columnconfigure(2, weight=1)
-        apps_frame.rowconfigure(0, weight=1)
-        apps_frame.rowconfigure(1, weight=1)
-        apps_frame.rowconfigure(2, weight=1)
+        # Configure grid
+        for i in range(3):
+            apps_frame.columnconfigure(i, weight=1)
+        for i in range(4):
+            apps_frame.rowconfigure(i, weight=1)
         
-        # Application buttons
         self.create_app_buttons(apps_frame)
         
-        # Control buttons
-        self.create_control_buttons(main_frame)
+        # Control buttons are already created in __init__
     
     def create_app_buttons(self, parent):
         """Create application launch buttons as custom tiles"""
@@ -209,10 +226,15 @@ class DashboardApp:
                                "Manage Print Package Review\nworkflows and stage transitions", 
                                self.launch_workflow_manager)
         
-        # SHIT BRICKS SIDEWAYS (Placeholder for now!)
-        self.create_app_tile(parent, 3, 0, "💩", "SHIT BRICKS SIDEWAYS", 
-                               "Coming soon! (You'll remember\nwhat this was for eventually!)", 
-                               self.launch_shit_bricks_sideways)
+        # Coil Verification Tool
+        self.create_app_tile(parent, 3, 0, "🔍", "Coil Verification Tool", 
+                               "Search and verify coil part numbers\nby Heater/Tank, Material & Diameter", 
+                               self.launch_coil_verification)
+        
+        # SHIT BRICKS SIDEWAYS (Placeholder for now!) - Moved to row 2, col 2 to replace Workflow Manager
+        # self.create_app_tile(parent, 3, 0, "💩", "SHIT BRICKS SIDEWAYS", 
+        #                        "Coming soon! (You'll remember\nwhat this was for eventually!)", 
+        #                        self.launch_shit_bricks_sideways)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a consistent app tile with icon, title, description, and counter"""
@@ -361,6 +383,18 @@ class DashboardApp:
                 conn.close()
                 return f"{count} Active Project{'s' if count != 1 else ''}"
             
+            elif "Coil Verification Tool" in tile_title:
+                # Count coil specifications in the verification database
+                try:
+                    coil_conn = sqlite3.connect('coil_verification.db')
+                    coil_cursor = coil_conn.cursor()
+                    coil_cursor.execute("SELECT COUNT(*) FROM coil_specifications")
+                    count = coil_cursor.fetchone()[0]
+                    coil_conn.close()
+                    return f"{count} Coil Spec{'s' if count != 1 else ''}"
+                except:
+                    return "Database Not Ready"
+            
             else:
                 conn.close()
                 return ""
@@ -368,27 +402,7 @@ class DashboardApp:
             print(f"Error getting counter: {e}")
             return ""
     
-    def create_control_buttons(self, parent):
-        """Create control buttons at the bottom - right-aligned, evenly spaced"""
-        control_frame = ttk.Frame(parent)
-        control_frame.pack(fill=tk.X, pady=(30, 0))
-        
-        # Create a right-aligned container for buttons
-        button_container = ttk.Frame(control_frame)
-        button_container.pack(side=tk.RIGHT)
-        
-        # All buttons right-aligned with consistent sizing and spacing
-        about_btn = ttk.Button(button_container, text="About", 
-                              command=self.show_about, style='Control.TButton')
-        about_btn.pack(side=tk.LEFT, padx=5)
-        
-        running_btn = ttk.Button(button_container, text="Show Running Apps", 
-                                command=self.show_running_apps, style='Control.TButton')
-        running_btn.pack(side=tk.LEFT, padx=5)
-        
-        exit_btn = ttk.Button(button_container, text="Exit Application", 
-                             command=self.exit_application, style='Control.TButton')
-        exit_btn.pack(side=tk.LEFT, padx=5)
+    
     
     def launch_projects(self):
         """Launch the Projects Management application"""
@@ -498,6 +512,18 @@ class DashboardApp:
         except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch Workflow Manager:\n{str(e)}")
     
+    def launch_coil_verification(self):
+        """Launch the Coil Verification Tool application"""
+        try:
+            if os.path.exists('coil_verification_tool.py'):
+                process = subprocess.Popen([sys.executable, 'coil_verification_tool.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "coil_verification_tool.py not found in current directory")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Coil Verification Tool:\n{str(e)}")
+    
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""
         self.child_processes = [p for p in self.child_processes if p.poll() is None]
@@ -527,6 +553,31 @@ class DashboardApp:
                            "• Cost estimation tools\n"
                            "• Report generation\n\n"
                            "Stay tuned for updates!")
+    
+    def launch_shit_bricks_sideways(self):
+        """Placeholder launcher for SHIT BRICKS SIDEWAYS tile"""
+        self.show_coming_soon()
+    
+    def get_running_related_processes(self):
+        """Get list of running processes related to drafting tools"""
+        try:
+            import psutil
+            related_processes = []
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    if proc.info['cmdline']:
+                        cmdline_str = ' '.join(proc.info['cmdline'])
+                        if any(app in cmdline_str for app in ['projects.py', 'product_configurations.py', 
+                                                             'print_package.py', 'd365_import_formatter.py',
+                                                             'drafting_items_to_look_for.py', 'project_monitor.py',
+                                                             'drawing_reviews.py', 'workflow_manager.py']):
+                            related_processes.append(proc)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+            return related_processes
+        except ImportError:
+            # Fallback if psutil is not available
+            return []
     
     def show_running_apps(self):
         """Show currently running applications"""

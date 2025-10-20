@@ -1,0 +1,4640 @@
+{
+  "Complete List": {
+    "A1": {
+      "value": "SS304 48\" SHEET"
+    },
+    "C1": {
+      "value": "SS304 60\" SHEET"
+    },
+    "E1": {
+      "value": "SS304 72\" SHEET"
+    },
+    "G1": {
+      "value": "SS316 48\" SHEET"
+    },
+    "I1": {
+      "value": "SS316 60\" SHEET"
+    },
+    "K1": {
+      "value": "SS316 72\" SHEET"
+    },
+    "A2": {
+      "value": "PART NUMBER"
+    },
+    "B2": {
+      "value": "DESCRIPTION"
+    },
+    "C2": {
+      "value": "PART NUMBER"
+    },
+    "D2": {
+      "value": "DESCRIPTION"
+    },
+    "E2": {
+      "value": "PART NUMBER"
+    },
+    "F2": {
+      "value": "DESCRIPTION"
+    },
+    "G2": {
+      "value": "PART NUMBER"
+    },
+    "H2": {
+      "value": "DESCRIPTION"
+    },
+    "I2": {
+      "value": "PART NUMBER"
+    },
+    "J2": {
+      "value": "DESCRIPTION"
+    },
+    "K2": {
+      "value": "PART NUMBER"
+    },
+    "L2": {
+      "value": "DESCRIPTION"
+    },
+    "A3": {
+      "formula": "='48 Sheet - SS304'!C3"
+    },
+    "B3": {
+      "formula": "='48 Sheet - SS304'!D3"
+    },
+    "C3": {
+      "formula": "='60 Sheet - SS304'!C3"
+    },
+    "D3": {
+      "formula": "='60 Sheet - SS304'!D3"
+    },
+    "E3": {
+      "formula": "='72 Sheet - SS304'!C3"
+    },
+    "F3": {
+      "formula": "='72 Sheet - SS304'!D3"
+    },
+    "G3": {
+      "formula": "='48 Sheet - SS316'!C3"
+    },
+    "H3": {
+      "formula": "='48 Sheet - SS316'!D3"
+    },
+    "I3": {
+      "formula": "='60 Sheet - SS316'!C3"
+    },
+    "J3": {
+      "formula": "='60 Sheet - SS316'!D3"
+    },
+    "K3": {
+      "formula": "='72 Sheet - SS316'!C3"
+    },
+    "L3": {
+      "formula": "='72 Sheet - SS316'!D3"
+    },
+    "A4": {
+      "formula": "='48 Sheet - SS304'!C4"
+    },
+    "B4": {
+      "formula": "='48 Sheet - SS304'!D4"
+    },
+    "C4": {
+      "formula": "='60 Sheet - SS304'!C4"
+    },
+    "D4": {
+      "formula": "='60 Sheet - SS304'!D4"
+    },
+    "E4": {
+      "formula": "='72 Sheet - SS304'!C4"
+    },
+    "F4": {
+      "formula": "='72 Sheet - SS304'!D4"
+    },
+    "G4": {
+      "formula": "='48 Sheet - SS316'!C4"
+    },
+    "H4": {
+      "formula": "='48 Sheet - SS316'!D4"
+    },
+    "I4": {
+      "formula": "='60 Sheet - SS316'!C4"
+    },
+    "J4": {
+      "formula": "='60 Sheet - SS316'!D4"
+    },
+    "K4": {
+      "formula": "='72 Sheet - SS316'!C4"
+    },
+    "L4": {
+      "formula": "='72 Sheet - SS316'!D4"
+    },
+    "A5": {
+      "formula": "='48 Sheet - SS304'!C5"
+    },
+    "B5": {
+      "formula": "='48 Sheet - SS304'!D5"
+    },
+    "C5": {
+      "formula": "='60 Sheet - SS304'!C5"
+    },
+    "D5": {
+      "formula": "='60 Sheet - SS304'!D5"
+    },
+    "E5": {
+      "formula": "='72 Sheet - SS304'!C5"
+    },
+    "F5": {
+      "formula": "='72 Sheet - SS304'!D5"
+    },
+    "G5": {
+      "formula": "='48 Sheet - SS316'!C5"
+    },
+    "H5": {
+      "formula": "='48 Sheet - SS316'!D5"
+    },
+    "I5": {
+      "formula": "='60 Sheet - SS316'!C5"
+    },
+    "J5": {
+      "formula": "='60 Sheet - SS316'!D5"
+    },
+    "K5": {
+      "formula": "='72 Sheet - SS316'!C5"
+    },
+    "L5": {
+      "formula": "='72 Sheet - SS316'!D5"
+    },
+    "A6": {
+      "formula": "='48 Sheet - SS304'!C6"
+    },
+    "B6": {
+      "formula": "='48 Sheet - SS304'!D6"
+    },
+    "C6": {
+      "formula": "='60 Sheet - SS304'!C6"
+    },
+    "D6": {
+      "formula": "='60 Sheet - SS304'!D6"
+    },
+    "E6": {
+      "formula": "='72 Sheet - SS304'!C6"
+    },
+    "F6": {
+      "formula": "='72 Sheet - SS304'!D6"
+    },
+    "G6": {
+      "formula": "='48 Sheet - SS316'!C6"
+    },
+    "H6": {
+      "formula": "='48 Sheet - SS316'!D6"
+    },
+    "I6": {
+      "formula": "='60 Sheet - SS316'!C6"
+    },
+    "J6": {
+      "formula": "='60 Sheet - SS316'!D6"
+    },
+    "K6": {
+      "formula": "='72 Sheet - SS316'!C6"
+    },
+    "L6": {
+      "formula": "='72 Sheet - SS316'!D6"
+    },
+    "A7": {
+      "formula": "='48 Sheet - SS304'!C7"
+    },
+    "B7": {
+      "formula": "='48 Sheet - SS304'!D7"
+    },
+    "C7": {
+      "formula": "='60 Sheet - SS304'!C7"
+    },
+    "D7": {
+      "formula": "='60 Sheet - SS304'!D7"
+    },
+    "E7": {
+      "formula": "='72 Sheet - SS304'!C7"
+    },
+    "F7": {
+      "formula": "='72 Sheet - SS304'!D7"
+    },
+    "G7": {
+      "formula": "='48 Sheet - SS316'!C7"
+    },
+    "H7": {
+      "formula": "='48 Sheet - SS316'!D7"
+    },
+    "I7": {
+      "formula": "='60 Sheet - SS316'!C7"
+    },
+    "J7": {
+      "formula": "='60 Sheet - SS316'!D7"
+    },
+    "K7": {
+      "formula": "='72 Sheet - SS316'!C7"
+    },
+    "L7": {
+      "formula": "='72 Sheet - SS316'!D7"
+    },
+    "A8": {
+      "formula": "='48 Sheet - SS304'!C8"
+    },
+    "B8": {
+      "formula": "='48 Sheet - SS304'!D8"
+    },
+    "C8": {
+      "formula": "='60 Sheet - SS304'!C8"
+    },
+    "D8": {
+      "formula": "='60 Sheet - SS304'!D8"
+    },
+    "E8": {
+      "formula": "='72 Sheet - SS304'!C8"
+    },
+    "F8": {
+      "formula": "='72 Sheet - SS304'!D8"
+    },
+    "G8": {
+      "formula": "='48 Sheet - SS316'!C8"
+    },
+    "H8": {
+      "formula": "='48 Sheet - SS316'!D8"
+    },
+    "I8": {
+      "formula": "='60 Sheet - SS316'!C8"
+    },
+    "J8": {
+      "formula": "='60 Sheet - SS316'!D8"
+    },
+    "K8": {
+      "formula": "='72 Sheet - SS316'!C8"
+    },
+    "L8": {
+      "formula": "='72 Sheet - SS316'!D8"
+    },
+    "A9": {
+      "formula": "='48 Sheet - SS304'!C9"
+    },
+    "B9": {
+      "formula": "='48 Sheet - SS304'!D9"
+    },
+    "C9": {
+      "formula": "='60 Sheet - SS304'!C9"
+    },
+    "D9": {
+      "formula": "='60 Sheet - SS304'!D9"
+    },
+    "E9": {
+      "formula": "='72 Sheet - SS304'!C9"
+    },
+    "F9": {
+      "formula": "='72 Sheet - SS304'!D9"
+    },
+    "G9": {
+      "formula": "='48 Sheet - SS316'!C9"
+    },
+    "H9": {
+      "formula": "='48 Sheet - SS316'!D9"
+    },
+    "I9": {
+      "formula": "='60 Sheet - SS316'!C9"
+    },
+    "J9": {
+      "formula": "='60 Sheet - SS316'!D9"
+    },
+    "K9": {
+      "formula": "='72 Sheet - SS316'!C9"
+    },
+    "L9": {
+      "formula": "='72 Sheet - SS316'!D9"
+    },
+    "A10": {
+      "formula": "='48 Sheet - SS304'!C10"
+    },
+    "B10": {
+      "formula": "='48 Sheet - SS304'!D10"
+    },
+    "C10": {
+      "formula": "='60 Sheet - SS304'!C10"
+    },
+    "D10": {
+      "formula": "='60 Sheet - SS304'!D10"
+    },
+    "E10": {
+      "formula": "='72 Sheet - SS304'!C10"
+    },
+    "F10": {
+      "formula": "='72 Sheet - SS304'!D10"
+    },
+    "G10": {
+      "formula": "='48 Sheet - SS316'!C10"
+    },
+    "H10": {
+      "formula": "='48 Sheet - SS316'!D10"
+    },
+    "I10": {
+      "formula": "='60 Sheet - SS316'!C10"
+    },
+    "J10": {
+      "formula": "='60 Sheet - SS316'!D10"
+    },
+    "K10": {
+      "formula": "='72 Sheet - SS316'!C10"
+    },
+    "L10": {
+      "formula": "='72 Sheet - SS316'!D10"
+    },
+    "A11": {
+      "formula": "='48 Sheet - SS304'!C11"
+    },
+    "B11": {
+      "formula": "='48 Sheet - SS304'!D11"
+    },
+    "C11": {
+      "formula": "='60 Sheet - SS304'!C11"
+    },
+    "D11": {
+      "formula": "='60 Sheet - SS304'!D11"
+    },
+    "E11": {
+      "formula": "='72 Sheet - SS304'!C11"
+    },
+    "F11": {
+      "formula": "='72 Sheet - SS304'!D11"
+    },
+    "G11": {
+      "formula": "='48 Sheet - SS316'!C11"
+    },
+    "H11": {
+      "formula": "='48 Sheet - SS316'!D11"
+    },
+    "I11": {
+      "formula": "='60 Sheet - SS316'!C11"
+    },
+    "J11": {
+      "formula": "='60 Sheet - SS316'!D11"
+    },
+    "K11": {
+      "formula": "='72 Sheet - SS316'!C11"
+    },
+    "L11": {
+      "formula": "='72 Sheet - SS316'!D11"
+    },
+    "A12": {
+      "formula": "='48 Sheet - SS304'!C12"
+    },
+    "B12": {
+      "formula": "='48 Sheet - SS304'!D12"
+    },
+    "C12": {
+      "formula": "='60 Sheet - SS304'!C12"
+    },
+    "D12": {
+      "formula": "='60 Sheet - SS304'!D12"
+    },
+    "E12": {
+      "formula": "='72 Sheet - SS304'!C12"
+    },
+    "F12": {
+      "formula": "='72 Sheet - SS304'!D12"
+    },
+    "G12": {
+      "formula": "='48 Sheet - SS316'!C12"
+    },
+    "H12": {
+      "formula": "='48 Sheet - SS316'!D12"
+    },
+    "I12": {
+      "formula": "='60 Sheet - SS316'!C12"
+    },
+    "J12": {
+      "formula": "='60 Sheet - SS316'!D12"
+    },
+    "K12": {
+      "formula": "='72 Sheet - SS316'!C12"
+    },
+    "L12": {
+      "formula": "='72 Sheet - SS316'!D12"
+    },
+    "A13": {
+      "formula": "='48 Sheet - SS304'!C13"
+    },
+    "B13": {
+      "formula": "='48 Sheet - SS304'!D13"
+    },
+    "C13": {
+      "formula": "='60 Sheet - SS304'!C13"
+    },
+    "D13": {
+      "formula": "='60 Sheet - SS304'!D13"
+    },
+    "E13": {
+      "formula": "='72 Sheet - SS304'!C13"
+    },
+    "F13": {
+      "formula": "='72 Sheet - SS304'!D13"
+    },
+    "G13": {
+      "formula": "='48 Sheet - SS316'!C13"
+    },
+    "H13": {
+      "formula": "='48 Sheet - SS316'!D13"
+    },
+    "I13": {
+      "formula": "='60 Sheet - SS316'!C13"
+    },
+    "J13": {
+      "formula": "='60 Sheet - SS316'!D13"
+    },
+    "K13": {
+      "formula": "='72 Sheet - SS316'!C13"
+    },
+    "L13": {
+      "formula": "='72 Sheet - SS316'!D13"
+    },
+    "A14": {
+      "formula": "='48 Sheet - SS304'!C14"
+    },
+    "B14": {
+      "formula": "='48 Sheet - SS304'!D14"
+    },
+    "C14": {
+      "formula": "='60 Sheet - SS304'!C14"
+    },
+    "D14": {
+      "formula": "='60 Sheet - SS304'!D14"
+    },
+    "E14": {
+      "formula": "='72 Sheet - SS304'!C14"
+    },
+    "F14": {
+      "formula": "='72 Sheet - SS304'!D14"
+    },
+    "G14": {
+      "formula": "='48 Sheet - SS316'!C14"
+    },
+    "H14": {
+      "formula": "='48 Sheet - SS316'!D14"
+    },
+    "I14": {
+      "formula": "='60 Sheet - SS316'!C14"
+    },
+    "J14": {
+      "formula": "='60 Sheet - SS316'!D14"
+    },
+    "K14": {
+      "formula": "='72 Sheet - SS316'!C14"
+    },
+    "L14": {
+      "formula": "='72 Sheet - SS316'!D14"
+    },
+    "A15": {
+      "formula": "='48 Sheet - SS304'!C15"
+    },
+    "B15": {
+      "formula": "='48 Sheet - SS304'!D15"
+    },
+    "C15": {
+      "formula": "='60 Sheet - SS304'!C15"
+    },
+    "D15": {
+      "formula": "='60 Sheet - SS304'!D15"
+    },
+    "E15": {
+      "formula": "='72 Sheet - SS304'!C15"
+    },
+    "F15": {
+      "formula": "='72 Sheet - SS304'!D15"
+    },
+    "G15": {
+      "formula": "='48 Sheet - SS316'!C15"
+    },
+    "H15": {
+      "formula": "='48 Sheet - SS316'!D15"
+    },
+    "I15": {
+      "formula": "='60 Sheet - SS316'!C15"
+    },
+    "J15": {
+      "formula": "='60 Sheet - SS316'!D15"
+    },
+    "K15": {
+      "formula": "='72 Sheet - SS316'!C15"
+    },
+    "L15": {
+      "formula": "='72 Sheet - SS316'!D15"
+    },
+    "A16": {
+      "formula": "='48 Sheet - SS304'!C16"
+    },
+    "B16": {
+      "formula": "='48 Sheet - SS304'!D16"
+    },
+    "C16": {
+      "formula": "='60 Sheet - SS304'!C16"
+    },
+    "D16": {
+      "formula": "='60 Sheet - SS304'!D16"
+    },
+    "E16": {
+      "formula": "='72 Sheet - SS304'!C16"
+    },
+    "F16": {
+      "formula": "='72 Sheet - SS304'!D16"
+    },
+    "G16": {
+      "formula": "='48 Sheet - SS316'!C16"
+    },
+    "H16": {
+      "formula": "='48 Sheet - SS316'!D16"
+    },
+    "I16": {
+      "formula": "='60 Sheet - SS316'!C16"
+    },
+    "J16": {
+      "formula": "='60 Sheet - SS316'!D16"
+    },
+    "K16": {
+      "formula": "='72 Sheet - SS316'!C16"
+    },
+    "L16": {
+      "formula": "='72 Sheet - SS316'!D16"
+    },
+    "A17": {
+      "formula": "='48 Sheet - SS304'!C17"
+    },
+    "B17": {
+      "formula": "='48 Sheet - SS304'!D17"
+    },
+    "C17": {
+      "formula": "='60 Sheet - SS304'!C17"
+    },
+    "D17": {
+      "formula": "='60 Sheet - SS304'!D17"
+    },
+    "E17": {
+      "formula": "='72 Sheet - SS304'!C17"
+    },
+    "F17": {
+      "formula": "='72 Sheet - SS304'!D17"
+    },
+    "G17": {
+      "formula": "='48 Sheet - SS316'!C17"
+    },
+    "H17": {
+      "formula": "='48 Sheet - SS316'!D17"
+    },
+    "I17": {
+      "formula": "='60 Sheet - SS316'!C17"
+    },
+    "J17": {
+      "formula": "='60 Sheet - SS316'!D17"
+    },
+    "K17": {
+      "formula": "='72 Sheet - SS316'!C17"
+    },
+    "L17": {
+      "formula": "='72 Sheet - SS316'!D17"
+    },
+    "A18": {
+      "formula": "='48 Sheet - SS304'!C18"
+    },
+    "B18": {
+      "formula": "='48 Sheet - SS304'!D18"
+    },
+    "C18": {
+      "formula": "='60 Sheet - SS304'!C18"
+    },
+    "D18": {
+      "formula": "='60 Sheet - SS304'!D18"
+    },
+    "E18": {
+      "formula": "='72 Sheet - SS304'!C18"
+    },
+    "F18": {
+      "formula": "='72 Sheet - SS304'!D18"
+    },
+    "G18": {
+      "formula": "='48 Sheet - SS316'!C18"
+    },
+    "H18": {
+      "formula": "='48 Sheet - SS316'!D18"
+    },
+    "I18": {
+      "formula": "='60 Sheet - SS316'!C18"
+    },
+    "J18": {
+      "formula": "='60 Sheet - SS316'!D18"
+    },
+    "K18": {
+      "formula": "='72 Sheet - SS316'!C18"
+    },
+    "L18": {
+      "formula": "='72 Sheet - SS316'!D18"
+    },
+    "A19": {
+      "formula": "='48 Sheet - SS304'!C19"
+    },
+    "B19": {
+      "formula": "='48 Sheet - SS304'!D19"
+    },
+    "C19": {
+      "formula": "='60 Sheet - SS304'!C19"
+    },
+    "D19": {
+      "formula": "='60 Sheet - SS304'!D19"
+    },
+    "E19": {
+      "formula": "='72 Sheet - SS304'!C19"
+    },
+    "F19": {
+      "formula": "='72 Sheet - SS304'!D19"
+    },
+    "G19": {
+      "formula": "='48 Sheet - SS316'!C19"
+    },
+    "H19": {
+      "formula": "='48 Sheet - SS316'!D19"
+    },
+    "I19": {
+      "formula": "='60 Sheet - SS316'!C19"
+    },
+    "J19": {
+      "formula": "='60 Sheet - SS316'!D19"
+    },
+    "K19": {
+      "formula": "='72 Sheet - SS316'!C19"
+    },
+    "L19": {
+      "formula": "='72 Sheet - SS316'!D19"
+    },
+    "A20": {
+      "formula": "='48 Sheet - SS304'!C20"
+    },
+    "B20": {
+      "formula": "='48 Sheet - SS304'!D20"
+    },
+    "C20": {
+      "formula": "='60 Sheet - SS304'!C20"
+    },
+    "D20": {
+      "formula": "='60 Sheet - SS304'!D20"
+    },
+    "E20": {
+      "formula": "='72 Sheet - SS304'!C20"
+    },
+    "F20": {
+      "formula": "='72 Sheet - SS304'!D20"
+    },
+    "G20": {
+      "formula": "='48 Sheet - SS316'!C20"
+    },
+    "H20": {
+      "formula": "='48 Sheet - SS316'!D20"
+    },
+    "I20": {
+      "formula": "='60 Sheet - SS316'!C20"
+    },
+    "J20": {
+      "formula": "='60 Sheet - SS316'!D20"
+    },
+    "K20": {
+      "formula": "='72 Sheet - SS316'!C20"
+    },
+    "L20": {
+      "formula": "='72 Sheet - SS316'!D20"
+    },
+    "A21": {
+      "formula": "='48 Sheet - SS304'!C21"
+    },
+    "B21": {
+      "formula": "='48 Sheet - SS304'!D21"
+    },
+    "C21": {
+      "formula": "='60 Sheet - SS304'!C21"
+    },
+    "D21": {
+      "formula": "='60 Sheet - SS304'!D21"
+    },
+    "E21": {
+      "formula": "='72 Sheet - SS304'!C21"
+    },
+    "F21": {
+      "formula": "='72 Sheet - SS304'!D21"
+    },
+    "G21": {
+      "formula": "='48 Sheet - SS316'!C21"
+    },
+    "H21": {
+      "formula": "='48 Sheet - SS316'!D21"
+    },
+    "I21": {
+      "formula": "='60 Sheet - SS316'!C21"
+    },
+    "J21": {
+      "formula": "='60 Sheet - SS316'!D21"
+    },
+    "K21": {
+      "formula": "='72 Sheet - SS316'!C21"
+    },
+    "L21": {
+      "formula": "='72 Sheet - SS316'!D21"
+    },
+    "A22": {
+      "formula": "='48 Sheet - SS304'!C22"
+    },
+    "B22": {
+      "formula": "='48 Sheet - SS304'!D22"
+    },
+    "C22": {
+      "formula": "='60 Sheet - SS304'!C22"
+    },
+    "D22": {
+      "formula": "='60 Sheet - SS304'!D22"
+    },
+    "E22": {
+      "formula": "='72 Sheet - SS304'!C22"
+    },
+    "F22": {
+      "formula": "='72 Sheet - SS304'!D22"
+    },
+    "G22": {
+      "formula": "='48 Sheet - SS316'!C22"
+    },
+    "H22": {
+      "formula": "='48 Sheet - SS316'!D22"
+    },
+    "I22": {
+      "formula": "='60 Sheet - SS316'!C22"
+    },
+    "J22": {
+      "formula": "='60 Sheet - SS316'!D22"
+    },
+    "K22": {
+      "formula": "='72 Sheet - SS316'!C22"
+    },
+    "L22": {
+      "formula": "='72 Sheet - SS316'!D22"
+    },
+    "A23": {
+      "formula": "='48 Sheet - SS304'!C23"
+    },
+    "B23": {
+      "formula": "='48 Sheet - SS304'!D23"
+    },
+    "C23": {
+      "formula": "='60 Sheet - SS304'!C23"
+    },
+    "D23": {
+      "formula": "='60 Sheet - SS304'!D23"
+    },
+    "E23": {
+      "formula": "='72 Sheet - SS304'!C23"
+    },
+    "F23": {
+      "formula": "='72 Sheet - SS304'!D23"
+    },
+    "G23": {
+      "formula": "='48 Sheet - SS316'!C23"
+    },
+    "H23": {
+      "formula": "='48 Sheet - SS316'!D23"
+    },
+    "I23": {
+      "formula": "='60 Sheet - SS316'!C23"
+    },
+    "J23": {
+      "formula": "='60 Sheet - SS316'!D23"
+    },
+    "K23": {
+      "formula": "='72 Sheet - SS316'!C23"
+    },
+    "L23": {
+      "formula": "='72 Sheet - SS316'!D23"
+    },
+    "A24": {
+      "formula": "='48 Sheet - SS304'!C24"
+    },
+    "B24": {
+      "formula": "='48 Sheet - SS304'!D24"
+    },
+    "C24": {
+      "formula": "='60 Sheet - SS304'!C24"
+    },
+    "D24": {
+      "formula": "='60 Sheet - SS304'!D24"
+    },
+    "E24": {
+      "formula": "='72 Sheet - SS304'!C24"
+    },
+    "F24": {
+      "formula": "='72 Sheet - SS304'!D24"
+    },
+    "G24": {
+      "formula": "='48 Sheet - SS316'!C24"
+    },
+    "H24": {
+      "formula": "='48 Sheet - SS316'!D24"
+    },
+    "I24": {
+      "formula": "='60 Sheet - SS316'!C24"
+    },
+    "J24": {
+      "formula": "='60 Sheet - SS316'!D24"
+    },
+    "K24": {
+      "formula": "='72 Sheet - SS316'!C24"
+    },
+    "L24": {
+      "formula": "='72 Sheet - SS316'!D24"
+    },
+    "A25": {
+      "formula": "='48 Sheet - SS304'!C25"
+    },
+    "B25": {
+      "formula": "='48 Sheet - SS304'!D25"
+    },
+    "C25": {
+      "formula": "='60 Sheet - SS304'!C25"
+    },
+    "D25": {
+      "formula": "='60 Sheet - SS304'!D25"
+    },
+    "E25": {
+      "formula": "='72 Sheet - SS304'!C25"
+    },
+    "F25": {
+      "formula": "='72 Sheet - SS304'!D25"
+    },
+    "G25": {
+      "formula": "='48 Sheet - SS316'!C25"
+    },
+    "H25": {
+      "formula": "='48 Sheet - SS316'!D25"
+    },
+    "I25": {
+      "formula": "='60 Sheet - SS316'!C25"
+    },
+    "J25": {
+      "formula": "='60 Sheet - SS316'!D25"
+    },
+    "K25": {
+      "formula": "='72 Sheet - SS316'!C25"
+    },
+    "L25": {
+      "formula": "='72 Sheet - SS316'!D25"
+    },
+    "A26": {
+      "formula": "='48 Sheet - SS304'!C26"
+    },
+    "B26": {
+      "formula": "='48 Sheet - SS304'!D26"
+    },
+    "C26": {
+      "formula": "='60 Sheet - SS304'!C26"
+    },
+    "D26": {
+      "formula": "='60 Sheet - SS304'!D26"
+    },
+    "E26": {
+      "formula": "='72 Sheet - SS304'!C26"
+    },
+    "F26": {
+      "formula": "='72 Sheet - SS304'!D26"
+    },
+    "G26": {
+      "formula": "='48 Sheet - SS316'!C26"
+    },
+    "H26": {
+      "formula": "='48 Sheet - SS316'!D26"
+    },
+    "I26": {
+      "formula": "='60 Sheet - SS316'!C26"
+    },
+    "J26": {
+      "formula": "='60 Sheet - SS316'!D26"
+    },
+    "K26": {
+      "formula": "='72 Sheet - SS316'!C26"
+    },
+    "L26": {
+      "formula": "='72 Sheet - SS316'!D26"
+    },
+    "A27": {
+      "formula": "='48 Sheet - SS304'!C27"
+    },
+    "B27": {
+      "formula": "='48 Sheet - SS304'!D27"
+    },
+    "C27": {
+      "formula": "='60 Sheet - SS304'!C27"
+    },
+    "D27": {
+      "formula": "='60 Sheet - SS304'!D27"
+    },
+    "E27": {
+      "formula": "='72 Sheet - SS304'!C27"
+    },
+    "F27": {
+      "formula": "='72 Sheet - SS304'!D27"
+    },
+    "G27": {
+      "formula": "='48 Sheet - SS316'!C27"
+    },
+    "H27": {
+      "formula": "='48 Sheet - SS316'!D27"
+    },
+    "I27": {
+      "formula": "='60 Sheet - SS316'!C27"
+    },
+    "J27": {
+      "formula": "='60 Sheet - SS316'!D27"
+    },
+    "K27": {
+      "formula": "='72 Sheet - SS316'!C27"
+    },
+    "L27": {
+      "formula": "='72 Sheet - SS316'!D27"
+    },
+    "A28": {
+      "formula": "='48 Sheet - SS304'!C28"
+    },
+    "B28": {
+      "formula": "='48 Sheet - SS304'!D28"
+    },
+    "C28": {
+      "formula": "='60 Sheet - SS304'!C28"
+    },
+    "D28": {
+      "formula": "='60 Sheet - SS304'!D28"
+    },
+    "E28": {
+      "formula": "='72 Sheet - SS304'!C28"
+    },
+    "F28": {
+      "formula": "='72 Sheet - SS304'!D28"
+    },
+    "G28": {
+      "formula": "='48 Sheet - SS316'!C28"
+    },
+    "H28": {
+      "formula": "='48 Sheet - SS316'!D28"
+    },
+    "I28": {
+      "formula": "='60 Sheet - SS316'!C28"
+    },
+    "J28": {
+      "formula": "='60 Sheet - SS316'!D28"
+    },
+    "K28": {
+      "formula": "='72 Sheet - SS316'!C28"
+    },
+    "L28": {
+      "formula": "='72 Sheet - SS316'!D28"
+    },
+    "A29": {
+      "formula": "='48 Sheet - SS304'!C29"
+    },
+    "B29": {
+      "formula": "='48 Sheet - SS304'!D29"
+    },
+    "C29": {
+      "formula": "='60 Sheet - SS304'!C29"
+    },
+    "D29": {
+      "formula": "='60 Sheet - SS304'!D29"
+    },
+    "E29": {
+      "formula": "='72 Sheet - SS304'!C29"
+    },
+    "F29": {
+      "formula": "='72 Sheet - SS304'!D29"
+    },
+    "G29": {
+      "formula": "='48 Sheet - SS316'!C29"
+    },
+    "H29": {
+      "formula": "='48 Sheet - SS316'!D29"
+    },
+    "I29": {
+      "formula": "='60 Sheet - SS316'!C29"
+    },
+    "J29": {
+      "formula": "='60 Sheet - SS316'!D29"
+    },
+    "K29": {
+      "formula": "='72 Sheet - SS316'!C29"
+    },
+    "L29": {
+      "formula": "='72 Sheet - SS316'!D29"
+    }
+  },
+  "48 Sheet - SS304": {
+    "A1": {
+      "value": 304
+    },
+    "B1": {
+      "value": 48
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-01-060"
+    },
+    "D2": {
+      "value": "SHEET, 304, 12GA, 48\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 36
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "C18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B18)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B18)"
+    },
+    "E18": {
+      "formula": "=MROUND(($B$1*B18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    },
+    "A20": {
+      "value": 76
+    },
+    "B20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "C20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B20)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B20)"
+    },
+    "E20": {
+      "formula": "=MROUND(($B$1*B20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A19+6"
+    },
+    "B21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "C21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B21)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B21)"
+    },
+    "E21": {
+      "formula": "=MROUND(($B$1*B21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "C22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B22)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B22)"
+    },
+    "E22": {
+      "formula": "=MROUND(($B$1*B22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "C23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B23)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B23)"
+    },
+    "E23": {
+      "formula": "=MROUND(($B$1*B23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "C24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B24)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B24)"
+    },
+    "E24": {
+      "formula": "=MROUND(($B$1*B24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "C25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B25)"
+    },
+    "E25": {
+      "formula": "=MROUND(($B$1*B25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "C26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B26)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B26)"
+    },
+    "E26": {
+      "formula": "=MROUND(($B$1*B26)/144,0.25)"
+    },
+    "A27": {
+      "formula": "=A26+6"
+    },
+    "B27": {
+      "formula": "=CEILING((PI()*(A27-0.875))+2,0.25)"
+    },
+    "C27": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B27)"
+    },
+    "D27": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B27)"
+    },
+    "E27": {
+      "formula": "=MROUND(($B$1*B27)/144,0.25)"
+    },
+    "A28": {
+      "formula": "=A27+6"
+    },
+    "B28": {
+      "formula": "=CEILING((PI()*(A28-0.875))+2,0.25)"
+    },
+    "C28": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B28)"
+    },
+    "D28": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B28)"
+    },
+    "E28": {
+      "formula": "=MROUND(($B$1*B28)/144,0.25)"
+    },
+    "A29": {
+      "formula": "=A28+6"
+    },
+    "B29": {
+      "formula": "=CEILING((PI()*(A29-0.875))+2,0.25)"
+    },
+    "C29": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B29)"
+    },
+    "D29": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B29)"
+    },
+    "E29": {
+      "formula": "=MROUND(($B$1*B29)/144,0.25)"
+    },
+    "A30": {
+      "formula": "=A29+6"
+    },
+    "B30": {
+      "formula": "=CEILING((PI()*(A30-0.875))+2,0.25)"
+    },
+    "C30": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B30)"
+    },
+    "D30": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B30)"
+    },
+    "E30": {
+      "formula": "=MROUND(($B$1*B30)/144,0.25)"
+    },
+    "A31": {
+      "formula": "=A30+6"
+    },
+    "B31": {
+      "formula": "=CEILING((PI()*(A31-0.875))+2,0.25)"
+    },
+    "C31": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B31)"
+    },
+    "D31": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B31)"
+    },
+    "E31": {
+      "formula": "=MROUND(($B$1*B31)/144,0.25)"
+    },
+    "A32": {
+      "formula": "=A31+6"
+    },
+    "B32": {
+      "formula": "=CEILING((PI()*(A32-0.875))+2,0.25)"
+    },
+    "C32": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B32)"
+    },
+    "D32": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B32)"
+    },
+    "E32": {
+      "formula": "=MROUND(($B$1*B32)/144,0.25)"
+    }
+  },
+  "60 Sheet - SS304": {
+    "A1": {
+      "value": 304
+    },
+    "B1": {
+      "value": 60
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-01-053"
+    },
+    "D2": {
+      "value": "SHEET, 304, 12GA, 60\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 36
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "C18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B18)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B18)"
+    },
+    "E18": {
+      "formula": "=MROUND(($B$1*B18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    },
+    "A20": {
+      "value": 76
+    },
+    "B20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "C20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B20)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B20)"
+    },
+    "E20": {
+      "formula": "=MROUND(($B$1*B20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A19+6"
+    },
+    "B21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "C21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B21)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B21)"
+    },
+    "E21": {
+      "formula": "=MROUND(($B$1*B21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "C22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B22)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B22)"
+    },
+    "E22": {
+      "formula": "=MROUND(($B$1*B22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "C23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B23)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B23)"
+    },
+    "E23": {
+      "formula": "=MROUND(($B$1*B23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "C24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B24)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B24)"
+    },
+    "E24": {
+      "formula": "=MROUND(($B$1*B24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "C25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B25)"
+    },
+    "E25": {
+      "formula": "=MROUND(($B$1*B25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "C26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B26)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B26)"
+    },
+    "E26": {
+      "formula": "=MROUND(($B$1*B26)/144,0.25)"
+    },
+    "A27": {
+      "formula": "=A26+6"
+    },
+    "B27": {
+      "formula": "=CEILING((PI()*(A27-0.875))+2,0.25)"
+    },
+    "C27": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B27)"
+    },
+    "D27": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B27)"
+    },
+    "E27": {
+      "formula": "=MROUND(($B$1*B27)/144,0.25)"
+    },
+    "A28": {
+      "formula": "=A27+6"
+    },
+    "B28": {
+      "formula": "=CEILING((PI()*(A28-0.875))+2,0.25)"
+    },
+    "C28": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B28)"
+    },
+    "D28": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B28)"
+    },
+    "E28": {
+      "formula": "=MROUND(($B$1*B28)/144,0.25)"
+    },
+    "A29": {
+      "formula": "=A28+6"
+    },
+    "B29": {
+      "formula": "=CEILING((PI()*(A29-0.875))+2,0.25)"
+    },
+    "C29": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B29)"
+    },
+    "D29": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B29)"
+    },
+    "E29": {
+      "formula": "=MROUND(($B$1*B29)/144,0.25)"
+    },
+    "A30": {
+      "formula": "=A29+6"
+    },
+    "B30": {
+      "formula": "=CEILING((PI()*(A30-0.875))+2,0.25)"
+    },
+    "C30": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B30)"
+    },
+    "D30": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B30)"
+    },
+    "E30": {
+      "formula": "=MROUND(($B$1*B30)/144,0.25)"
+    },
+    "A31": {
+      "formula": "=A30+6"
+    },
+    "B31": {
+      "formula": "=CEILING((PI()*(A31-0.875))+2,0.25)"
+    },
+    "C31": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B31)"
+    },
+    "D31": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B31)"
+    },
+    "E31": {
+      "formula": "=MROUND(($B$1*B31)/144,0.25)"
+    },
+    "A32": {
+      "formula": "=A31+6"
+    },
+    "B32": {
+      "formula": "=CEILING((PI()*(A32-0.875))+2,0.25)"
+    },
+    "C32": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B32)"
+    },
+    "D32": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B32)"
+    },
+    "E32": {
+      "formula": "=MROUND(($B$1*B32)/144,0.25)"
+    }
+  },
+  "72 Sheet - SS304": {
+    "A1": {
+      "value": 304
+    },
+    "B1": {
+      "value": 72
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-01-058"
+    },
+    "D2": {
+      "value": "SHEET, 304, 12GA, 72\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 36
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "C18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B18)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B18)"
+    },
+    "E18": {
+      "formula": "=MROUND(($B$1*B18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    },
+    "A20": {
+      "value": 76
+    },
+    "B20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "C20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B20)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B20)"
+    },
+    "E20": {
+      "formula": "=MROUND(($B$1*B20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A19+6"
+    },
+    "B21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "C21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B21)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B21)"
+    },
+    "E21": {
+      "formula": "=MROUND(($B$1*B21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "C22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B22)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B22)"
+    },
+    "E22": {
+      "formula": "=MROUND(($B$1*B22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "C23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B23)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B23)"
+    },
+    "E23": {
+      "formula": "=MROUND(($B$1*B23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "C24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B24)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B24)"
+    },
+    "E24": {
+      "formula": "=MROUND(($B$1*B24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "C25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B25)"
+    },
+    "E25": {
+      "formula": "=MROUND(($B$1*B25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "C26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B26)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B26)"
+    },
+    "E26": {
+      "formula": "=MROUND(($B$1*B26)/144,0.25)"
+    },
+    "A27": {
+      "formula": "=A26+6"
+    },
+    "B27": {
+      "formula": "=CEILING((PI()*(A27-0.875))+2,0.25)"
+    },
+    "C27": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B27)"
+    },
+    "D27": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B27)"
+    },
+    "E27": {
+      "formula": "=MROUND(($B$1*B27)/144,0.25)"
+    },
+    "A28": {
+      "formula": "=A27+6"
+    },
+    "B28": {
+      "formula": "=CEILING((PI()*(A28-0.875))+2,0.25)"
+    },
+    "C28": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B28)"
+    },
+    "D28": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B28)"
+    },
+    "E28": {
+      "formula": "=MROUND(($B$1*B28)/144,0.25)"
+    },
+    "A29": {
+      "formula": "=A28+6"
+    },
+    "B29": {
+      "formula": "=CEILING((PI()*(A29-0.875))+2,0.25)"
+    },
+    "C29": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B29)"
+    },
+    "D29": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B29)"
+    },
+    "E29": {
+      "formula": "=MROUND(($B$1*B29)/144,0.25)"
+    },
+    "A30": {
+      "formula": "=A29+6"
+    },
+    "B30": {
+      "formula": "=CEILING((PI()*(A30-0.875))+2,0.25)"
+    },
+    "C30": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B30)"
+    },
+    "D30": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B30)"
+    },
+    "E30": {
+      "formula": "=MROUND(($B$1*B30)/144,0.25)"
+    },
+    "A31": {
+      "formula": "=A30+6"
+    },
+    "B31": {
+      "formula": "=CEILING((PI()*(A31-0.875))+2,0.25)"
+    },
+    "C31": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B31)"
+    },
+    "D31": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B31)"
+    },
+    "E31": {
+      "formula": "=MROUND(($B$1*B31)/144,0.25)"
+    },
+    "A32": {
+      "formula": "=A31+6"
+    },
+    "B32": {
+      "formula": "=CEILING((PI()*(A32-0.875))+2,0.25)"
+    },
+    "C32": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B32)"
+    },
+    "D32": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B32)"
+    },
+    "E32": {
+      "formula": "=MROUND(($B$1*B32)/144,0.25)"
+    }
+  },
+  "48 Sheet - SS316": {
+    "A1": {
+      "value": 316
+    },
+    "B1": {
+      "value": 48
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-02-018"
+    },
+    "D2": {
+      "value": "SHEET, 316, 12GA, 48\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 36
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "C18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B18)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B18)"
+    },
+    "E18": {
+      "formula": "=MROUND(($B$1*B18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    },
+    "A20": {
+      "value": 76
+    },
+    "B20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "C20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B20)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B20)"
+    },
+    "E20": {
+      "formula": "=MROUND(($B$1*B20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A19+6"
+    },
+    "B21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "C21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B21)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B21)"
+    },
+    "E21": {
+      "formula": "=MROUND(($B$1*B21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "C22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B22)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B22)"
+    },
+    "E22": {
+      "formula": "=MROUND(($B$1*B22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "C23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B23)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B23)"
+    },
+    "E23": {
+      "formula": "=MROUND(($B$1*B23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "C24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B24)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B24)"
+    },
+    "E24": {
+      "formula": "=MROUND(($B$1*B24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "C25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B25)"
+    },
+    "E25": {
+      "formula": "=MROUND(($B$1*B25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "C26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B26)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B26)"
+    },
+    "E26": {
+      "formula": "=MROUND(($B$1*B26)/144,0.25)"
+    },
+    "A27": {
+      "formula": "=A26+6"
+    },
+    "B27": {
+      "formula": "=CEILING((PI()*(A27-0.875))+2,0.25)"
+    },
+    "C27": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B27)"
+    },
+    "D27": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B27)"
+    },
+    "E27": {
+      "formula": "=MROUND(($B$1*B27)/144,0.25)"
+    },
+    "A28": {
+      "formula": "=A27+6"
+    },
+    "B28": {
+      "formula": "=CEILING((PI()*(A28-0.875))+2,0.25)"
+    },
+    "C28": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B28)"
+    },
+    "D28": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B28)"
+    },
+    "E28": {
+      "formula": "=MROUND(($B$1*B28)/144,0.25)"
+    },
+    "A29": {
+      "formula": "=A28+6"
+    },
+    "B29": {
+      "formula": "=CEILING((PI()*(A29-0.875))+2,0.25)"
+    },
+    "C29": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B29)"
+    },
+    "D29": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B29)"
+    },
+    "E29": {
+      "formula": "=MROUND(($B$1*B29)/144,0.25)"
+    },
+    "A30": {
+      "formula": "=A29+6"
+    },
+    "B30": {
+      "formula": "=CEILING((PI()*(A30-0.875))+2,0.25)"
+    },
+    "C30": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B30)"
+    },
+    "D30": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B30)"
+    },
+    "E30": {
+      "formula": "=MROUND(($B$1*B30)/144,0.25)"
+    },
+    "A31": {
+      "formula": "=A30+6"
+    },
+    "B31": {
+      "formula": "=CEILING((PI()*(A31-0.875))+2,0.25)"
+    },
+    "C31": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B31)"
+    },
+    "D31": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B31)"
+    },
+    "E31": {
+      "formula": "=MROUND(($B$1*B31)/144,0.25)"
+    },
+    "A32": {
+      "formula": "=A31+6"
+    },
+    "B32": {
+      "formula": "=CEILING((PI()*(A32-0.875))+2,0.25)"
+    },
+    "C32": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B32)"
+    },
+    "D32": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B32)"
+    },
+    "E32": {
+      "formula": "=MROUND(($B$1*B32)/144,0.25)"
+    }
+  },
+  "60 Sheet - SS316": {
+    "A1": {
+      "value": 316
+    },
+    "B1": {
+      "value": 60
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-02-042"
+    },
+    "D2": {
+      "value": "SHEET, 316, 12GA, 60\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 36
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "C18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B18)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B18)"
+    },
+    "E18": {
+      "formula": "=MROUND(($B$1*B18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    },
+    "A20": {
+      "value": 76
+    },
+    "B20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "C20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B20)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B20)"
+    },
+    "E20": {
+      "formula": "=MROUND(($B$1*B20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A19+6"
+    },
+    "B21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "C21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B21)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B21)"
+    },
+    "E21": {
+      "formula": "=MROUND(($B$1*B21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "C22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B22)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B22)"
+    },
+    "E22": {
+      "formula": "=MROUND(($B$1*B22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "C23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B23)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B23)"
+    },
+    "E23": {
+      "formula": "=MROUND(($B$1*B23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "C24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B24)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B24)"
+    },
+    "E24": {
+      "formula": "=MROUND(($B$1*B24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "C25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B25)"
+    },
+    "E25": {
+      "formula": "=MROUND(($B$1*B25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "C26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B26)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B26)"
+    },
+    "E26": {
+      "formula": "=MROUND(($B$1*B26)/144,0.25)"
+    },
+    "A27": {
+      "formula": "=A26+6"
+    },
+    "B27": {
+      "formula": "=CEILING((PI()*(A27-0.875))+2,0.25)"
+    },
+    "C27": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B27)"
+    },
+    "D27": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B27)"
+    },
+    "E27": {
+      "formula": "=MROUND(($B$1*B27)/144,0.25)"
+    },
+    "A28": {
+      "formula": "=A27+6"
+    },
+    "B28": {
+      "formula": "=CEILING((PI()*(A28-0.875))+2,0.25)"
+    },
+    "C28": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B28)"
+    },
+    "D28": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B28)"
+    },
+    "E28": {
+      "formula": "=MROUND(($B$1*B28)/144,0.25)"
+    },
+    "A29": {
+      "formula": "=A28+6"
+    },
+    "B29": {
+      "formula": "=CEILING((PI()*(A29-0.875))+2,0.25)"
+    },
+    "C29": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B29)"
+    },
+    "D29": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B29)"
+    },
+    "E29": {
+      "formula": "=MROUND(($B$1*B29)/144,0.25)"
+    },
+    "A30": {
+      "formula": "=A29+6"
+    },
+    "B30": {
+      "formula": "=CEILING((PI()*(A30-0.875))+2,0.25)"
+    },
+    "C30": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B30)"
+    },
+    "D30": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B30)"
+    },
+    "E30": {
+      "formula": "=MROUND(($B$1*B30)/144,0.25)"
+    },
+    "A31": {
+      "formula": "=A30+6"
+    },
+    "B31": {
+      "formula": "=CEILING((PI()*(A31-0.875))+2,0.25)"
+    },
+    "C31": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B31)"
+    },
+    "D31": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B31)"
+    },
+    "E31": {
+      "formula": "=MROUND(($B$1*B31)/144,0.25)"
+    },
+    "A32": {
+      "formula": "=A31+6"
+    },
+    "B32": {
+      "formula": "=CEILING((PI()*(A32-0.875))+2,0.25)"
+    },
+    "C32": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B32)"
+    },
+    "D32": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B32)"
+    },
+    "E32": {
+      "formula": "=MROUND(($B$1*B32)/144,0.25)"
+    }
+  },
+  "72 Sheet - SS316": {
+    "A1": {
+      "value": 316
+    },
+    "B1": {
+      "value": 72
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-02-039"
+    },
+    "D2": {
+      "value": "SHEET, 316, 12GA, 72\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 36
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "C18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B18)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B18)"
+    },
+    "E18": {
+      "formula": "=MROUND(($B$1*B18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    },
+    "A20": {
+      "value": 76
+    },
+    "B20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "C20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B20)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B20)"
+    },
+    "E20": {
+      "formula": "=MROUND(($B$1*B20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A19+6"
+    },
+    "B21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "C21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B21)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B21)"
+    },
+    "E21": {
+      "formula": "=MROUND(($B$1*B21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "C22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B22)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B22)"
+    },
+    "E22": {
+      "formula": "=MROUND(($B$1*B22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "C23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B23)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B23)"
+    },
+    "E23": {
+      "formula": "=MROUND(($B$1*B23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "C24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B24)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B24)"
+    },
+    "E24": {
+      "formula": "=MROUND(($B$1*B24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "C25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B25)"
+    },
+    "E25": {
+      "formula": "=MROUND(($B$1*B25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "C26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B26)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B26)"
+    },
+    "E26": {
+      "formula": "=MROUND(($B$1*B26)/144,0.25)"
+    },
+    "A27": {
+      "formula": "=A26+6"
+    },
+    "B27": {
+      "formula": "=CEILING((PI()*(A27-0.875))+2,0.25)"
+    },
+    "C27": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B27)"
+    },
+    "D27": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B27)"
+    },
+    "E27": {
+      "formula": "=MROUND(($B$1*B27)/144,0.25)"
+    },
+    "A28": {
+      "formula": "=A27+6"
+    },
+    "B28": {
+      "formula": "=CEILING((PI()*(A28-0.875))+2,0.25)"
+    },
+    "C28": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B28)"
+    },
+    "D28": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B28)"
+    },
+    "E28": {
+      "formula": "=MROUND(($B$1*B28)/144,0.25)"
+    },
+    "A29": {
+      "formula": "=A28+6"
+    },
+    "B29": {
+      "formula": "=CEILING((PI()*(A29-0.875))+2,0.25)"
+    },
+    "C29": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B29)"
+    },
+    "D29": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B29)"
+    },
+    "E29": {
+      "formula": "=MROUND(($B$1*B29)/144,0.25)"
+    },
+    "A30": {
+      "formula": "=A29+6"
+    },
+    "B30": {
+      "formula": "=CEILING((PI()*(A30-0.875))+2,0.25)"
+    },
+    "C30": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B30)"
+    },
+    "D30": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B30)"
+    },
+    "E30": {
+      "formula": "=MROUND(($B$1*B30)/144,0.25)"
+    },
+    "A31": {
+      "formula": "=A30+6"
+    },
+    "B31": {
+      "formula": "=CEILING((PI()*(A31-0.875))+2,0.25)"
+    },
+    "C31": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B31)"
+    },
+    "D31": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B31)"
+    },
+    "E31": {
+      "formula": "=MROUND(($B$1*B31)/144,0.25)"
+    },
+    "A32": {
+      "formula": "=A31+6"
+    },
+    "B32": {
+      "formula": "=CEILING((PI()*(A32-0.875))+2,0.25)"
+    },
+    "C32": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B32)"
+    },
+    "D32": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B32)"
+    },
+    "E32": {
+      "formula": "=MROUND(($B$1*B32)/144,0.25)"
+    }
+  },
+  "Heaters": {
+    "A1": {
+      "value": 304
+    },
+    "B1": {
+      "value": 48
+    },
+    "C1": {
+      "value": "PART NUMBER"
+    },
+    "D1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "900-01-060"
+    },
+    "D2": {
+      "value": "SHEET, 304, 12GA, 48\""
+    },
+    "E2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 28.25
+    },
+    "B3": {
+      "formula": "=CEILING((PI()*(A3-0.1094))+2,0.25)"
+    },
+    "C3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B3)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B3)"
+    },
+    "E3": {
+      "formula": "=MROUND(($B$1*B3)/144,0.25)"
+    },
+    "A4": {
+      "value": 40
+    },
+    "B4": {
+      "formula": "=CEILING((PI()*(A4-0.1094))+2,0.25)"
+    },
+    "C4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B4)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B4)"
+    },
+    "E4": {
+      "formula": "=MROUND(($B$1*B4)/144,0.25)"
+    },
+    "A5": {
+      "value": 51.75
+    },
+    "B5": {
+      "formula": "=CEILING((PI()*(A5-0.1094))+2,0.25)"
+    },
+    "C5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B5)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B5)"
+    },
+    "E5": {
+      "formula": "=MROUND(($B$1*B5)/144,0.25)"
+    },
+    "A6": {
+      "value": 57.125
+    },
+    "B6": {
+      "formula": "=CEILING((PI()*(A6-0.1094))+2,0.25)"
+    },
+    "C6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B6)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B6)"
+    },
+    "E6": {
+      "formula": "=MROUND(($B$1*B6)/144,0.25)"
+    },
+    "A7": {
+      "value": 73.125
+    },
+    "B7": {
+      "formula": "=CEILING((PI()*(A7-0.1094))+2,0.25)"
+    },
+    "C7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B7)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B7)"
+    },
+    "E7": {
+      "formula": "=MROUND(($B$1*B7)/144,0.25)"
+    },
+    "A8": {
+      "value": 81.125
+    },
+    "B8": {
+      "formula": "=CEILING((PI()*(A8-0.1094))+2,0.25)"
+    },
+    "C8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B8)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B8)"
+    },
+    "E8": {
+      "formula": "=MROUND(($B$1*B8)/144,0.25)"
+    },
+    "A9": {
+      "value": 93.125
+    },
+    "B9": {
+      "formula": "=CEILING((PI()*(A9-0.1094))+2,0.25)"
+    },
+    "C9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B9)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B9)"
+    },
+    "E9": {
+      "formula": "=MROUND(($B$1*B9)/144,0.25)"
+    },
+    "A10": {
+      "value": 31.125
+    },
+    "B10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "C10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B10)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B10)"
+    },
+    "E10": {
+      "formula": "=MROUND(($B$1*B10)/144,0.25)"
+    },
+    "A11": {
+      "value": 42.875
+    },
+    "B11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "C11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B11)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B11)"
+    },
+    "E11": {
+      "formula": "=MROUND(($B$1*B11)/144,0.25)"
+    },
+    "A12": {
+      "value": 54.625
+    },
+    "B12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "C12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B12)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B12)"
+    },
+    "E12": {
+      "formula": "=MROUND(($B$1*B12)/144,0.25)"
+    },
+    "A13": {
+      "value": 60
+    },
+    "B13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "C13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B13)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B13)"
+    },
+    "E13": {
+      "formula": "=MROUND(($B$1*B13)/144,0.25)"
+    },
+    "A14": {
+      "value": 69
+    },
+    "B14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "C14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B14)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B14)"
+    },
+    "E14": {
+      "formula": "=MROUND(($B$1*B14)/144,0.25)"
+    },
+    "A15": {
+      "value": 76
+    },
+    "B15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "C15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B15)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B15)"
+    },
+    "E15": {
+      "formula": "=MROUND(($B$1*B15)/144,0.25)"
+    },
+    "A16": {
+      "value": 84
+    },
+    "B16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "C16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B16)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B16)"
+    },
+    "E16": {
+      "formula": "=MROUND(($B$1*B16)/144,0.25)"
+    },
+    "A17": {
+      "value": 96
+    },
+    "B17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "C17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B17)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B17)"
+    },
+    "E17": {
+      "formula": "=MROUND(($B$1*B17)/144,0.25)"
+    },
+    "A19": {
+      "value": 66.125
+    },
+    "B19": {
+      "formula": "=CEILING((PI()*(A19-0.1094))+2,0.25)"
+    },
+    "C19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$B$1,\"-\",$B19)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT(D$2,\" X \",$B19)"
+    },
+    "E19": {
+      "formula": "=MROUND(($B$1*B19)/144,0.25)"
+    }
+  },
+  "Tanks": {
+    "A1": {
+      "value": 304
+    },
+    "B1": {
+      "value": 48
+    },
+    "C1": {
+      "value": 48
+    },
+    "D1": {
+      "value": "PART NUMBER"
+    },
+    "E1": {
+      "value": "DESCRIPTION"
+    },
+    "A2": {
+      "value": "TANK/HTR DIAMETER"
+    },
+    "B2": {
+      "value": "LENGTHS"
+    },
+    "C2": {
+      "value": "LENGTHS"
+    },
+    "D2": {
+      "value": "900-01-060"
+    },
+    "E2": {
+      "value": "SHEET, 304, 12GA, 48\""
+    },
+    "F2": {
+      "value": "SQ FT"
+    },
+    "A3": {
+      "value": 36
+    },
+    "B3": {
+      "value": 112.5
+    },
+    "C3": {
+      "formula": "=CEILING((PI()*(A3-0.875))+2,0.25)"
+    },
+    "D3": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C3)"
+    },
+    "E3": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C3)"
+    },
+    "F3": {
+      "formula": "=MROUND(($C$1*C3)/144,0.25)"
+    },
+    "A4": {
+      "formula": "=A3+6"
+    },
+    "B4": {
+      "value": 131.25
+    },
+    "C4": {
+      "formula": "=CEILING((PI()*(A4-0.875))+2,0.25)"
+    },
+    "D4": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C4)"
+    },
+    "E4": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C4)"
+    },
+    "F4": {
+      "formula": "=MROUND(($C$1*C4)/144,0.25)"
+    },
+    "A5": {
+      "formula": "=A4+6"
+    },
+    "B5": {
+      "value": 150.25
+    },
+    "C5": {
+      "formula": "=CEILING((PI()*(A5-0.875))+2,0.25)"
+    },
+    "D5": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C5)"
+    },
+    "E5": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C5)"
+    },
+    "F5": {
+      "formula": "=MROUND(($C$1*C5)/144,0.25)"
+    },
+    "A6": {
+      "formula": "=A5+6"
+    },
+    "B6": {
+      "value": 169
+    },
+    "C6": {
+      "formula": "=CEILING((PI()*(A6-0.875))+2,0.25)"
+    },
+    "D6": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C6)"
+    },
+    "E6": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C6)"
+    },
+    "F6": {
+      "formula": "=MROUND(($C$1*C6)/144,0.25)"
+    },
+    "A7": {
+      "formula": "=A6+6"
+    },
+    "B7": {
+      "value": 187.75
+    },
+    "C7": {
+      "formula": "=CEILING((PI()*(A7-0.875))+2,0.25)"
+    },
+    "D7": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C7)"
+    },
+    "E7": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C7)"
+    },
+    "F7": {
+      "formula": "=MROUND(($C$1*C7)/144,0.25)"
+    },
+    "A8": {
+      "formula": "=A7+6"
+    },
+    "B8": {
+      "value": 206.75
+    },
+    "C8": {
+      "formula": "=CEILING((PI()*(A8-0.875))+2,0.25)"
+    },
+    "D8": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C8)"
+    },
+    "E8": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C8)"
+    },
+    "F8": {
+      "formula": "=MROUND(($C$1*C8)/144,0.25)"
+    },
+    "A9": {
+      "formula": "=A8+6"
+    },
+    "B9": {
+      "value": 225.5
+    },
+    "C9": {
+      "formula": "=CEILING((PI()*(A9-0.875))+2,0.25)"
+    },
+    "D9": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C9)"
+    },
+    "E9": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C9)"
+    },
+    "F9": {
+      "formula": "=MROUND(($C$1*C9)/144,0.25)"
+    },
+    "A10": {
+      "value": 76
+    },
+    "B10": {
+      "value": 238.25
+    },
+    "C10": {
+      "formula": "=CEILING((PI()*(A10-0.875))+2,0.25)"
+    },
+    "D10": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C10)"
+    },
+    "E10": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C10)"
+    },
+    "F10": {
+      "formula": "=MROUND(($C$1*C10)/144,0.25)"
+    },
+    "A11": {
+      "formula": "=A9+6"
+    },
+    "B11": {
+      "value": 244.5
+    },
+    "C11": {
+      "formula": "=CEILING((PI()*(A11-0.875))+2,0.25)"
+    },
+    "D11": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C11)"
+    },
+    "E11": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C11)"
+    },
+    "F11": {
+      "formula": "=MROUND(($C$1*C11)/144,0.25)"
+    },
+    "A12": {
+      "formula": "=A11+6"
+    },
+    "B12": {
+      "value": 263.25
+    },
+    "C12": {
+      "formula": "=CEILING((PI()*(A12-0.875))+2,0.25)"
+    },
+    "D12": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C12)"
+    },
+    "E12": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C12)"
+    },
+    "F12": {
+      "formula": "=MROUND(($C$1*C12)/144,0.25)"
+    },
+    "A13": {
+      "formula": "=A12+6"
+    },
+    "B13": {
+      "value": 282
+    },
+    "C13": {
+      "formula": "=CEILING((PI()*(A13-0.875))+2,0.25)"
+    },
+    "D13": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C13)"
+    },
+    "E13": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C13)"
+    },
+    "F13": {
+      "formula": "=MROUND(($C$1*C13)/144,0.25)"
+    },
+    "A14": {
+      "formula": "=A13+6"
+    },
+    "B14": {
+      "value": 301
+    },
+    "C14": {
+      "formula": "=CEILING((PI()*(A14-0.875))+2,0.25)"
+    },
+    "D14": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C14)"
+    },
+    "E14": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C14)"
+    },
+    "F14": {
+      "formula": "=MROUND(($C$1*C14)/144,0.25)"
+    },
+    "A15": {
+      "formula": "=A14+6"
+    },
+    "B15": {
+      "value": 319.75
+    },
+    "C15": {
+      "formula": "=CEILING((PI()*(A15-0.875))+2,0.25)"
+    },
+    "D15": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C15)"
+    },
+    "E15": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C15)"
+    },
+    "F15": {
+      "formula": "=MROUND(($C$1*C15)/144,0.25)"
+    },
+    "A16": {
+      "formula": "=A15+6"
+    },
+    "B16": {
+      "value": 338.75
+    },
+    "C16": {
+      "formula": "=CEILING((PI()*(A16-0.875))+2,0.25)"
+    },
+    "D16": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C16)"
+    },
+    "E16": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C16)"
+    },
+    "F16": {
+      "formula": "=MROUND(($C$1*C16)/144,0.25)"
+    },
+    "A17": {
+      "formula": "=A16+6"
+    },
+    "B17": {
+      "value": 357.5
+    },
+    "C17": {
+      "formula": "=CEILING((PI()*(A17-0.875))+2,0.25)"
+    },
+    "D17": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C17)"
+    },
+    "E17": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C17)"
+    },
+    "F17": {
+      "formula": "=MROUND(($C$1*C17)/144,0.25)"
+    },
+    "A18": {
+      "formula": "=A17+6"
+    },
+    "B18": {
+      "value": 376.25
+    },
+    "C18": {
+      "formula": "=CEILING((PI()*(A18-0.875))+2,0.25)"
+    },
+    "D18": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C18)"
+    },
+    "E18": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C18)"
+    },
+    "F18": {
+      "formula": "=MROUND(($C$1*C18)/144,0.25)"
+    },
+    "A19": {
+      "formula": "=A18+6"
+    },
+    "B19": {
+      "value": 395.25
+    },
+    "C19": {
+      "formula": "=CEILING((PI()*(A19-0.875))+2,0.25)"
+    },
+    "D19": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C19)"
+    },
+    "E19": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C19)"
+    },
+    "F19": {
+      "formula": "=MROUND(($C$1*C19)/144,0.25)"
+    },
+    "A20": {
+      "formula": "=A19+6"
+    },
+    "B20": {
+      "value": 414
+    },
+    "C20": {
+      "formula": "=CEILING((PI()*(A20-0.875))+2,0.25)"
+    },
+    "D20": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C20)"
+    },
+    "E20": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C20)"
+    },
+    "F20": {
+      "formula": "=MROUND(($C$1*C20)/144,0.25)"
+    },
+    "A21": {
+      "formula": "=A20+6"
+    },
+    "B21": {
+      "value": 433
+    },
+    "C21": {
+      "formula": "=CEILING((PI()*(A21-0.875))+2,0.25)"
+    },
+    "D21": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C21)"
+    },
+    "E21": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C21)"
+    },
+    "F21": {
+      "formula": "=MROUND(($C$1*C21)/144,0.25)"
+    },
+    "A22": {
+      "formula": "=A21+6"
+    },
+    "B22": {
+      "value": 451.75
+    },
+    "C22": {
+      "formula": "=CEILING((PI()*(A22-0.875))+2,0.25)"
+    },
+    "D22": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C22)"
+    },
+    "E22": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C22)"
+    },
+    "F22": {
+      "formula": "=MROUND(($C$1*C22)/144,0.25)"
+    },
+    "A23": {
+      "formula": "=A22+6"
+    },
+    "B23": {
+      "value": 470.5
+    },
+    "C23": {
+      "formula": "=CEILING((PI()*(A23-0.875))+2,0.25)"
+    },
+    "D23": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C23)"
+    },
+    "E23": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C23)"
+    },
+    "F23": {
+      "formula": "=MROUND(($C$1*C23)/144,0.25)"
+    },
+    "A24": {
+      "formula": "=A23+6"
+    },
+    "B24": {
+      "value": 489.5
+    },
+    "C24": {
+      "formula": "=CEILING((PI()*(A24-0.875))+2,0.25)"
+    },
+    "D24": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C24)"
+    },
+    "E24": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C24)"
+    },
+    "F24": {
+      "formula": "=MROUND(($C$1*C24)/144,0.25)"
+    },
+    "A25": {
+      "formula": "=A24+6"
+    },
+    "B25": {
+      "value": 508.25
+    },
+    "C25": {
+      "formula": "=CEILING((PI()*(A25-0.875))+2,0.25)"
+    },
+    "D25": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C25)"
+    },
+    "E25": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C25)"
+    },
+    "F25": {
+      "formula": "=MROUND(($C$1*C25)/144,0.25)"
+    },
+    "A26": {
+      "formula": "=A25+6"
+    },
+    "B26": {
+      "value": 527.25
+    },
+    "C26": {
+      "formula": "=CEILING((PI()*(A26-0.875))+2,0.25)"
+    },
+    "D26": {
+      "formula": "=_xlfn.CONCAT($A$1,\"-\",12,\"-\",$C$1,\"-\",$C26)"
+    },
+    "E26": {
+      "formula": "=_xlfn.CONCAT(E$2,\" X \",$C26)"
+    },
+    "F26": {
+      "formula": "=MROUND(($C$1*C26)/144,0.25)"
+    }
+  }
+}
