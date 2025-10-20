@@ -7,3 +7,5 @@ backup/master_drafting_tools.db
 
 __pycache__/database_setup.cpython-313.pyc
 
+drafting_tools.db-wal
+drafting_tools.db-shm

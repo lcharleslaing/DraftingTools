@@ -3,6 +3,8 @@ from tkinter import ttk, messagebox
 import sqlite3
 import re
 from typing import List, Dict, Optional, Tuple
+from datetime import datetime
+import getpass
 
 class CoilVerificationTool:
     def __init__(self, root):
@@ -492,6 +494,8 @@ class CoilVerificationTool:
         self.context_menu.add_command(label="Copy Part Number", command=self.copy_part_number)
         self.context_menu.add_command(label="Copy Description", command=self.copy_description)
         self.context_menu.add_separator()
+        self.context_menu.add_command(label="Add to Notes", command=self.add_to_notes)
+        self.context_menu.add_separator()
         self.context_menu.add_command(label="Copy All Selected", command=self.copy_all_selected)
         
         # Bind right-click event to treeview
@@ -546,6 +550,222 @@ class CoilVerificationTool:
                 self.root.clipboard_clear()
                 self.root.clipboard_append(formatted_text)
                 self.status_var.set("Copied all data from selected row")
+
+    def add_to_notes(self):
+        """Add coil verification note to a job's notes"""
+        selection = self.results_tree.selection()
+        if not selection:
+            messagebox.showwarning("Warning", "Please select a coil result first")
+            return
+        
+        item = selection[0]
+        values = self.results_tree.item(item, 'values')
+        if not values:
+            messagebox.showwarning("Warning", "No coil data selected")
+            return
+        
+        part_number = values[0]
+        description = values[1]
+        
+        # Create and show the notes dialog
+        self.show_notes_dialog(part_number, description)
+    
+    def show_notes_dialog(self, part_number, description):
+        """Show dialog to select job and add Kemco P/N"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Add Coil Verification to Job Notes")
+        dialog.geometry("600x600")
+        dialog.resizable(True, True)
+        dialog.transient(self.root)
+        dialog.grab_set()
+        
+        # Center the dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
+        y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
+        dialog.geometry(f"+{x}+{y}")
+        
+        # Main frame
+        main_frame = ttk.Frame(dialog, padding="20")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Title
+        title_label = ttk.Label(main_frame, text="Add Coil Verification to Job Notes", 
+                               font=('Arial', 14, 'bold'))
+        title_label.pack(pady=(0, 20))
+        
+        # Coil info frame
+        coil_frame = ttk.LabelFrame(main_frame, text="Coil Information", padding="10")
+        coil_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        ttk.Label(coil_frame, text=f"Part Number: {part_number}").pack(anchor=tk.W)
+        ttk.Label(coil_frame, text=f"Description: {description}").pack(anchor=tk.W)
+        
+        # Job selection frame
+        job_frame = ttk.LabelFrame(main_frame, text="Job Selection", padding="10")
+        job_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        # Job search
+        ttk.Label(job_frame, text="Search Job:").pack(anchor=tk.W)
+        job_search_var = tk.StringVar()
+        job_search_entry = ttk.Entry(job_frame, textvariable=job_search_var, width=30)
+        job_search_entry.pack(fill=tk.X, pady=(5, 10))
+        job_search_entry.bind('<KeyRelease>', lambda e: self.filter_jobs(job_search_var.get(), job_listbox))
+        
+        # Job listbox
+        ttk.Label(job_frame, text="Select Job:").pack(anchor=tk.W)
+        listbox_frame = ttk.Frame(job_frame)
+        listbox_frame.pack(fill=tk.BOTH, expand=True, pady=(5, 0))
+        
+        job_listbox = tk.Listbox(listbox_frame, height=8)
+        job_scrollbar = ttk.Scrollbar(listbox_frame, orient=tk.VERTICAL, command=job_listbox.yview)
+        job_listbox.configure(yscrollcommand=job_scrollbar.set)
+        
+        job_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        job_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Load jobs
+        self.load_jobs(job_listbox)
+        
+        # Kemco P/N frame
+        kemco_frame = ttk.LabelFrame(main_frame, text="Kemco Part Number", padding="10")
+        kemco_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        ttk.Label(kemco_frame, text="Kemco P/N:").pack(anchor=tk.W)
+        kemco_var = tk.StringVar()
+        kemco_entry = ttk.Entry(kemco_frame, textvariable=kemco_var, width=30)
+        kemco_entry.pack(fill=tk.X, pady=(5, 0))
+        
+        # Buttons frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(15, 0))
+        
+        def add_note():
+            selected_indices = job_listbox.curselection()
+            if not selected_indices:
+                messagebox.showwarning("Warning", "Please select a job")
+                return
+            
+            kemco_pn = kemco_var.get().strip()
+            if not kemco_pn:
+                messagebox.showwarning("Warning", "Please enter a Kemco P/N")
+                return
+            
+            selected_job = job_listbox.get(selected_indices[0])
+            job_number = selected_job.split(' - ')[0]  # Extract job number from "12345 - Customer Name"
+            
+            # Add the note
+            self.add_verification_note(job_number, kemco_pn, part_number, description)
+            dialog.destroy()
+        
+        ttk.Button(button_frame, text="Add to Notes", command=add_note).pack(side=tk.RIGHT, padx=(10, 0))
+        ttk.Button(button_frame, text="Cancel", command=dialog.destroy).pack(side=tk.RIGHT)
+    
+    def load_jobs(self, listbox):
+        """Load all jobs into the listbox"""
+        try:
+            # Connect to main database
+            main_conn = sqlite3.connect("drafting_tools.db")
+            cursor = main_conn.cursor()
+            
+            cursor.execute("""
+                SELECT job_number, customer_name, customer_location 
+                FROM projects 
+                ORDER BY job_number DESC
+            """)
+            jobs = cursor.fetchall()
+            
+            listbox.delete(0, tk.END)
+            for job_number, customer_name, customer_location in jobs:
+                display_text = f"{job_number} - {customer_name or 'Unknown Customer'}"
+                if customer_location:
+                    display_text += f" ({customer_location})"
+                listbox.insert(tk.END, display_text)
+            
+            main_conn.close()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load jobs: {str(e)}")
+    
+    def filter_jobs(self, search_text, listbox):
+        """Filter jobs based on search text"""
+        try:
+            # Connect to main database
+            main_conn = sqlite3.connect("drafting_tools.db")
+            cursor = main_conn.cursor()
+            
+            if search_text.strip():
+                cursor.execute("""
+                    SELECT job_number, customer_name, customer_location 
+                    FROM projects 
+                    WHERE job_number LIKE ? OR customer_name LIKE ? OR customer_location LIKE ?
+                    ORDER BY job_number DESC
+                """, (f"%{search_text}%", f"%{search_text}%", f"%{search_text}%"))
+            else:
+                cursor.execute("""
+                    SELECT job_number, customer_name, customer_location 
+                    FROM projects 
+                    ORDER BY job_number DESC
+                """)
+            
+            jobs = cursor.fetchall()
+            
+            listbox.delete(0, tk.END)
+            for job_number, customer_name, customer_location in jobs:
+                display_text = f"{job_number} - {customer_name or 'Unknown Customer'}"
+                if customer_location:
+                    display_text += f" ({customer_location})"
+                listbox.insert(tk.END, display_text)
+            
+            main_conn.close()
+            
+        except Exception as e:
+            print(f"Error filtering jobs: {e}")
+    
+    def add_verification_note(self, job_number, kemco_pn, coil_part_number, coil_description):
+        """Add verification note to the job's notes"""
+        try:
+            # Connect to main database
+            main_conn = sqlite3.connect("drafting_tools.db")
+            cursor = main_conn.cursor()
+            
+            # Create job_notes table if it doesn't exist
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS job_notes (
+                    job_number TEXT PRIMARY KEY,
+                    notes TEXT
+                )
+            """)
+            
+            # Get current notes
+            cursor.execute("SELECT notes FROM job_notes WHERE job_number = ?", (job_number,))
+            result = cursor.fetchone()
+            current_notes = result[0] if result and result[0] else ""
+            
+            # Create verification note
+            current_time = datetime.now().strftime("%Y-%m-%d @ %I:%M %p")
+            current_user = getpass.getuser()
+            
+            verification_note = f"\n{current_time} - {current_user}\n** Verified Coil size was correct on the drawings for {kemco_pn}\n"
+            
+            # Append to existing notes
+            new_notes = current_notes + verification_note
+            
+            # Save updated notes
+            cursor.execute("""
+                INSERT OR REPLACE INTO job_notes (job_number, notes) 
+                VALUES (?, ?)
+            """, (job_number, new_notes))
+            
+            main_conn.commit()
+            main_conn.close()
+            
+            messagebox.showinfo("Success", f"Coil verification note added to job {job_number}")
+            self.status_var.set(f"Added verification note for {kemco_pn} to job {job_number}")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to add verification note: {str(e)}")
+            self.status_var.set("Failed to add verification note")
 
     def on_closing(self):
         """Handle application closing"""
