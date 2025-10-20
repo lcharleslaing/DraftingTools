@@ -7,11 +7,14 @@ import sys
 from datetime import datetime
 
 class ProductConfigurationsApp:
-    def __init__(self):
+    def __init__(self, job_number=None):
         self.root = tk.Tk()
         self.root.title("Product Configurations - Heater, Tank & Pump")
         self.root.state('zoomed')  # Maximized window
         self.root.minsize(1200, 800)
+        
+        # Store job number for preloading
+        self.preload_job_number = job_number
         
         # Initialize database
         self.init_database()
@@ -1353,5 +1356,17 @@ class ProductConfigurationsApp:
         self.root.mainloop()
 
 if __name__ == "__main__":
-    app = ProductConfigurationsApp()
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Product Configurations Application')
+    parser.add_argument('--job', type=str, help='Job number to preload')
+    args = parser.parse_args()
+    
+    app = ProductConfigurationsApp(job_number=args.job)
+    
+    # If job number provided, show it in the interface
+    if args.job:
+        print(f"Product Configurations opened with job number: {args.job}")
+    
     app.run()

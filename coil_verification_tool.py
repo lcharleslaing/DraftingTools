@@ -48,7 +48,7 @@ class CoilVerificationTool:
             print(f"Total records in database: {count}")
             
             if count == 0:
-                print("No data in coil_specifications table")
+                print("No data in coil_specifications table - please run excel_coil_setup.py first")
                 return []
             
             cursor.execute("""
@@ -231,19 +231,6 @@ class CoilVerificationTool:
         self.diameter_combo.grid(row=0, column=5, sticky=tk.W, padx=(0, 20))
         # No default selection - user must choose
         
-        # Coil Length
-        ttk.Label(params_frame, text="Coil Length:").grid(row=1, column=0, sticky=tk.W, padx=(0, 10))
-        self.length_var = tk.StringVar()
-        length_entry = ttk.Entry(params_frame, textvariable=self.length_var, width=15)
-        length_entry.grid(row=1, column=1, sticky=tk.W, padx=(0, 20))
-        
-        # Length tolerance
-        ttk.Label(params_frame, text="Tolerance:").grid(row=1, column=2, sticky=tk.W, padx=(0, 10))
-        self.tolerance_var = tk.StringVar()
-        tolerance_combo = ttk.Combobox(params_frame, textvariable=self.tolerance_var,
-                                      values=["0.25", "0.5", "1.0", "2.0"], state="readonly", width=10)
-        tolerance_combo.grid(row=1, column=3, sticky=tk.W, padx=(0, 20))
-        tolerance_combo.set("0.25")
         
         # Search buttons frame
         button_frame = ttk.Frame(search_frame)
@@ -344,19 +331,6 @@ class CoilVerificationTool:
                     messagebox.showwarning("Warning", "Invalid diameter value selected")
                     return
             
-            # Add coil length search with tolerance
-            length_str = self.length_var.get().strip()
-            if length_str:
-                try:
-                    target_length = float(length_str)
-                    tolerance = float(self.tolerance_var.get())
-                    min_length = target_length - tolerance
-                    max_length = target_length + tolerance
-                    query += " AND length_inches BETWEEN ? AND ?"
-                    params.extend([min_length, max_length])
-                except ValueError:
-                    messagebox.showwarning("Warning", "Invalid coil length value. Please enter a number.")
-                    return
             
             query += " ORDER BY component_type, material_type, diameter_inches, length_inches"
             
@@ -438,8 +412,6 @@ class CoilVerificationTool:
         self.sheet_size_var.set("ALL")
         self.material_var.set("ALL")
         self.diameter_var.set("")  # Clear diameter selection
-        self.length_var.set("")
-        self.tolerance_var.set("0.25")
         self.part_number_var.set("")
         
         # Reset dropdowns to show all options
@@ -582,8 +554,21 @@ class CoilVerificationTool:
         self.root.destroy()
 
 def main():
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Coil Verification Tool')
+    parser.add_argument('--job', type=str, help='Job number to preload')
+    args = parser.parse_args()
+    
     root = tk.Tk()
     app = CoilVerificationTool(root)
+    
+    # If job number provided, show it in status
+    if args.job:
+        app.status_var.set(f"Ready - Job {args.job} preloaded. Select search parameters and click Search Coils")
+        print(f"Coil Verification Tool opened with job number: {args.job}")
+    
     root.mainloop()
 
 if __name__ == "__main__":

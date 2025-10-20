@@ -1142,7 +1142,19 @@ class ResultTable:
 
 # -------------- Main --------------
 if __name__ == "__main__":
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='D365 Import Formatter')
+    parser.add_argument('--job', type=str, help='Job number to preload')
+    args = parser.parse_args()
+    
     init_db()
     defaults = load_workbook_defaults(WORKBOOK_JSON)
     app = App(defaults)
+    
+    # If job number provided, show it in the interface
+    if args.job:
+        print(f"D365 Import Formatter opened with job number: {args.job}")
+    
     app.mainloop()

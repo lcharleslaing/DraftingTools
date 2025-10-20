@@ -14,10 +14,13 @@ from datetime import datetime
 import json
 
 class PrintPackageApp:
-    def __init__(self):
+    def __init__(self, job_number=None):
         self.root = tk.Tk()
         self.root.title("Print Package Management - Drafting Tools")
         self.root.state('zoomed')  # Maximized window
+        
+        # Store job number for preloading
+        self.preload_job_number = job_number
         self.root.minsize(1200, 800)
         
         # Initialize database
@@ -2382,5 +2385,17 @@ Y
         self.root.mainloop()
 
 if __name__ == "__main__":
-    app = PrintPackageApp()
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Print Package Management Application')
+    parser.add_argument('--job', type=str, help='Job number to preload')
+    args = parser.parse_args()
+    
+    app = PrintPackageApp(job_number=args.job)
+    
+    # If job number provided, show it in the interface
+    if args.job:
+        print(f"Print Package Management opened with job number: {args.job}")
+    
     app.run()

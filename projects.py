@@ -227,6 +227,9 @@ class ProjectsApp:
         # Bind selection event
         self.tree.bind('<<TreeviewSelect>>', self.on_project_select)
         
+        # Create right-click context menu for job numbers
+        self.create_job_context_menu()
+        
         # Job Notes area below the projects table
         notes_frame = ttk.LabelFrame(list_frame, text="Job Notes", padding="5")
         notes_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(10, 0))
@@ -4554,6 +4557,103 @@ class ProjectsApp:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save job notes: {str(e)}")
     
+    def create_job_context_menu(self):
+        """Create right-click context menu for job numbers"""
+        self.job_context_menu = tk.Menu(self.root, tearoff=0)
+        
+        # Add all dashboard applications
+        self.job_context_menu.add_command(label="Open in Projects Management", command=lambda: self.open_app_with_job("projects"))
+        self.job_context_menu.add_command(label="Open in Product Configurations", command=lambda: self.open_app_with_job("product_configs"))
+        self.job_context_menu.add_command(label="Open in Print Package Management", command=lambda: self.open_app_with_job("print_packages"))
+        self.job_context_menu.add_command(label="Open in D365 Import Formatter", command=lambda: self.open_app_with_job("d365_formatter"))
+        self.job_context_menu.add_command(label="Open in Project File Monitor", command=lambda: self.open_app_with_job("project_monitor"))
+        self.job_context_menu.add_command(label="Open in Drawing Reviews", command=lambda: self.open_app_with_job("drawing_reviews"))
+        self.job_context_menu.add_command(label="Open in Drafting Checklist", command=lambda: self.open_app_with_job("drafting_checklist"))
+        self.job_context_menu.add_command(label="Open in Resource Allocation", command=lambda: self.open_app_with_job("resource_allocation"))
+        self.job_context_menu.add_command(label="Open in Workflow Manager", command=lambda: self.open_app_with_job("workflow_manager"))
+        self.job_context_menu.add_command(label="Open in Coil Verification", command=lambda: self.open_app_with_job("coil_verification"))
+        
+        # Bind right-click event to treeview
+        self.tree.bind("<Button-3>", self.show_job_context_menu)  # Button-3 is right-click on Windows
+        self.tree.bind("<Button-2>", self.show_job_context_menu)  # Button-2 is right-click on Mac/Linux
+    
+    def show_job_context_menu(self, event):
+        """Show context menu at cursor position"""
+        # Select the item under the cursor
+        item = self.tree.identify_row(event.y)
+        if item:
+            self.tree.selection_set(item)
+            # Show context menu
+            try:
+                self.job_context_menu.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.job_context_menu.grab_release()
+    
+    def open_app_with_job(self, app_name):
+        """Open specified app with current job number"""
+        selection = self.tree.selection()
+        if not selection:
+            messagebox.showwarning("Warning", "No job selected!")
+            return
+        
+        # Get job number from selected row
+        item = selection[0]
+        values = self.tree.item(item, 'values')
+        if not values:
+            messagebox.showwarning("Warning", "No job data found!")
+            return
+        
+        job_number = values[0]  # Job Number is the first column
+        
+        # Map app names to actual Python files
+        app_files = {
+            "projects": "projects.py",
+            "product_configs": "product_configurations.py",
+            "print_packages": "print_package_manager.py", 
+            "d365_formatter": "d365_import_formatter.py",
+            "project_monitor": "project_monitor.py",
+            "drawing_reviews": "drawing_reviews.py",
+            "drafting_checklist": "drafting_checklist.py",
+            "resource_allocation": "resource_allocation.py",
+            "workflow_manager": "workflow_manager.py",
+            "coil_verification": "coil_verification_tool.py"
+        }
+        
+        app_file = app_files.get(app_name)
+        if not app_file:
+            messagebox.showerror("Error", f"Unknown app: {app_name}")
+            return
+        
+        # Check if file exists
+        if not os.path.exists(app_file):
+            messagebox.showerror("Error", f"Application file not found: {app_file}")
+            return
+        
+        try:
+            # Launch the app with job number as parameter
+            subprocess.Popen([sys.executable, app_file, "--job", str(job_number)])
+            print(f"Launched {app_name} with job number: {job_number}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch {app_name}:\n{str(e)}")
+
+    def preload_job(self, job_number):
+        """Preload a specific job number in the table"""
+        try:
+            # Find the job in the treeview
+            for item in self.tree.get_children():
+                values = self.tree.item(item, 'values')
+                if values and values[0] == str(job_number):
+                    # Select and focus on this item
+                    self.tree.selection_set(item)
+                    self.tree.focus(item)
+                    self.tree.see(item)
+                    print(f"Preloaded job number: {job_number}")
+                    return
+            
+            print(f"Job number {job_number} not found in current view")
+        except Exception as e:
+            print(f"Error preloading job {job_number}: {e}")
+
     def on_closing(self):
         """Handle application closing"""
         self.db_manager.backup_database()
@@ -4561,8 +4661,20 @@ class ProjectsApp:
         self.root.destroy()
 
 def main():
+    import argparse
+    
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Projects Management Application')
+    parser.add_argument('--job', type=str, help='Job number to preload')
+    args = parser.parse_args()
+    
     root = tk.Tk()
     app = ProjectsApp(root)
+    
+    # If job number provided, select it in the table
+    if args.job:
+        app.preload_job(args.job)
+    
     root.mainloop()
 
 if __name__ == "__main__":
