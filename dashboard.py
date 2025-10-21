@@ -237,69 +237,37 @@ class DashboardApp:
         #                        self.launch_shit_bricks_sideways)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
-        """Create a consistent app tile with icon, title, description, and counter"""
-        # Create outer container for scale effect
-        container = tk.Frame(parent, bg='#f5f5f5')
-        container.grid(row=row, column=col, padx=15, pady=15, sticky=(tk.W, tk.E, tk.N, tk.S))
+        """Create a simple button with formatted title"""
+        # Create a frame to hold the button content
+        btn_frame = tk.Frame(parent, relief='raised', borderwidth=2, bg='white')
+        btn_frame.grid(row=row, column=col, padx=10, pady=10, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Create tile frame with consistent size
-        tile_frame = tk.Frame(container, relief='raised', borderwidth=2, 
-                             bg='white', highlightthickness=1, highlightbackground='#d0d0d0')
-        tile_frame.pack(fill=tk.BOTH, expand=True)
+        # Make the entire frame clickable
+        def on_click(event):
+            command()
         
-        # Set minimum size for consistency (adjusted for 3-column layout)
-        tile_frame.grid_propagate(False)
-        tile_frame.config(width=250, height=160)
+        btn_frame.bind('<Button-1>', on_click)
+        btn_frame.bind('<Enter>', lambda e: btn_frame.config(cursor='hand2'))
+        btn_frame.bind('<Leave>', lambda e: btn_frame.config(cursor=''))
         
-        # Create clickable button that fills the tile
-        btn = tk.Button(tile_frame, relief='flat', bg='white', 
-                       activebackground='#E8F0FE', bd=0, cursor='hand2',
-                       command=command)
-        btn.pack(fill=tk.BOTH, expand=True)
+        # Icon (larger)
+        icon_label = tk.Label(btn_frame, text=icon, font=('Arial', 24), bg='white')
+        icon_label.pack(pady=(10, 5))
         
-        # Icon
-        icon_label = tk.Label(btn, text=icon, font=('Arial', 32), 
-                            bg='white', fg='#3498db')
-        icon_label.pack(pady=(15, 10))
+        # Title (bold and larger)
+        title_label = tk.Label(btn_frame, text=title, font=('Arial', 14, 'bold'), bg='white')
+        title_label.pack(pady=(0, 5))
+        title_label.bind('<Button-1>', on_click)
+        title_label.bind('<Enter>', lambda e: btn_frame.config(cursor='hand2'))
+        title_label.bind('<Leave>', lambda e: btn_frame.config(cursor=''))
         
-        # Title
-        title_label = tk.Label(btn, text=title, font=('Arial', 14, 'bold'), 
-                             bg='white', fg='#2c3e50')
-        title_label.pack(pady=(0, 8))
-        
-        # Description
-        desc_label = tk.Label(btn, text=description, font=('Arial', 11), 
-                            bg='white', fg='#7f8c8d', justify='center')
-        desc_label.pack(pady=(0, 5))
-        
-        # Counter at bottom-right
-        counter_text = self.get_tile_counter(title)
-        counter_label = tk.Label(btn, text=counter_text, font=('Arial', 10, 'normal'), 
-                               bg='white', fg='#555555', anchor='e')
-        counter_label.pack(side=tk.BOTTOM, anchor='se', padx=8, pady=8)
-        
-        # Store references for hover effects
-        all_widgets = [btn, icon_label, title_label, desc_label, counter_label]
-        
-        # Hover effects with scale and color change
-        def on_enter(e):
-            # Change background to light accent
-            for widget in all_widgets:
-                widget.config(bg='#E8F0FE')
-            # Scale up effect (simulated by changing relief and border)
-            tile_frame.config(relief='raised', borderwidth=3, highlightbackground='#3498db')
-        
-        def on_leave(e):
-            # Restore original background
-            for widget in all_widgets:
-                widget.config(bg='white')
-            # Restore original relief and border
-            tile_frame.config(relief='raised', borderwidth=2, highlightbackground='#d0d0d0')
-        
-        # Bind hover events to all widgets
-        for widget in all_widgets:
-            widget.bind('<Enter>', on_enter)
-            widget.bind('<Leave>', on_leave)
+        # Description (normal size, non-bold)
+        desc_label = tk.Label(btn_frame, text=description, font=('Arial', 10), 
+                             bg='white', wraplength=200, justify='center')
+        desc_label.pack(pady=(0, 10))
+        desc_label.bind('<Button-1>', on_click)
+        desc_label.bind('<Enter>', lambda e: btn_frame.config(cursor='hand2'))
+        desc_label.bind('<Leave>', lambda e: btn_frame.config(cursor=''))
     
     def get_tile_counter(self, tile_title):
         """Get dynamic counter for each tile"""
