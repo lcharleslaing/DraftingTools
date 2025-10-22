@@ -252,11 +252,11 @@ class ProductConfigurationsApp:
         # List of all StringVar and BooleanVar fields that should auto-save
         field_vars = [
             'heater_model_var', 'location_var', 'heater_diameter_var', 'heater_height_var',
-            'heater_stack_diameter_var', 'application_var', 'material_var', 'flanges_var',
-            'burner_model_var', 'gas_train_position_var', 'heater_mounting_var', 'gaige_cocks_var',
-            'temperature_switch_var', 'packaging_var', 'mod_piping_transducer_material_var',
+            'heater_stack_diameter_var', 'application_var', 'material_var', 'flanges_316_var',
+            'burner_model_var', 'gas_train_position_var', 'heater_mounting_var', 'gauge_cocks_var',
+            'temperature_switch_var', 'packaging_type_var', 'mod_piping_transducer_material_var',
             'hose_material_var', 'modulating_valve_var', 'media_frame_height_var',
-            'gas_var', 'side_manway_option_var', 'side_manway_angle_var', 'water_inlet_size_var',
+            'gas_type_var', 'side_manway_option_var', 'side_manway_angle_var', 'water_inlet_size_var',
             'water_inlet_angles_var', 'suction_fitting_size_var', 'suction_fitting_height_var',
             'suction_fitting_angle_var', 'ballast_packing_rings_var', 'ballast_packing_rings_height_var',
             'float_chamber_angle_var', 'heater_final_assembly_part_number_var', 'hose_length_var',

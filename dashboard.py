@@ -4,6 +4,7 @@ import subprocess
 import os
 import sys
 import sqlite3
+from db_utils import get_connection
 from settings import SettingsManager
 
 class DashboardApp:
@@ -231,10 +232,7 @@ class DashboardApp:
                                "Search and verify coil part numbers\nby Heater/Tank, Material & Diameter", 
                                self.launch_coil_verification)
         
-        # SHIT BRICKS SIDEWAYS (Placeholder for now!) - Moved to row 2, col 2 to replace Workflow Manager
-        # self.create_app_tile(parent, 3, 0, "💩", "SHIT BRICKS SIDEWAYS", 
-        #                        "Coming soon! (You'll remember\nwhat this was for eventually!)", 
-        #                        self.launch_shit_bricks_sideways)
+        # Reserved placeholder for future app
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a simple button with formatted title"""
@@ -272,7 +270,7 @@ class DashboardApp:
     def get_tile_counter(self, tile_title):
         """Get dynamic counter for each tile"""
         try:
-            conn = sqlite3.connect('drafting_tools.db')
+            conn = get_connection('drafting_tools.db')
             cursor = conn.cursor()
             
             if "Projects Management" in tile_title:
@@ -292,7 +290,11 @@ class DashboardApp:
                 return f"{count} Active Project{'s' if count != 1 else ''}"
             
             elif "Product Configurations" in tile_title:
-                # Count configurations
+                # Count configurations, guard table existence
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='heater_configurations'")
+                if cursor.fetchone() is None:
+                    conn.close()
+                    return "0 Configurations"
                 cursor.execute("SELECT COUNT(DISTINCT job_number) FROM heater_configurations")
                 count = cursor.fetchone()[0]
                 conn.close()
@@ -327,14 +329,22 @@ class DashboardApp:
                 return f"{count} Print Package{'s' if count != 1 else ''}"
             
             elif "D365 Import Formatter" in tile_title:
-                # Count D365 import configurations
+                # Count D365 import configurations, guard table existence
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='d365_import_configs'")
+                if cursor.fetchone() is None:
+                    conn.close()
+                    return "0 Configurations"
                 cursor.execute("SELECT COUNT(DISTINCT job_number) FROM d365_import_configs")
                 count = cursor.fetchone()[0]
                 conn.close()
                 return f"{count} Configuration{'s' if count != 1 else ''}"
             
             elif "Drafting Drawing Checklist" in tile_title:
-                # Count active projects with checklist items
+                # Count active projects with checklist items, guard table existence
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='project_checklist_status'")
+                if cursor.fetchone() is None:
+                    conn.close()
+                    return "0 Active Projects"
                 cursor.execute("""
                     SELECT COUNT(DISTINCT p.job_number)
                     FROM projects p

@@ -18,6 +18,13 @@ class DatabaseManager:
         """Initialize the database with all required tables"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
+        # Pragmas for integrity and performance
+        try:
+            cursor.execute("PRAGMA foreign_keys = ON")
+            cursor.execute("PRAGMA journal_mode = WAL")
+            cursor.execute("PRAGMA synchronous = NORMAL")
+        except Exception:
+            pass
         
         # Create designers table
         cursor.execute('''
@@ -63,7 +70,7 @@ class DatabaseManager:
                 engineer_id INTEGER,
                 redline_date TEXT,
                 is_completed BOOLEAN DEFAULT 0,
-                FOREIGN KEY (project_id) REFERENCES projects (id),
+                FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
                 FOREIGN KEY (engineer_id) REFERENCES engineers (id)
             )
         ''')
@@ -77,7 +84,7 @@ class DatabaseManager:
                 update_date TEXT,
                 update_cycle INTEGER,
                 is_completed BOOLEAN DEFAULT 0,
-                FOREIGN KEY (project_id) REFERENCES projects (id),
+                FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
                 FOREIGN KEY (engineer_id) REFERENCES engineers (id)
             )
         ''')
@@ -89,7 +96,7 @@ class DatabaseManager:
                 project_id INTEGER,
                 review_date TEXT,
                 is_completed BOOLEAN DEFAULT 0,
-                FOREIGN KEY (project_id) REFERENCES projects (id)
+                FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
             )
         ''')
         
@@ -100,7 +107,7 @@ class DatabaseManager:
                 project_id INTEGER,
                 entry_date TEXT,
                 is_completed BOOLEAN DEFAULT 0,
-                FOREIGN KEY (project_id) REFERENCES projects (id)
+                FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
             )
         ''')
         
@@ -111,7 +118,7 @@ class DatabaseManager:
                 project_id INTEGER,
                 fixed_errors_date TEXT,
                 is_completed BOOLEAN DEFAULT 0,
-                FOREIGN KEY (project_id) REFERENCES projects (id)
+                FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
             )
         ''')
         
@@ -126,7 +133,7 @@ class DatabaseManager:
                 other_notes TEXT,
                 other_date TEXT,
                 is_completed BOOLEAN DEFAULT 0,
-                FOREIGN KEY (project_id) REFERENCES projects (id)
+                FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
             )
         ''')
         
@@ -226,7 +233,7 @@ class DatabaseManager:
                 file_extension TEXT,
                 added_date TEXT,
                 added_by TEXT,
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -237,7 +244,7 @@ class DatabaseManager:
                 job_number TEXT NOT NULL,
                 package_name TEXT,
                 created_date TEXT,
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -249,7 +256,7 @@ class DatabaseManager:
                 config_type TEXT NOT NULL,
                 config_data TEXT,
                 created_date TEXT,
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -264,7 +271,7 @@ class DatabaseManager:
                 template TEXT,
                 product_type TEXT,
                 created_date TEXT,
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -277,7 +284,7 @@ class DatabaseManager:
                 param_name TEXT NOT NULL,
                 param_value TEXT,
                 created_date TEXT,
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -293,7 +300,7 @@ class DatabaseManager:
                 initialized_date TEXT DEFAULT CURRENT_TIMESTAMP,
                 completed_date TEXT,
                 notes TEXT,
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -316,8 +323,8 @@ class DatabaseManager:
                 file_size INTEGER,
                 file_type TEXT DEFAULT 'pdf',
                 created_date TEXT DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (review_id) REFERENCES print_package_reviews (review_id),
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (review_id) REFERENCES print_package_reviews (review_id) ON DELETE CASCADE,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
@@ -335,13 +342,51 @@ class DatabaseManager:
                 started_date TEXT,
                 completed_date TEXT,
                 notes TEXT,
-                FOREIGN KEY (review_id) REFERENCES print_package_reviews (review_id),
-                FOREIGN KEY (job_number) REFERENCES projects (job_number)
+                FOREIGN KEY (review_id) REFERENCES print_package_reviews (review_id) ON DELETE CASCADE,
+                FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
         
         conn.commit()
-        conn.close()
+        
+        # Create helpful indexes (idempotent)
+        try:
+            idx_statements = [
+                # Projects and lookups
+                "CREATE INDEX IF NOT EXISTS idx_projects_job_number ON projects(job_number)",
+                "CREATE INDEX IF NOT EXISTS idx_projects_assigned_to_id ON projects(assigned_to_id)",
+                "CREATE INDEX IF NOT EXISTS idx_projects_engineer_id ON projects(project_engineer_id)",
+                "CREATE INDEX IF NOT EXISTS idx_projects_due_date ON projects(due_date)",
+                # Workflow tables by project_id
+                "CREATE INDEX IF NOT EXISTS idx_initial_redline_project ON initial_redline(project_id)",
+                "CREATE INDEX IF NOT EXISTS idx_redline_updates_project ON redline_updates(project_id)",
+                "CREATE INDEX IF NOT EXISTS idx_ops_review_project ON ops_review(project_id)",
+                "CREATE INDEX IF NOT EXISTS idx_d365_bom_entry_project ON d365_bom_entry(project_id)",
+                "CREATE INDEX IF NOT EXISTS idx_peter_weck_review_project ON peter_weck_review(project_id)",
+                "CREATE INDEX IF NOT EXISTS idx_release_to_dee_project ON release_to_dee(project_id)",
+                # Drawings/print packages
+                "CREATE INDEX IF NOT EXISTS idx_drawings_job_number ON drawings(job_number)",
+                "CREATE INDEX IF NOT EXISTS idx_print_packages_job_number ON print_packages(job_number)",
+                "CREATE INDEX IF NOT EXISTS idx_pp_reviews_job_number ON print_package_reviews(job_number)",
+                "CREATE INDEX IF NOT EXISTS idx_pp_workflow_review ON print_package_workflow(review_id)",
+                "CREATE INDEX IF NOT EXISTS idx_pp_workflow_job_stage ON print_package_workflow(job_number, stage)",
+                "CREATE INDEX IF NOT EXISTS idx_pp_files_review ON print_package_files(review_id)",
+                "CREATE INDEX IF NOT EXISTS idx_pp_files_job ON print_package_files(job_number)",
+                # D365 tables by job
+                "CREATE INDEX IF NOT EXISTS idx_d365_cfg_job ON d365_import_configs(job_number)",
+                "CREATE INDEX IF NOT EXISTS idx_d365_part_job ON d365_part_numbers(job_number)",
+                "CREATE INDEX IF NOT EXISTS idx_d365_param_job ON d365_import_params(job_number)",
+            ]
+            for stmt in idx_statements:
+                try:
+                    cursor.execute(stmt)
+                except Exception:
+                    pass
+            conn.commit()
+        except Exception:
+            pass
+        finally:
+            conn.close()
     
     def insert_default_data(self, cursor):
         """Insert default data for designers and engineers"""

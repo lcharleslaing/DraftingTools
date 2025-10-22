@@ -11,6 +11,7 @@ import os
 import subprocess
 import sys
 from datetime import datetime
+from db_utils import get_connection
 import json
 
 class PrintPackageApp:
@@ -252,7 +253,7 @@ class PrintPackageApp:
         
     def init_database(self):
         """Initialize the database connection"""
-        self.conn = sqlite3.connect('drafting_tools.db')
+        self.conn = get_connection('drafting_tools.db')
         
         # Create printer configuration table if it doesn't exist
         cursor = self.conn.cursor()

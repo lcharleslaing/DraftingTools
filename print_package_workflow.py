@@ -5,6 +5,7 @@ Handles stage transitions, auto-copying, and reviewer tracking
 """
 
 import sqlite3
+from db_utils import get_connection
 import os
 import shutil
 import uuid
@@ -43,7 +44,7 @@ class PrintPackageWorkflow:
     def get_review_info(self, job_number: str) -> Optional[Dict]:
         """Get Print Package Review information for a job"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = get_connection(self.db_path)
             cursor = conn.cursor()
             
             cursor.execute('''
@@ -75,7 +76,7 @@ class PrintPackageWorkflow:
     def get_workflow_status(self, job_number: str) -> List[Dict]:
         """Get workflow status for all stages of a job"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = get_connection(self.db_path)
             cursor = conn.cursor()
             
             cursor.execute('''
@@ -112,7 +113,7 @@ class PrintPackageWorkflow:
     def get_files_for_stage(self, job_number: str, stage: int) -> List[Dict]:
         """Get all files for a specific stage"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = get_connection(self.db_path)
             cursor = conn.cursor()
             
             # Get the review_id first
@@ -188,7 +189,7 @@ class PrintPackageWorkflow:
                 return False
             
             # Update workflow records
-            conn = sqlite3.connect(self.db_path)
+            conn = get_connection(self.db_path)
             cursor = conn.cursor()
             
             # Mark current stage as completed
@@ -235,7 +236,7 @@ class PrintPackageWorkflow:
             review_id = review_info['review_id']
             
             # Get job directory
-            conn = sqlite3.connect(self.db_path)
+            conn = get_connection(self.db_path)
             cursor = conn.cursor()
             
             cursor.execute('SELECT job_directory FROM projects WHERE job_number = ?', (job_number,))

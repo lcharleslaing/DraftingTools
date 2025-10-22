@@ -464,6 +464,8 @@ class ProjectsApp:
         details_frame = ttk.LabelFrame(self.project_details_container, text="Project Details", padding="10")
         details_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
         details_frame.columnconfigure(1, weight=1)
+        # Keep a durable reference for other methods
+        self.project_details_frame = details_frame
         
         # Job Number
         ttk.Label(details_frame, text="Job Number:").grid(row=0, column=0, sticky=tk.W, pady=2)
@@ -872,7 +874,9 @@ class ProjectsApp:
         conn.close()
         messagebox.showinfo("Deleted", f"{spec_name} manual value deleted")
         # Refresh the specifications
-        self.update_specifications(self.project_details_container.winfo_children()[0])
+        # Refresh specifications using stable reference
+        if hasattr(self, 'project_details_frame'):
+            self.update_specifications(self.project_details_frame)
     
     def create_spec_input_field(self, parent_frame, spec_name, row, column=1):
         """Create an input field for manual entry of missing specifications"""
@@ -930,7 +934,8 @@ class ProjectsApp:
         conn.close()
         messagebox.showinfo("Saved", f"{spec_name} saved as: {value.strip()}")
         # Update the specifications to show the saved value
-        self.update_specifications(self.project_details_container.winfo_children()[0])
+        if hasattr(self, 'project_details_frame'):
+            self.update_specifications(self.project_details_frame)
     
     def get_saved_manual_spec(self, spec_name):
         """Get a previously saved manual specification value for the current job"""
@@ -3080,10 +3085,6 @@ class ProjectsApp:
         if messagebox.askyesno("Confirm Reset", 
                               "Are you sure you want to reset the database? This will delete ALL data!"):
             try:
-                # Close current connection
-                if hasattr(self, 'db_manager'):
-                    self.db_manager.close()
-                
                 # Delete the database file
                 import os
                 if os.path.exists(self.db_manager.db_path):
@@ -3997,7 +3998,8 @@ class ProjectsApp:
         self.update_quick_access()
         
         # Update specifications panel
-        self.update_specifications(self.project_details_container.winfo_children()[0])
+        if hasattr(self, 'project_details_frame'):
+            self.update_specifications(self.project_details_frame)
         
         # Update cover sheet button
         self.update_cover_sheet_button()
@@ -4609,11 +4611,13 @@ class ProjectsApp:
         app_files = {
             "projects": "projects.py",
             "product_configs": "product_configurations.py",
-            "print_packages": "print_package_manager.py", 
+            # Correct filename in repo is print_package.py
+            "print_packages": "print_package.py",
             "d365_formatter": "d365_import_formatter.py",
             "project_monitor": "project_monitor.py",
             "drawing_reviews": "drawing_reviews.py",
-            "drafting_checklist": "drafting_checklist.py",
+            # Correct checklist script name
+            "drafting_checklist": "drafting_items_to_look_for.py",
             "resource_allocation": "resource_allocation.py",
             "workflow_manager": "workflow_manager.py",
             "coil_verification": "coil_verification_tool.py"
