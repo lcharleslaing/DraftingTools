@@ -4155,7 +4155,22 @@ class ProjectsApp:
     
     def new_project(self):
         """Clear form for new project"""
-        # Clear main project fields
+        # Avoid autosave triggers while clearing
+        self._loading_project = True
+
+        # Unselect any selected project in the tree and clear highlight
+        try:
+            for item in self.tree.get_children():
+                self.tree.item(item, tags=())
+            self.tree.selection_set(())
+            self.tree.focus("")
+        except Exception:
+            pass
+
+        # Reset selection context
+        self.current_project = None
+
+        # Clear main project fields (all blank; no defaults)
         self.job_number_var.set("")
         self.job_directory_picker.set("")
         self.customer_name_var.set("")
@@ -4163,33 +4178,63 @@ class ProjectsApp:
         self.customer_location_var.set("")
         self.customer_location_picker.set("")
         self.assigned_to_var.set("")
-        self.assignment_date_entry.set(datetime.now().strftime("%Y-%m-%d"))
+        self.project_engineer_var.set("")
+        self.assignment_date_entry.set("")
+        self.due_date_entry.set("")
         self.start_date_entry.set("")
         self.completion_date_entry.set("")
         self.duration_var.set("")
         self.released_to_dee_entry.set("")
-        
+
         # Clear workflow fields
         self.initial_redline_var.set(False)
         self.initial_engineer_var.set("")
         self.initial_date_entry.set("")
-        
+
         for i in range(1, 5):
-            getattr(self, f"redline_update_{i}_var").set(False)
-            setattr(self, f"redline_update_{i}_engineer_var", tk.StringVar(""))
+            # Uncheck, clear engineer dropdown, and clear dates
+            if hasattr(self, f"redline_update_{i}_var"):
+                getattr(self, f"redline_update_{i}_var").set(False)
+            if hasattr(self, f"redline_update_{i}_engineer_var"):
+                getattr(self, f"redline_update_{i}_engineer_var").set("")
             if hasattr(self, f"redline_update_{i}_date_entry"):
                 getattr(self, f"redline_update_{i}_date_entry").set("")
-        
-        self.ops_review_var.set(False)
-        self.ops_review_date_entry.set("")
-        self.peter_weck_var.set(False)
-        self.peter_weck_date_entry.set("")
-        self.release_fixed_errors_var.set(False)
-        self.missing_prints_date_entry.set("")
-        self.d365_updates_date_entry.set("")
-        self.other_notes_var.set("")
-        self.other_date_entry.set("")
-        
+
+        if hasattr(self, 'ops_review_var'):
+            self.ops_review_var.set(False)
+        if hasattr(self, 'ops_review_date_entry'):
+            self.ops_review_date_entry.set("")
+        if hasattr(self, 'peter_weck_var'):
+            self.peter_weck_var.set(False)
+        if hasattr(self, 'peter_weck_date_entry'):
+            self.peter_weck_date_entry.set("")
+        if hasattr(self, 'd365_bom_var'):
+            self.d365_bom_var.set(False)
+        if hasattr(self, 'd365_bom_date_entry'):
+            self.d365_bom_date_entry.set("")
+        if hasattr(self, 'release_fixed_errors_var'):
+            self.release_fixed_errors_var.set(False)
+        if hasattr(self, 'missing_prints_date_entry'):
+            self.missing_prints_date_entry.set("")
+        if hasattr(self, 'd365_updates_date_entry'):
+            self.d365_updates_date_entry.set("")
+        if hasattr(self, 'other_notes_var'):
+            self.other_notes_var.set("")
+        if hasattr(self, 'other_date_entry'):
+            self.other_date_entry.set("")
+        if hasattr(self, 'release_due_date_entry'):
+            self.release_due_date_entry.set("")
+        if hasattr(self, 'release_due_display_var'):
+            self.release_due_display_var.set("")
+
+        # Clear notes context and text area
+        try:
+            self.current_job_notes = ""
+            if hasattr(self, 'notes_text'):
+                self.notes_text.delete('1.0', tk.END)
+        except Exception:
+            pass
+
         # Clear KOM file path and all document lists
         if hasattr(self, 'kom_oc_form_path'):
             self.kom_oc_form_path = None
@@ -4201,9 +4246,23 @@ class ProjectsApp:
             self.engineering_general_docs = []
         if hasattr(self, 'engineering_releases_docs'):
             self.engineering_releases_docs = []
-        
-        # Update quick access panel
+
+        # Update quick access and specifications panels to reflect no selection
         self.update_quick_access()
+        try:
+            if hasattr(self, 'project_details_frame'):
+                self.update_specifications(self.project_details_frame)
+        except Exception:
+            pass
+
+        # Update cover sheet action state
+        try:
+            self.update_cover_sheet_button()
+        except Exception:
+            pass
+
+        # Re-enable autosave after clearing
+        self._loading_project = False
     
     def save_project(self):
         """Save project to database"""
