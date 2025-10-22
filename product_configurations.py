@@ -103,12 +103,6 @@ class ProductConfigurationsApp:
         # Bind selection event
         self.project_tree.bind('<<TreeviewSelect>>', self.on_project_select)
         # Right-click: add note
-        self.project_ctx = ttk.Menu(project_frame, tearoff=0)
-        try:
-            # ttk.Menu may not exist on some themes; fallback to tk.Menu
-            pass
-        except Exception:
-            pass
         self.project_ctx = tk.Menu(project_frame, tearoff=0)
         self.project_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
         self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
