@@ -20,6 +20,7 @@ def add_app_bar(root, current_app: str = None) -> tk.Frame:
         ('Project Monitor', 'project_monitor'),
         ('Drawing Reviews', 'drawing_reviews'),
         ('Checklist', 'drafting_checklist'),
+        ('Proj Workflow', 'project_workflow'),
         ('Workflow', 'workflow_manager'),
         ('Coil Verify', 'coil_verification'),
     ]

@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import time
 import psutil
 
 APP_MAP = {
@@ -13,20 +14,35 @@ APP_MAP = {
     'drawing_reviews': {'script': 'drawing_reviews.py', 'title': 'Drawing Reviews - Digital Markup System'},
     'drafting_checklist': {'script': 'drafting_items_to_look_for.py', 'title': 'Drafting Drawing Checklist - Drafting Tools'},
     'workflow_manager': {'script': 'workflow_manager.py', 'title': 'Print Package Workflow Manager'},
+    'project_workflow': {'script': 'project_workflow.py', 'title': 'Project Workflow'},
     'coil_verification': {'script': 'coil_verification_tool.py', 'title': 'Coil Verification Tool - Drafting Tools'},
     'app_order': {'script': 'app_order.py', 'title': 'App Order Manager - Drafting Tools'},
     'assist_engineering': {'script': 'assist_engineering.py', 'title': 'Assist Engineering'},
 }
 
+CACHED_PIDS = {}
+
 
 def _find_process_for_script(script_name: str):
+    # Fast path: cached PID
+    pid = CACHED_PIDS.get(script_name)
+    if pid and psutil.pid_exists(pid):
+        try:
+            return psutil.Process(pid)
+        except Exception:
+            CACHED_PIDS.pop(script_name, None)
+    # Time‑budgeted scan to avoid slow downs
+    deadline = time.perf_counter() + 0.3  # 300ms budget
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
         try:
             cmdline = proc.info.get('cmdline') or []
             if any(script_name in part for part in cmdline):
+                CACHED_PIDS[script_name] = proc.pid
                 return proc
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
+        if time.perf_counter() > deadline:
+            break
     return None
 
 
@@ -101,13 +117,15 @@ def open_or_focus(app_key: str):
         # As a fallback (e.g., pywin32 missing), attempt to launch to ensure user sees a window
         # May result in a second instance in rare cases, but improves UX when focus is not possible.
         try:
-            subprocess.Popen([sys.executable, script])
+            p = subprocess.Popen([sys.executable, script], start_new_session=True)
+            CACHED_PIDS[script] = p.pid
         except Exception:
             pass
         return
 
     # Launch new process
     try:
-        subprocess.Popen([sys.executable, script])
+        p = subprocess.Popen([sys.executable, script], start_new_session=True)
+        CACHED_PIDS[script] = p.pid
     except Exception:
         pass

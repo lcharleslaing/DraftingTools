@@ -134,22 +134,19 @@ class ProjectsApp:
         main_paned = ttk.PanedWindow(self.content, orient=tk.HORIZONTAL)
         main_paned.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=10, pady=(0, 10))
         
-        # Container frames for each section
+        # Container frames for each section (workflow removed from Projects app)
         self.project_list_container = ttk.Frame(main_paned)
         self.project_details_container = ttk.Frame(main_paned)
-        self.workflow_container = ttk.Frame(main_paned)
         self.quick_access_container = ttk.Frame(main_paned)
         
         # Add containers to paned window - they will expand vertically
         main_paned.add(self.project_list_container, weight=1)
         main_paned.add(self.project_details_container, weight=1)
-        main_paned.add(self.workflow_container, weight=1)
         main_paned.add(self.quick_access_container, weight=1)
         
         # Create panels inside containers
         self.create_project_list_panel()
         self.create_project_details_panel()
-        self.create_workflow_panel()
         self.create_quick_access_panel()
         
         # Row 2: Fixed footer with action buttons

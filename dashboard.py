@@ -230,6 +230,11 @@ class DashboardApp:
                                "Manage Print Package Review\nworkflows and stage transitions", 
                                self.launch_workflow_manager)
         
+        # Project Workflow (Template + Per-Project)
+        self.create_app_tile(parent, 3, 1, "🗂️", "Project Workflow", 
+                              "Define Standard workflow and\nupdate per‑project step states", 
+                              self.launch_project_workflow)
+        
         # Coil Verification Tool
         self.create_app_tile(parent, 3, 0, "🔍", "Coil Verification Tool", 
                                "Search and verify coil part numbers\nby Heater/Tank, Material & Diameter", 
@@ -493,6 +498,18 @@ class DashboardApp:
         except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch Workflow Manager:\n{str(e)}")
     
+    def launch_project_workflow(self):
+        """Launch the Project Workflow application"""
+        try:
+            if os.path.exists('project_workflow.py'):
+                process = subprocess.Popen([sys.executable, 'project_workflow.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "project_workflow.py not found in current directory")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Project Workflow:\n{str(e)}")
+    
     def launch_coil_verification(self):
         """Launch the Coil Verification Tool application"""
         try:
@@ -548,10 +565,11 @@ class DashboardApp:
                 try:
                     if proc.info['cmdline']:
                         cmdline_str = ' '.join(proc.info['cmdline'])
-                        if any(app in cmdline_str for app in ['projects.py', 'product_configurations.py', 
-                                                             'print_package.py', 'd365_import_formatter.py',
-                                                             'drafting_items_to_look_for.py', 'project_monitor.py',
-                                                             'drawing_reviews.py', 'workflow_manager.py']):
+                        if any(app in cmdline_str for app in [
+                            'projects.py', 'product_configurations.py', 'print_package.py',
+                            'd365_import_formatter.py', 'drafting_items_to_look_for.py', 'project_monitor.py',
+                            'drawing_reviews.py', 'workflow_manager.py', 'project_workflow.py'
+                        ]):
                             related_processes.append(proc)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
@@ -607,29 +625,16 @@ Developed for CECO Environmental Corp
     def exit_application(self):
         """Exit the application and close all related windows"""
         try:
-            # Simple confirmation dialog
-            if messagebox.askyesno("Exit Application", "Are you sure you want to exit the Drafting Tools Suite?"):
-                # Close tracked child processes first
-                self.close_tracked_processes()
-                # Also close any other related processes detected via psutil
-                try:
-                    for proc in self.get_running_related_processes():
-                        try:
-                            proc.terminate()
-                            proc.wait(timeout=2)
-                        except Exception:
-                            try:
-                                proc.kill()
-                            except Exception:
-                                pass
-                except Exception:
-                    pass
-                
-                # Close the main window
-                self.root.quit()
+            if not messagebox.askyesno("Exit Application", "Are you sure you want to exit the Drafting Tools Suite?"):
+                return
+
+            # Collect all related processes (tracked + discovered) and terminate in two phases
+            self.terminate_related_processes()
+
+            # Close the main window
+            self.root.quit()
         except Exception as e:
             print(f"Error in exit_application: {e}")
-            # Fallback: just close the main window
             self.root.quit()
     
     def close_tracked_processes(self):
@@ -652,6 +657,102 @@ Developed for CECO Environmental Corp
             self.child_processes.clear()
         except Exception as e:
             print(f"Error closing tracked processes: {e}")
+
+    def _collect_target_processes(self):
+        """Return a unique list of psutil.Process objects for all related apps, including tracked children."""
+        pids = set()
+        procs = []
+        try:
+            import psutil
+        except ImportError:
+            return []
+
+        # Include tracked child processes
+        for p in list(self.child_processes):
+            try:
+                if p and p.pid:
+                    pids.add(p.pid)
+            except Exception:
+                continue
+
+        # Include discovered related processes
+        for proc in self.get_running_related_processes():
+            try:
+                pids.add(proc.pid)
+            except Exception:
+                continue
+
+        # Exclude current dashboard process
+        try:
+            pids.discard(os.getpid())
+        except Exception:
+            pass
+
+        # Materialize psutil.Process objects
+        for pid in pids:
+            try:
+                procs.append(psutil.Process(pid))
+            except Exception:
+                continue
+        return procs
+
+    def terminate_related_processes(self):
+        """Terminate all related app processes quickly and reliably.
+
+        Strategy:
+        - Send terminate() to all target processes at once.
+        - Wait briefly; then kill survivors.
+        - Also attempt to terminate process children recursively.
+        """
+        try:
+            import psutil
+        except ImportError:
+            # Fallback to best-effort tracked close
+            self.close_tracked_processes()
+            return
+
+        procs = self._collect_target_processes()
+        if not procs:
+            return
+
+        # First pass: try to terminate children first (recursive)
+        all_procs = set(procs)
+        try:
+            for p in list(procs):
+                try:
+                    for ch in p.children(recursive=True):
+                        all_procs.add(ch)
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+        # Send terminate to everyone
+        for p in list(all_procs):
+            try:
+                p.terminate()
+            except Exception:
+                pass
+
+        # Wait briefly
+        try:
+            psutil.wait_procs(list(all_procs), timeout=2)
+        except Exception:
+            pass
+
+        # Kill any survivors
+        for p in list(all_procs):
+            try:
+                if p.is_running():
+                    p.kill()
+            except Exception:
+                pass
+
+        # One last short wait
+        try:
+            psutil.wait_procs(list(all_procs), timeout=1)
+        except Exception:
+            pass
     
     def center_window(self):
         """Center the window on screen"""

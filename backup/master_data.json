@@ -3,19 +3,19 @@
   "sqlite_sequence": [
     {
       "name": "departments",
-      "seq": 30
+      "seq": 50
     },
     {
       "name": "designers",
-      "seq": 68
+      "seq": 112
     },
     {
       "name": "engineers",
-      "seq": 51
+      "seq": 84
     },
     {
       "name": "app_order",
-      "seq": 34
+      "seq": 56
     },
     {
       "name": "projects",
@@ -59,15 +59,23 @@
     },
     {
       "name": "workflow_templates",
-      "seq": 3
+      "seq": 4
     },
     {
       "name": "workflow_template_steps",
-      "seq": 3
+      "seq": 5
     },
     {
       "name": "project_workflow_steps",
-      "seq": 15
+      "seq": 25
+    },
+    {
+      "name": "workflow_step_tasks",
+      "seq": 4
+    },
+    {
+      "name": "project_step_tasks",
+      "seq": 3
     }
   ],
   "departments": [
@@ -30388,8 +30396,15 @@
       "id": 3,
       "name": "Standard",
       "version": 3,
-      "is_active": 1,
+      "is_active": 0,
       "created_date": "2025-10-22 11:22:45"
+    },
+    {
+      "id": 4,
+      "name": "Standard",
+      "version": 4,
+      "is_active": 1,
+      "created_date": "2025-10-22 15:50:29"
     }
   ],
   "workflow_template_steps": [
@@ -30414,6 +30429,24 @@
     {
       "id": 3,
       "template_id": 3,
+      "order_index": 2,
+      "department": "Drafting",
+      "group_name": "Project Accessment",
+      "title": "Check Project Status",
+      "planned_duration_days": 1
+    },
+    {
+      "id": 4,
+      "template_id": 4,
+      "order_index": 1,
+      "department": "Project Scheduling",
+      "group_name": "Assignment",
+      "title": "Assigned to",
+      "planned_duration_days": 1
+    },
+    {
+      "id": 5,
+      "template_id": 4,
       "order_index": 2,
       "department": "Drafting",
       "group_name": "Project Accessment",
@@ -30612,7 +30645,7 @@
       "actual_duration_days": null
     },
     {
-      "id": 14,
+      "id": 16,
       "project_id": 171,
       "template_id": 3,
       "template_step_id": 2,
@@ -30621,19 +30654,19 @@
       "group_name": "Assignment",
       "title": "Assigned to",
       "start_flag": 1,
-      "start_ts": "2025-10-22 14:15:24",
-      "completed_flag": 1,
-      "completed_ts": "2025-10-22 14:16:26",
+      "start_ts": "2025-10-22 14:36:48",
+      "completed_flag": 0,
+      "completed_ts": null,
       "transfer_to_name": null,
       "transfer_to_ts": null,
       "received_from_name": null,
       "received_from_ts": null,
       "planned_due_date": null,
-      "actual_completed_date": "2025-10-22",
-      "actual_duration_days": 0
+      "actual_completed_date": null,
+      "actual_duration_days": null
     },
     {
-      "id": 15,
+      "id": 17,
       "project_id": 171,
       "template_id": 3,
       "template_step_id": 3,
@@ -30641,17 +30674,146 @@
       "department": "Drafting",
       "group_name": "Project Accessment",
       "title": "Check Project Status",
-      "start_flag": 1,
-      "start_ts": "2025-10-22 14:16:19",
-      "completed_flag": 1,
-      "completed_ts": "2025-10-22 14:16:24",
+      "start_flag": 0,
+      "start_ts": null,
+      "completed_flag": 0,
+      "completed_ts": null,
       "transfer_to_name": null,
       "transfer_to_ts": null,
       "received_from_name": null,
       "received_from_ts": null,
       "planned_due_date": null,
-      "actual_completed_date": "2025-10-22",
-      "actual_duration_days": 0
+      "actual_completed_date": null,
+      "actual_duration_days": null
+    },
+    {
+      "id": 18,
+      "project_id": 166,
+      "template_id": 3,
+      "template_step_id": 2,
+      "order_index": 1,
+      "department": "Project Scheduling",
+      "group_name": "Assignment",
+      "title": "Assigned to",
+      "start_flag": 0,
+      "start_ts": null,
+      "completed_flag": 0,
+      "completed_ts": null,
+      "transfer_to_name": null,
+      "transfer_to_ts": null,
+      "received_from_name": null,
+      "received_from_ts": null,
+      "planned_due_date": "2025-12-01",
+      "actual_completed_date": null,
+      "actual_duration_days": null
+    },
+    {
+      "id": 19,
+      "project_id": 166,
+      "template_id": 3,
+      "template_step_id": 3,
+      "order_index": 2,
+      "department": "Drafting",
+      "group_name": "Project Accessment",
+      "title": "Check Project Status",
+      "start_flag": 0,
+      "start_ts": null,
+      "completed_flag": 0,
+      "completed_ts": null,
+      "transfer_to_name": null,
+      "transfer_to_ts": null,
+      "received_from_name": null,
+      "received_from_ts": null,
+      "planned_due_date": "2025-12-02",
+      "actual_completed_date": null,
+      "actual_duration_days": null
+    },
+    {
+      "id": 24,
+      "project_id": 123,
+      "template_id": 4,
+      "template_step_id": 4,
+      "order_index": 1,
+      "department": "Project Scheduling",
+      "group_name": "Assignment",
+      "title": "Assigned to",
+      "start_flag": 0,
+      "start_ts": null,
+      "completed_flag": 0,
+      "completed_ts": null,
+      "transfer_to_name": null,
+      "transfer_to_ts": null,
+      "received_from_name": null,
+      "received_from_ts": null,
+      "planned_due_date": "2025-10-29",
+      "actual_completed_date": null,
+      "actual_duration_days": null
+    },
+    {
+      "id": 25,
+      "project_id": 123,
+      "template_id": 4,
+      "template_step_id": 5,
+      "order_index": 2,
+      "department": "Drafting",
+      "group_name": "Project Accessment",
+      "title": "Check Project Status",
+      "start_flag": 0,
+      "start_ts": null,
+      "completed_flag": 0,
+      "completed_ts": null,
+      "transfer_to_name": null,
+      "transfer_to_ts": null,
+      "received_from_name": null,
+      "received_from_ts": null,
+      "planned_due_date": "2025-10-30",
+      "actual_completed_date": null,
+      "actual_duration_days": null
+    }
+  ],
+  "workflow_step_tasks": [
+    {
+      "id": 3,
+      "template_step_id": 4,
+      "order_index": 1,
+      "title": "Verify Due Date",
+      "default_checked": 0
+    },
+    {
+      "id": 4,
+      "template_step_id": 4,
+      "order_index": 2,
+      "title": "Sample Template Task",
+      "default_checked": 0
+    }
+  ],
+  "project_step_tasks": [
+    {
+      "id": 1,
+      "project_step_id": 24,
+      "template_task_id": null,
+      "order_index": 1,
+      "title": "Sample Task",
+      "is_checked": 0,
+      "checked_ts": null
+    },
+    {
+      "id": 2,
+      "project_step_id": 24,
+      "template_task_id": 3,
+      "order_index": 1,
+      "title": "Verify Due Date",
+      "is_checked": 0,
+      "checked_ts": null
+    },
+    {
+      "id": 3,
+      "project_step_id": 24,
+      "template_task_id": 4,
+      "order_index": 2,
+      "title": "Sample Template Task",
+      "is_checked": 0,
+      "checked_ts": null
     }
   ]
 }

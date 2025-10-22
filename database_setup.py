@@ -331,6 +331,39 @@ class DatabaseManager:
         except Exception:
             pass
 
+        # Workflow step tasks (template-level)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS workflow_step_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                template_step_id INTEGER NOT NULL,
+                order_index INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                default_checked INTEGER DEFAULT 0,
+                FOREIGN KEY (template_step_id) REFERENCES workflow_template_steps(id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Project step tasks (per-project checklist items)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS project_step_tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_step_id INTEGER NOT NULL,
+                template_task_id INTEGER,
+                order_index INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                is_checked INTEGER DEFAULT 0,
+                checked_ts TEXT,
+                FOREIGN KEY (project_step_id) REFERENCES project_workflow_steps(id) ON DELETE CASCADE,
+                FOREIGN KEY (template_task_id) REFERENCES workflow_step_tasks(id) ON DELETE SET NULL
+            )
+        ''')
+
+        try:
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_wst_template ON workflow_step_tasks(template_step_id, order_index)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_pst_project_step ON project_step_tasks(project_step_id, order_index)')
+        except Exception:
+            pass
+
         # Seed a default "Standard" template if none exists
         cursor.execute('SELECT COUNT(*) FROM workflow_templates')
         cnt = cursor.fetchone()[0]
