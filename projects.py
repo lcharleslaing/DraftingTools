@@ -1385,20 +1385,11 @@ class ProjectsApp:
         main_container.rowconfigure(1, weight=1)
         workflow_frame.columnconfigure(0, weight=1)
         
-        # Section 1: Drafting & Redline Updates
-        self.drafting_section = CollapsibleFrame(workflow_frame, "Drafting & Redline Updates")
-        self.drafting_section.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
-        self.create_drafting_redline_content(self.drafting_section.content)
-        
-        # Section 2: Production & OPS Review  
-        self.production_section = CollapsibleFrame(workflow_frame, "Production & OPS Review")
-        self.production_section.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
-        self.create_production_ops_content(self.production_section.content)
-        
-        # Section 3: D365 & Release
-        self.release_section = CollapsibleFrame(workflow_frame, "D365 & Release")
-        self.release_section.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
-        self.create_d365_release_content(self.release_section.content)
+        # Section 0: Template-driven workflow (new)
+        self.template_workflow_section = CollapsibleFrame(workflow_frame, "Standard Workflow (Template)")
+        self.template_workflow_section.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 5))
+        self.create_template_workflow_content(self.template_workflow_section.content)
+        # Legacy hardcoded workflow sections removed per new template-driven workflow
     
     def create_workflow_toolbar(self, parent):
         """Create toolbar with print button"""
@@ -1411,11 +1402,602 @@ class ProjectsApp:
                                font=('Arial', 12, 'bold'))
         title_label.grid(row=0, column=0, sticky=tk.W)
         
-        # Print button on the right
-        self.cover_sheet_btn = ttk.Button(toolbar, text="🖨️ Print Status Report", 
+        # Right-side actions
+        actions_frame = ttk.Frame(toolbar)
+        actions_frame.grid(row=0, column=1, sticky=tk.E)
+
+        settings_btn = ttk.Button(actions_frame, text="⚙️ Workflow Settings", command=self.open_workflow_settings)
+        settings_btn.pack(side=tk.LEFT, padx=(0, 6))
+
+        apply_btn = ttk.Button(actions_frame, text="↺ Apply Standard Workflow", command=self.apply_standard_workflow_to_current_project)
+        apply_btn.pack(side=tk.LEFT, padx=(0, 6))
+
+        self.cover_sheet_btn = ttk.Button(actions_frame, text="🖨️ Print Status Report", 
                                          command=self.print_cover_sheet,
                                          style='Accent.TButton')
-        self.cover_sheet_btn.grid(row=0, column=1, sticky=tk.E, padx=(10, 0))
+        self.cover_sheet_btn.pack(side=tk.LEFT)
+
+    def create_template_workflow_content(self, parent):
+        """Render the template-driven workflow steps for the current project in a vertical layout"""
+        for child in parent.winfo_children():
+            child.destroy()
+        parent.columnconfigure(0, weight=1)
+
+        self.workflow_row_widgets = {}
+
+        steps = self._load_project_workflow_steps()
+        if not steps:
+            msg = "No workflow steps defined. Use Workflow Settings to define and apply the Standard Workflow."
+            ttk.Label(parent, text=msg, foreground='gray').grid(row=0, column=0, sticky=tk.W, pady=(6, 0))
+            return
+
+        people = self._get_people_list()
+
+        row_i = 0
+        for step in steps:
+            sid = step['id']
+            step_frame = ttk.LabelFrame(parent, text=step['department'])
+            step_frame.grid(row=row_i, column=0, sticky=(tk.W, tk.E), padx=2, pady=4)
+            step_frame.columnconfigure(1, weight=1)
+
+            # Group and Title
+            ttk.Label(step_frame, text=f"Group: {step['group_name'] or ''}", font=('Arial', 9, 'italic')).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(2, 0))
+            ttk.Label(step_frame, text=f"Title: {step['title']}", font=('Arial', 10, 'bold')).grid(row=1, column=0, columnspan=2, sticky=tk.W)
+
+            # Detailed fields laid out vertically
+            r = 2
+            # Start
+            start_var = tk.BooleanVar(value=bool(step['start_flag']))
+            ttk.Label(step_frame, text="Start:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            start_chk = ttk.Checkbutton(step_frame, variable=start_var, command=lambda s=sid, v=start_var: self._on_start_toggle(s, v))
+            start_chk.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+            ttk.Label(step_frame, text="Started At:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            started_lbl = ttk.Label(step_frame, text=(step['start_ts'] or ''))
+            started_lbl.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+
+            # Completed
+            comp_var = tk.BooleanVar(value=bool(step['completed_flag']))
+            ttk.Label(step_frame, text="Completed:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            comp_chk = ttk.Checkbutton(step_frame, variable=comp_var, command=lambda s=sid, v=comp_var: self._on_completed_toggle(s, v))
+            comp_chk.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+            ttk.Label(step_frame, text="Completed At:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            completed_lbl = ttk.Label(step_frame, text=(step['completed_ts'] or ''))
+            completed_lbl.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+
+            # Transfer To / Received From
+            to_var = tk.StringVar(value=step['transfer_to_name'] or '')
+            ttk.Label(step_frame, text="Transfer To:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            to_combo = ttk.Combobox(step_frame, textvariable=to_var, values=people, width=18, state='readonly')
+            to_combo.grid(row=r, column=1, sticky=tk.W)
+            to_combo.bind('<<ComboboxSelected>>', lambda e, s=sid, v=to_var: self._on_transfer_set(s, v))
+            r += 1
+            ttk.Label(step_frame, text="Transfer Set At:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            to_ts_lbl = ttk.Label(step_frame, text=(step.get('transfer_to_ts') or ''))
+            to_ts_lbl.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+
+            from_var = tk.StringVar(value=step['received_from_name'] or '')
+            ttk.Label(step_frame, text="Received From:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            from_combo = ttk.Combobox(step_frame, textvariable=from_var, values=people, width=18, state='readonly')
+            from_combo.grid(row=r, column=1, sticky=tk.W)
+            from_combo.bind('<<ComboboxSelected>>', lambda e, s=sid, v=from_var: self._on_received_set(s, v))
+            r += 1
+            ttk.Label(step_frame, text="Received Set At:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            from_ts_lbl = ttk.Label(step_frame, text=(step.get('received_from_ts') or ''))
+            from_ts_lbl.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+
+            # Due and Duration
+            ttk.Label(step_frame, text="Due:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            due_lbl = ttk.Label(step_frame, text=(step['planned_due_date'] or ''))
+            due_lbl.grid(row=r, column=1, sticky=tk.W)
+            r += 1
+
+            ttk.Label(step_frame, text="Duration (days):").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            dur_lbl = ttk.Label(step_frame, text=(str(step.get('actual_duration_days') or step.get('planned_duration_days') or '') ))
+            dur_lbl.grid(row=r, column=1, sticky=tk.W)
+
+            self.workflow_row_widgets[sid] = {
+                'start_var': start_var, 'start_lbl': started_lbl,
+                'comp_var': comp_var, 'comp_lbl': completed_lbl,
+                'to_var': to_var, 'from_var': from_var,
+                'due_lbl': due_lbl, 'dur_lbl': dur_lbl
+            }
+            row_i += 1
+
+    def _get_people_list(self):
+        """Return a consolidated list of names from designers, engineers, plus Production 'Larry W.'"""
+        names = set()
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT name FROM designers")
+            for r in cur.fetchall():
+                if r and r[0]:
+                    names.add(r[0])
+            cur.execute("SELECT name FROM engineers")
+            for r in cur.fetchall():
+                if r and r[0]:
+                    names.add(r[0])
+            conn.close()
+        except Exception:
+            pass
+        # Ensure Production name present
+        names.add('Larry W.')
+        return sorted(names)
+
+    def _load_project_workflow_steps(self):
+        """Load workflow steps for current project (with planned durations from template)."""
+        if not self.current_project:
+            return []
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM projects WHERE job_number = ?", (self.current_project,))
+            pid_row = cur.fetchone()
+            if not pid_row:
+                conn.close()
+                return []
+            project_id = pid_row[0]
+            try:
+                cur.execute(
+                    """
+                    SELECT pws.id, pws.order_index, pws.department, pws.group_name, pws.title,
+                           pws.start_flag, pws.start_ts, pws.completed_flag, pws.completed_ts,
+                           pws.transfer_to_name, pws.received_from_name, pws.transfer_to_ts, pws.received_from_ts,
+                           pws.planned_due_date, pws.actual_completed_date, pws.actual_duration_days,
+                           wts.planned_duration_days
+                    FROM project_workflow_steps pws
+                    LEFT JOIN workflow_template_steps wts ON pws.template_step_id = wts.id
+                    WHERE pws.project_id = ?
+                    ORDER BY pws.order_index
+                    """,
+                    (project_id,)
+                )
+                rows = cur.fetchall()
+            except Exception:
+                # Fallback if timestamp columns are missing on older DBs
+                cur.execute(
+                    """
+                    SELECT pws.id, pws.order_index, pws.department, pws.group_name, pws.title,
+                           pws.start_flag, pws.start_ts, pws.completed_flag, pws.completed_ts,
+                           pws.transfer_to_name, pws.received_from_name,
+                           pws.planned_due_date, pws.actual_completed_date, pws.actual_duration_days,
+                           wts.planned_duration_days
+                    FROM project_workflow_steps pws
+                    LEFT JOIN workflow_template_steps wts ON pws.template_step_id = wts.id
+                    WHERE pws.project_id = ?
+                    ORDER BY pws.order_index
+                    """,
+                    (project_id,)
+                )
+                rows = cur.fetchall()
+            conn.close()
+            steps = []
+            for r in rows:
+                # Support both shapes depending on DB schema
+                if len(r) >= 17:
+                    steps.append({
+                        'id': r[0], 'order_index': r[1], 'department': r[2], 'group_name': r[3], 'title': r[4],
+                        'start_flag': r[5], 'start_ts': r[6], 'completed_flag': r[7], 'completed_ts': r[8],
+                        'transfer_to_name': r[9], 'received_from_name': r[10], 'transfer_to_ts': r[11], 'received_from_ts': r[12],
+                        'planned_due_date': r[13], 'actual_completed_date': r[14], 'actual_duration_days': r[15],
+                        'planned_duration_days': r[16]
+                    })
+                else:
+                    steps.append({
+                        'id': r[0], 'order_index': r[1], 'department': r[2], 'group_name': r[3], 'title': r[4],
+                        'start_flag': r[5], 'start_ts': r[6], 'completed_flag': r[7], 'completed_ts': r[8],
+                        'transfer_to_name': r[9], 'received_from_name': r[10],
+                        'planned_due_date': r[11], 'actual_completed_date': r[12], 'actual_duration_days': r[13],
+                        'planned_duration_days': r[14]
+                    })
+            return steps
+        except Exception as e:
+            print(f"Error loading project workflow steps: {e}")
+            return []
+
+    def _on_start_toggle(self, step_id, var):
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            # Guard: ensure the step belongs to the selected project
+            cur.execute("SELECT project_id FROM project_workflow_steps WHERE id = ?", (step_id,))
+            row = cur.fetchone()
+            if not row:
+                print(f"DEBUG[_on_start_toggle]: step {step_id} not found")
+                conn.close(); return
+            step_pid = row[0]
+            cur.execute("SELECT id FROM projects WHERE job_number = ?", (self.current_project,))
+            prow = cur.fetchone()
+            if not prow or prow[0] != step_pid:
+                print(f"DEBUG[_on_start_toggle]: mismatch current_pid={prow[0] if prow else None} step_pid={step_pid} current_project={self.current_project}")
+                conn.close(); return
+            # Retain timestamp if exists when unchecking
+            if var.get():
+                cur.execute(
+                    "UPDATE project_workflow_steps SET start_flag = 1, start_ts = COALESCE(start_ts, ?) WHERE id = ? AND project_id = ?",
+                    (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), step_id, step_pid)
+                )
+            else:
+                cur.execute("UPDATE project_workflow_steps SET start_flag = 0 WHERE id = ? AND project_id = ?", (step_id, step_pid))
+            conn.commit()
+            print(f"DEBUG[_on_start_toggle]: updated step_id={step_id} project_id={step_pid} new_value={int(var.get())}")
+            conn.close()
+        except Exception as e:
+            print(f"Error updating start flag: {e}")
+        self._refresh_template_workflow_after_change()
+
+    def _on_completed_toggle(self, step_id, var):
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT project_id FROM project_workflow_steps WHERE id = ?", (step_id,))
+            row = cur.fetchone()
+            if not row:
+                conn.close(); return
+            step_pid = row[0]
+            cur.execute("SELECT id FROM projects WHERE job_number = ?", (self.current_project,))
+            prow = cur.fetchone()
+            if not prow or prow[0] != step_pid:
+                conn.close(); return
+            if var.get():
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                # Compute actual duration if start exists
+                cur.execute("SELECT start_ts FROM project_workflow_steps WHERE id = ? AND project_id = ?", (step_id, step_pid))
+                row = cur.fetchone()
+                actual_dur = None
+                try:
+                    if row and row[0]:
+                        sdt = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+                        actual_dur = (datetime.now() - sdt).days
+                except Exception:
+                    actual_dur = None
+                cur.execute(
+                    """
+                    UPDATE project_workflow_steps
+                    SET completed_flag = 1,
+                        completed_ts = COALESCE(completed_ts, ?),
+                        actual_completed_date = COALESCE(actual_completed_date, DATE(?)),
+                        actual_duration_days = COALESCE(actual_duration_days, ?)
+                    WHERE id = ? AND project_id = ?
+                    """,
+                    (now, now, actual_dur, step_id, step_pid)
+                )
+            else:
+                cur.execute("UPDATE project_workflow_steps SET completed_flag = 0 WHERE id = ? AND project_id = ?", (step_id, step_pid))
+            conn.commit()
+            print(f"DEBUG[_on_completed_toggle]: updated step_id={step_id} project_id={step_pid} new_value={int(var.get())}")
+            conn.close()
+        except Exception as e:
+            print(f"Error updating completed flag: {e}")
+        self._refresh_template_workflow_after_change()
+
+    def _on_transfer_set(self, step_id, var):
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT project_id FROM project_workflow_steps WHERE id = ?", (step_id,))
+            row = cur.fetchone()
+            if not row:
+                conn.close(); return
+            step_pid = row[0]
+            cur.execute(
+                "UPDATE project_workflow_steps SET transfer_to_name = ?, transfer_to_ts = COALESCE(transfer_to_ts, ?) WHERE id = ? AND project_id = ?",
+                (var.get(), datetime.now().strftime("%Y-%m-%d %H:%M:%S"), step_id, step_pid)
+            )
+            conn.commit(); conn.close()
+            print(f"DEBUG[_on_transfer_set]: step_id={step_id} project_id={step_pid} name='{var.get()}'")
+        except Exception as e:
+            print(f"Error setting transfer_to: {e}")
+        self._refresh_template_workflow_after_change(recalc=False)
+
+    def _on_received_set(self, step_id, var):
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT project_id FROM project_workflow_steps WHERE id = ?", (step_id,))
+            row = cur.fetchone()
+            if not row:
+                conn.close(); return
+            step_pid = row[0]
+            cur.execute(
+                "UPDATE project_workflow_steps SET received_from_name = ?, received_from_ts = COALESCE(received_from_ts, ?) WHERE id = ? AND project_id = ?",
+                (var.get(), datetime.now().strftime("%Y-%m-%d %H:%M:%S"), step_id, step_pid)
+            )
+            conn.commit(); conn.close()
+            print(f"DEBUG[_on_received_set]: step_id={step_id} project_id={step_pid} name='{var.get()}'")
+        except Exception as e:
+            print(f"Error setting received_from: {e}")
+        self._refresh_template_workflow_after_change(recalc=False)
+
+    def _refresh_template_workflow_after_change(self, recalc=True):
+        # Recompute due dates if needed and refresh UI
+        if recalc:
+            try:
+                self._recompute_workflow_due_dates_for_current_project()
+            except Exception:
+                pass
+        if hasattr(self, 'template_workflow_section'):
+            self.create_template_workflow_content(self.template_workflow_section.content)
+
+    def _recompute_workflow_due_dates_for_current_project(self):
+        if not self.current_project:
+            return
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            # Get project id and due date
+            cur.execute("SELECT id, due_date FROM projects WHERE job_number = ?", (self.current_project,))
+            row = cur.fetchone()
+            if not row:
+                conn.close(); return
+            project_id, proj_due = row[0], row[1]
+            if not proj_due:
+                conn.close(); return
+            # Load steps and durations
+            cur.execute(
+                """
+                SELECT pws.id, pws.order_index, pws.start_ts,
+                       wts.planned_duration_days
+                FROM project_workflow_steps pws
+                LEFT JOIN workflow_template_steps wts ON pws.template_step_id = wts.id
+                WHERE pws.project_id = ?
+                ORDER BY pws.order_index
+                """, (project_id,)
+            )
+            steps = cur.fetchall()
+            if not steps:
+                conn.close(); return
+
+            # Helper to subtract business days (Mon-Fri)
+            def subtract_business_days(date_obj, days):
+                import datetime as _dt
+                d = date_obj
+                remaining = int(days or 0)
+                while remaining > 0:
+                    d = d - _dt.timedelta(days=1)
+                    if d.weekday() < 5:  # Mon-Fri
+                        remaining -= 1
+                return d
+
+            from datetime import datetime as _dt
+            next_start_planned = _dt.strptime(proj_due, "%Y-%m-%d").date()
+
+            # Build list for reverse calc
+            steps_rev = list(reversed(steps))
+            updates = []
+            for sid, order_i, start_ts, dur_days in steps_rev:
+                # If next step has actual start, use that as this due
+                planned_due = next_start_planned
+                # planned start based on duration
+                planned_start = subtract_business_days(planned_due, dur_days or 0)
+                # For the next iteration, determine next_start_planned:
+                # If this step has actual start, that's the next planned for previous step; else planned_start
+                if start_ts:
+                    try:
+                        next_start_planned = _dt.strptime(start_ts, "%Y-%m-%d %H:%M:%S").date()
+                    except Exception:
+                        next_start_planned = planned_start
+                else:
+                    next_start_planned = planned_start
+                updates.append((sid, planned_due.strftime("%Y-%m-%d")))
+
+            # Apply updates
+            for sid, due in updates:
+                cur.execute("UPDATE project_workflow_steps SET planned_due_date = ? WHERE id = ?", (due, sid))
+            conn.commit(); conn.close()
+        except Exception as e:
+            print(f"Error recomputing due dates: {e}")
+
+    def open_workflow_settings(self):
+        """Open the Standard Workflow settings editor (versioned templates)."""
+        win = tk.Toplevel(self.root)
+        win.title("Standard Workflow Settings")
+        win.geometry("900x500")
+        win.transient(self.root)
+        win.grab_set()
+
+        main = ttk.Frame(win, padding=10)
+        main.pack(fill=tk.BOTH, expand=True)
+        main.columnconfigure(0, weight=1)
+
+        # Header
+        ttk.Label(main, text="Standard Workflow (Active Template)", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky=tk.W)
+
+        # Steps tree
+        cols = ("Order", "Department", "Group", "Title", "Duration (days)")
+        tree = ttk.Treeview(main, columns=cols, show='headings', height=16)
+        for c in cols:
+            tree.heading(c, text=c)
+        tree.column("Order", width=60, anchor='center')
+        tree.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(6, 6))
+        main.rowconfigure(1, weight=1)
+
+        # Controls
+        controls = ttk.Frame(main)
+        controls.grid(row=2, column=0, sticky=tk.W)
+        add_before_btn = ttk.Button(controls, text="Add Before", command=lambda: self._wf_add_step(tree, before=True))
+        add_after_btn = ttk.Button(controls, text="Add After", command=lambda: self._wf_add_step(tree, before=False))
+        delete_btn = ttk.Button(controls, text="Delete", command=lambda: self._wf_delete_step(tree))
+        up_btn = ttk.Button(controls, text="Move Up", command=lambda: self._wf_move(tree, -1))
+        down_btn = ttk.Button(controls, text="Move Down", command=lambda: self._wf_move(tree, +1))
+        save_btn = ttk.Button(controls, text="Save As New Version (Activate)", command=lambda: self._wf_save_new_version(tree, win))
+        for b in (add_before_btn, add_after_btn, delete_btn, up_btn, down_btn, save_btn):
+            b.pack(side=tk.LEFT, padx=4)
+
+        # Load active template steps
+        steps = self._wf_load_active_template_steps()
+        for i, s in enumerate(steps):
+            tree.insert('', 'end', values=(i+1, s['department'], s['group_name'] or '', s['title'], s['planned_duration_days']))
+
+        # Enable in-place edit on double-click
+        def on_double_click(event):
+            item = tree.selection()
+            if not item:
+                return
+            col = tree.identify_column(event.x)
+            if col in ('#2', '#3', '#4', '#5'):
+                self._wf_edit_cell(tree, item[0], col)
+        tree.bind('<Double-1>', on_double_click)
+
+    def _wf_load_active_template_steps(self):
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT id, version FROM workflow_templates WHERE name = ? AND is_active = 1 ORDER BY version DESC LIMIT 1", ('Standard',))
+            t = cur.fetchone()
+            if not t:
+                conn.close(); return []
+            tid = t[0]
+            cur.execute("""
+                SELECT id, order_index, department, group_name, title, planned_duration_days
+                FROM workflow_template_steps WHERE template_id = ? ORDER BY order_index
+            """, (tid,))
+            rows = cur.fetchall(); conn.close()
+            return [
+                {
+                    'id': r[0], 'order_index': r[1], 'department': r[2], 'group_name': r[3], 'title': r[4], 'planned_duration_days': r[5]
+                } for r in rows
+            ]
+        except Exception as e:
+            print(f"Error loading template steps: {e}")
+            return []
+
+    def _wf_add_step(self, tree, before=True):
+        sel = tree.selection()
+        insert_index = 0
+        if sel:
+            idx = tree.index(sel[0])
+            insert_index = idx if before else idx + 1
+        vals = (insert_index+1, "Drafting", "", "New Step", 1)
+        tree.insert('', insert_index, values=vals)
+        # Re-number
+        for i, iid in enumerate(tree.get_children()):
+            v = list(tree.item(iid, 'values')); v[0] = i+1; tree.item(iid, values=v)
+
+    def _wf_delete_step(self, tree):
+        sel = tree.selection()
+        if not sel:
+            return
+        tree.delete(sel[0])
+        for i, iid in enumerate(tree.get_children()):
+            v = list(tree.item(iid, 'values')); v[0] = i+1; tree.item(iid, values=v)
+
+    def _wf_move(self, tree, delta):
+        sel = tree.selection()
+        if not sel:
+            return
+        iid = sel[0]
+        idx = tree.index(iid)
+        new_idx = idx + delta
+        if new_idx < 0 or new_idx >= len(tree.get_children()):
+            return
+        tree.move(iid, '', new_idx)
+        for i, ci in enumerate(tree.get_children()):
+            v = list(tree.item(ci, 'values')); v[0] = i+1; tree.item(ci, values=v)
+
+    def _wf_edit_cell(self, tree, item_id, col_id):
+        # Simple inline editor: replace cell with entry and commit on Return
+        x, y, w, h = tree.bbox(item_id, col_id)
+        value = tree.set(item_id, col_id)
+        entry = ttk.Entry(tree)
+        entry.place(x=x, y=y, width=w, height=h)
+        entry.insert(0, value)
+        entry.focus_set()
+
+        def on_return(event):
+            new_val = entry.get()
+            entry.destroy()
+            tree.set(item_id, col_id, new_val)
+        entry.bind('<Return>', on_return)
+        entry.bind('<FocusOut>', lambda e: entry.destroy())
+
+    def _wf_save_new_version(self, tree, win):
+        # Persist a new template version and activate it
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            # Compute next version
+            cur.execute("SELECT COALESCE(MAX(version),0) FROM workflow_templates WHERE name = ?", ('Standard',))
+            next_ver = (cur.fetchone()[0] or 0) + 1
+            cur.execute("INSERT INTO workflow_templates (name, version, is_active, created_date) VALUES (?, ?, 1, ?)",
+                        ('Standard', next_ver, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            new_tid = cur.lastrowid
+            # Deactivate others
+            cur.execute("UPDATE workflow_templates SET is_active = 0 WHERE name = ? AND id != ?", ('Standard', new_tid))
+            # Insert steps
+            for i, iid in enumerate(tree.get_children()):
+                v = tree.item(iid, 'values')
+                order_i = int(v[0]); dept = str(v[1]); group = str(v[2]); title = str(v[3]); dur = int(v[4]) if str(v[4]).isdigit() else 1
+                cur.execute(
+                    """
+                    INSERT INTO workflow_template_steps
+                    (template_id, order_index, department, group_name, title, planned_duration_days)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (new_tid, order_i, dept, group, title, dur)
+                )
+            conn.commit(); conn.close()
+            messagebox.showinfo("Saved", f"Activated Standard v{next_ver}.")
+            win.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save template: {e}")
+
+    def apply_standard_workflow_to_current_project(self):
+        """Seed or replace the current project's workflow from the active Standard template."""
+        if not self.current_project:
+            messagebox.showwarning("No Project", "Please select a project first.")
+            return
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            # Get project id
+            cur.execute("SELECT id FROM projects WHERE job_number = ?", (self.current_project,))
+            row = cur.fetchone()
+            if not row:
+                conn.close(); messagebox.showerror("Error", "Project not found in database."); return
+            project_id = row[0]
+            # Count existing steps
+            cur.execute("SELECT COUNT(*) FROM project_workflow_steps WHERE project_id = ?", (project_id,))
+            existing = cur.fetchone()[0]
+            # Load active template id
+            cur.execute("SELECT id, version FROM workflow_templates WHERE name = ? AND is_active = 1 ORDER BY version DESC LIMIT 1", ('Standard',))
+            trow = cur.fetchone()
+            if not trow:
+                conn.close(); messagebox.showwarning("No Template", "No active Standard workflow found. Define it in Workflow Settings."); return
+            tid, tver = trow
+            if existing > 0:
+                if not messagebox.askyesno("Replace Workflow", f"This project already has {existing} workflow step(s).\nReplace with Standard v{tver}? This will remove all current step state."):
+                    conn.close(); return
+                cur.execute("DELETE FROM project_workflow_steps WHERE project_id = ?", (project_id,))
+            # Insert steps from template
+            cur.execute("""
+                SELECT id, order_index, department, group_name, title
+                FROM workflow_template_steps WHERE template_id = ? ORDER BY order_index
+            """, (tid,))
+            steps = cur.fetchall()
+            for sid, order_i, dept, group_name, title in steps:
+                cur.execute(
+                    """
+                    INSERT INTO project_workflow_steps
+                    (project_id, template_id, template_step_id, order_index, department, group_name, title)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (project_id, tid, sid, order_i, dept, group_name, title)
+                )
+            conn.commit(); conn.close()
+            # Recompute planned due dates and refresh UI
+            self._recompute_workflow_due_dates_for_current_project()
+            if hasattr(self, 'template_workflow_section'):
+                self.create_template_workflow_content(self.template_workflow_section.content)
+            messagebox.showinfo("Applied", f"Applied Standard v{tver} to project {self.current_project}.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to apply workflow: {e}")
     
     def create_cover_sheet_button(self, parent):
         """Create the cover sheet print button"""
@@ -3568,11 +4150,14 @@ class ProjectsApp:
         job_number = self.job_number_var.get().strip()
         if not self.is_valid_job_number(job_number):
             return
-        
+
         conn = sqlite3.connect(self.db_manager.db_path)
         cursor = conn.cursor()
         
         try:
+            # Determine if this is a new project (no existing row before upsert)
+            cursor.execute("SELECT id FROM projects WHERE job_number = ?", (job_number,))
+            existed_before = cursor.fetchone() is not None
             # Get designer ID
             designer_id = None
             if self.assigned_to_var.get():
@@ -3600,43 +4185,109 @@ class ProjectsApp:
                     pass
             
             # Insert or update project
-            cursor.execute("""
-                INSERT OR REPLACE INTO projects 
-                (job_number, job_directory, customer_name, customer_name_directory, 
-                 customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
-                 assignment_date, start_date, completion_date, 
-                 total_duration_days, released_to_dee, due_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                job_number,
-                self.job_directory_picker.get() or None,
-                self.customer_name_var.get().upper() or None,
-                self.customer_name_picker.get() or None,
-                self.customer_location_var.get().upper() or None,
-                self.customer_location_picker.get() or None,
-                designer_id,
-                project_engineer_id,
-                self.assignment_date_entry.get() or None,
-                self.start_date_entry.get() or None,
-                self.completion_date_entry.get() or None,
-                duration,
-                self.released_to_dee_entry.get() or None,
-                self.due_date_entry.get() or None
-            ))
+            cursor.execute(
+                """
+                INSERT INTO projects (
+                    job_number, job_directory, customer_name, customer_name_directory,
+                    customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
+                    assignment_date, start_date, completion_date, total_duration_days, released_to_dee, due_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(job_number) DO UPDATE SET
+                    job_directory = excluded.job_directory,
+                    customer_name = excluded.customer_name,
+                    customer_name_directory = excluded.customer_name_directory,
+                    customer_location = excluded.customer_location,
+                    customer_location_directory = excluded.customer_location_directory,
+                    assigned_to_id = excluded.assigned_to_id,
+                    project_engineer_id = excluded.project_engineer_id,
+                    assignment_date = excluded.assignment_date,
+                    start_date = excluded.start_date,
+                    completion_date = excluded.completion_date,
+                    total_duration_days = excluded.total_duration_days,
+                    released_to_dee = excluded.released_to_dee,
+                    due_date = excluded.due_date
+                """,
+                (
+                    job_number,
+                    self.job_directory_picker.get() or None,
+                    self.customer_name_var.get().upper() or None,
+                    self.customer_name_picker.get() or None,
+                    self.customer_location_var.get().upper() or None,
+                    self.customer_location_picker.get() or None,
+                    designer_id,
+                    project_engineer_id,
+                    self.assignment_date_entry.get() or None,
+                    self.start_date_entry.get() or None,
+                    self.completion_date_entry.get() or None,
+                    duration,
+                    self.released_to_dee_entry.get() or None,
+                    self.due_date_entry.get() or None,
+                ),
+            )
             
             # Get project ID
             cursor.execute("SELECT id FROM projects WHERE job_number = ?", (job_number,))
             project_id = cursor.fetchone()[0]
             
-            # Save workflow data
+            # Save workflow data (legacy, fixed sections)
             self.save_workflow_data(cursor, project_id)
             
             conn.commit()
+
+            # Ensure template-driven workflow steps exist only for brand-new projects
+            if not existed_before:
+                try:
+                    self._ensure_project_workflow_seeded(project_id)
+                    # Recompute planned due dates chain
+                    self._recompute_workflow_due_dates_for_current_project()
+                except Exception:
+                    pass
             
         except Exception as e:
             print(f"Silent save failed: {e}")
         finally:
             conn.close()
+
+    def _get_active_template_id(self):
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM workflow_templates WHERE name = ? AND is_active = 1 ORDER BY version DESC LIMIT 1", ('Standard',))
+            r = cur.fetchone(); conn.close()
+            return r[0] if r else None
+        except Exception:
+            return None
+
+    def _ensure_project_workflow_seeded(self, project_id):
+        """Seed project workflow steps from active template if none exist (new projects only)."""
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM project_workflow_steps WHERE project_id = ?", (project_id,))
+            if cur.fetchone()[0] > 0:
+                conn.close(); return
+            tid = self._get_active_template_id()
+            if not tid:
+                conn.close(); return
+            # Load template steps
+            cur.execute("""
+                SELECT id, order_index, department, group_name, title, planned_duration_days
+                FROM workflow_template_steps WHERE template_id = ? ORDER BY order_index
+            """, (tid,))
+            steps = cur.fetchall()
+            for s in steps:
+                step_id, order_i, dept, group, title, dur = s
+                cur.execute(
+                    """
+                    INSERT INTO project_workflow_steps
+                    (project_id, template_id, template_step_id, order_index, department, group_name, title)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (project_id, tid, step_id, order_i, dept, group, title)
+                )
+            conn.commit(); conn.close()
+        except Exception as e:
+            print(f"Error seeding project workflow: {e}")
     
     def load_dropdown_data(self):
         """Load data for dropdown menus"""
@@ -3926,10 +4577,13 @@ class ProjectsApp:
         # Temporarily disable auto-save to prevent saving empty values
         self._loading_project = True
         
-        # Clear initial redline
-        self.initial_redline_var.set(False)
-        self.initial_engineer_var.set("")
-        self.initial_date_entry.set("")
+        # Clear initial redline (guarded)
+        if hasattr(self, 'initial_redline_var'):
+            self.initial_redline_var.set(False)
+        if hasattr(self, 'initial_engineer_var'):
+            self.initial_engineer_var.set("")
+        if hasattr(self, 'initial_date_entry'):
+            self.initial_date_entry.set("")
         
         # Clear redline updates
         for i in range(1, 5):
@@ -3941,25 +4595,38 @@ class ProjectsApp:
                 getattr(self, f"redline_update_{i}_date_entry").set("")
         
         # Clear OPS review
-        self.ops_review_var.set(False)
-        self.ops_review_date_entry.set("")
+        if hasattr(self, 'ops_review_var'):
+            self.ops_review_var.set(False)
+        if hasattr(self, 'ops_review_date_entry'):
+            self.ops_review_date_entry.set("")
         
         # Clear D365 BOM Entry
-        self.d365_bom_var.set(False)
-        self.d365_bom_date_entry.set("")
+        if hasattr(self, 'd365_bom_var'):
+            self.d365_bom_var.set(False)
+        if hasattr(self, 'd365_bom_date_entry'):
+            self.d365_bom_date_entry.set("")
         
         # Clear Peter Weck review
-        self.peter_weck_var.set(False)
-        self.peter_weck_date_entry.set("")
+        if hasattr(self, 'peter_weck_var'):
+            self.peter_weck_var.set(False)
+        if hasattr(self, 'peter_weck_date_entry'):
+            self.peter_weck_date_entry.set("")
         
         # Clear release to Dee
-        self.release_fixed_errors_var.set(False)
-        self.missing_prints_date_entry.set("")
-        self.d365_updates_date_entry.set("")
-        self.other_notes_var.set("")
-        self.other_date_entry.set("")
-        self.release_due_date_entry.set("")
-        self.release_due_display_var.set("")
+        if hasattr(self, 'release_fixed_errors_var'):
+            self.release_fixed_errors_var.set(False)
+        if hasattr(self, 'missing_prints_date_entry'):
+            self.missing_prints_date_entry.set("")
+        if hasattr(self, 'd365_updates_date_entry'):
+            self.d365_updates_date_entry.set("")
+        if hasattr(self, 'other_notes_var'):
+            self.other_notes_var.set("")
+        if hasattr(self, 'other_date_entry'):
+            self.other_date_entry.set("")
+        if hasattr(self, 'release_due_date_entry'):
+            self.release_due_date_entry.set("")
+        if hasattr(self, 'release_due_display_var'):
+            self.release_due_display_var.set("")
 
     def load_project_details(self, job_number):
         """Load details for selected project"""
@@ -4034,11 +4701,18 @@ class ProjectsApp:
         
         # Load job notes
         self.load_job_notes(clean_job_number)
-        
+
         # Re-enable auto-save
         self._loading_project = False
-        
+
         conn.close()
+        
+        # Refresh template-driven workflow section after loading a project
+        try:
+            if hasattr(self, 'template_workflow_section'):
+                self.create_template_workflow_content(self.template_workflow_section.content)
+        except Exception:
+            pass
     
     def load_workflow_data(self, job_number, cursor):
         """Load workflow data for selected project"""
@@ -4186,10 +4860,13 @@ class ProjectsApp:
         self.duration_var.set("")
         self.released_to_dee_entry.set("")
 
-        # Clear workflow fields
-        self.initial_redline_var.set(False)
-        self.initial_engineer_var.set("")
-        self.initial_date_entry.set("")
+        # Clear workflow fields (legacy sections guarded)
+        if hasattr(self, 'initial_redline_var'):
+            self.initial_redline_var.set(False)
+        if hasattr(self, 'initial_engineer_var'):
+            self.initial_engineer_var.set("")
+        if hasattr(self, 'initial_date_entry'):
+            self.initial_date_entry.set("")
 
         for i in range(1, 5):
             # Uncheck, clear engineer dropdown, and clear dates
@@ -4305,30 +4982,46 @@ class ProjectsApp:
                 except ValueError:
                     pass
             
-            # Insert or update project
-            cursor.execute("""
-                INSERT OR REPLACE INTO projects 
-                (job_number, job_directory, customer_name, customer_name_directory, 
-                 customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
-                 assignment_date, start_date, completion_date, 
-                 total_duration_days, released_to_dee, due_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                job_number,
-                self.job_directory_picker.get() or None,
-                self.customer_name_var.get().upper() or None,
-                self.customer_name_picker.get() or None,
-                self.customer_location_var.get().upper() or None,
-                self.customer_location_picker.get() or None,
-                designer_id,
-                project_engineer_id,
-                self.assignment_date_entry.get() or None,
-                self.start_date_entry.get() or None,
-                self.completion_date_entry.get() or None,
-                duration,
-                self.released_to_dee_entry.get() or None,
-                self.due_date_entry.get() or None
-            ))
+            # Insert or update project (preserve row id)
+            cursor.execute(
+                """
+                INSERT INTO projects (
+                    job_number, job_directory, customer_name, customer_name_directory,
+                    customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
+                    assignment_date, start_date, completion_date, total_duration_days, released_to_dee, due_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(job_number) DO UPDATE SET
+                    job_directory = excluded.job_directory,
+                    customer_name = excluded.customer_name,
+                    customer_name_directory = excluded.customer_name_directory,
+                    customer_location = excluded.customer_location,
+                    customer_location_directory = excluded.customer_location_directory,
+                    assigned_to_id = excluded.assigned_to_id,
+                    project_engineer_id = excluded.project_engineer_id,
+                    assignment_date = excluded.assignment_date,
+                    start_date = excluded.start_date,
+                    completion_date = excluded.completion_date,
+                    total_duration_days = excluded.total_duration_days,
+                    released_to_dee = excluded.released_to_dee,
+                    due_date = excluded.due_date
+                """,
+                (
+                    job_number,
+                    self.job_directory_picker.get() or None,
+                    self.customer_name_var.get().upper() or None,
+                    self.customer_name_picker.get() or None,
+                    self.customer_location_var.get().upper() or None,
+                    self.customer_location_picker.get() or None,
+                    designer_id,
+                    project_engineer_id,
+                    self.assignment_date_entry.get() or None,
+                    self.start_date_entry.get() or None,
+                    self.completion_date_entry.get() or None,
+                    duration,
+                    self.released_to_dee_entry.get() or None,
+                    self.due_date_entry.get() or None,
+                ),
+            )
             
             # Get project ID
             cursor.execute("SELECT id FROM projects WHERE job_number = ?", (self.job_number_var.get(),))
@@ -4349,89 +5042,125 @@ class ProjectsApp:
     
     def save_workflow_data(self, cursor, project_id):
         """Save workflow data for the project"""
-        # Save initial redline (always save, regardless of checkbox state)
-        engineer_id = None
-        if self.initial_engineer_var.get():
-            cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.initial_engineer_var.get(),))
-            result = cursor.fetchone()
-            if result:
-                engineer_id = result[0]
-        
-        cursor.execute("""
-            INSERT OR REPLACE INTO initial_redline 
-            (project_id, engineer_id, redline_date, is_completed)
-            VALUES (?, ?, ?, ?)
-        """, (project_id, engineer_id, self.initial_date_entry.get() or None, self.initial_redline_var.get()))
-        
-        # Save redline updates (always save all cycles, regardless of checkbox state)
-        for i in range(1, 5):
-            var_name = f"redline_update_{i}_var"
-            engineer_var_name = f"redline_update_{i}_engineer_var"
-            date_entry_name = f"redline_update_{i}_date_entry"
-            
+        # Make legacy saves safe if the corresponding UI fields were removed
+        # Initial redline
+        try:
             engineer_id = None
-            if hasattr(self, engineer_var_name) and getattr(self, engineer_var_name).get():
-                cursor.execute("SELECT id FROM engineers WHERE name = ?", (getattr(self, engineer_var_name).get(),))
+            if hasattr(self, 'initial_engineer_var') and self.initial_engineer_var.get():
+                cursor.execute("SELECT id FROM engineers WHERE name = ?", (self.initial_engineer_var.get(),))
                 result = cursor.fetchone()
                 if result:
                     engineer_id = result[0]
-            
-            date_value = None
-            if hasattr(self, date_entry_name):
-                date_value = getattr(self, date_entry_name).get()
-            
-            checkbox_value = False
-            if hasattr(self, var_name):
-                checkbox_value = getattr(self, var_name).get()
-            
-            cursor.execute("""
-                INSERT OR REPLACE INTO redline_updates 
-                (project_id, engineer_id, update_date, update_cycle, is_completed)
-                VALUES (?, ?, ?, ?, ?)
-            """, (project_id, engineer_id, date_value, i, checkbox_value))
-        
-        # Save OPS review (always save, regardless of checkbox state)
-        cursor.execute("""
-            INSERT OR REPLACE INTO ops_review 
-            (project_id, review_date, is_completed)
-            VALUES (?, ?, ?)
-        """, (project_id, self.ops_review_date_entry.get() or None, self.ops_review_var.get()))
-        
-        # Save D365 BOM Entry (always save, regardless of checkbox state)
-        cursor.execute("""
-            INSERT OR REPLACE INTO d365_bom_entry 
-            (project_id, entry_date, is_completed)
-            VALUES (?, ?, ?)
-        """, (project_id, self.d365_bom_date_entry.get() or None, self.d365_bom_var.get()))
-        
-        # Save Peter Weck review (always save, regardless of checkbox state)
-        cursor.execute("""
-            INSERT OR REPLACE INTO peter_weck_review 
-            (project_id, fixed_errors_date, is_completed)
-            VALUES (?, ?, ?)
-        """, (project_id, self.peter_weck_date_entry.get() or None, self.peter_weck_var.get()))
-        
-        # Save release to Dee (always save, regardless of checkbox state)
-        release_date = self.released_to_dee_entry.get() or None
-        cursor.execute("""
-            INSERT OR REPLACE INTO release_to_dee 
-            (project_id, release_date, missing_prints_date, d365_updates_date, 
-             other_notes, other_date, due_date, is_completed)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (project_id, release_date,
-             self.missing_prints_date_entry.get() or None,
-             self.d365_updates_date_entry.get() or None,
-             self.other_notes_var.get() or None,
-             self.other_date_entry.get() or None,
-             self.release_due_date_entry.get() or None,
-             self.release_fixed_errors_var.get()))
-        
-        # Update the main projects table with the release date
-        cursor.execute("""
-            UPDATE projects 
-            SET released_to_dee = ?
-            WHERE id = ?
-        """, (release_date, project_id))
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO initial_redline 
+                (project_id, engineer_id, redline_date, is_completed)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    project_id,
+                    engineer_id,
+                    self.initial_date_entry.get() if hasattr(self, 'initial_date_entry') else None,
+                    self.initial_redline_var.get() if hasattr(self, 'initial_redline_var') else 0,
+                ),
+            )
+        except Exception:
+            pass
+
+        # Redline updates
+        for i in range(1, 5):
+            try:
+                var_name = f"redline_update_{i}_var"
+                engineer_var_name = f"redline_update_{i}_engineer_var"
+                date_entry_name = f"redline_update_{i}_date_entry"
+
+                engineer_id = None
+                if hasattr(self, engineer_var_name) and getattr(self, engineer_var_name).get():
+                    cursor.execute("SELECT id FROM engineers WHERE name = ?", (getattr(self, engineer_var_name).get(),))
+                    result = cursor.fetchone()
+                    if result:
+                        engineer_id = result[0]
+
+                date_value = getattr(self, date_entry_name).get() if hasattr(self, date_entry_name) else None
+                checkbox_value = getattr(self, var_name).get() if hasattr(self, var_name) else 0
+
+                cursor.execute(
+                    """
+                    INSERT OR REPLACE INTO redline_updates 
+                    (project_id, engineer_id, update_date, update_cycle, is_completed)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (project_id, engineer_id, date_value, i, checkbox_value),
+                )
+            except Exception:
+                pass
+
+        # OPS review
+        try:
+            review_date = self.ops_review_date_entry.get() if hasattr(self, 'ops_review_date_entry') else None
+            is_completed = self.ops_review_var.get() if hasattr(self, 'ops_review_var') else 0
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO ops_review 
+                (project_id, review_date, is_completed)
+                VALUES (?, ?, ?)
+                """,
+                (project_id, review_date, is_completed),
+            )
+        except Exception:
+            pass
+
+        # D365 BOM Entry
+        try:
+            entry_date = self.d365_bom_date_entry.get() if hasattr(self, 'd365_bom_date_entry') else None
+            is_completed = self.d365_bom_var.get() if hasattr(self, 'd365_bom_var') else 0
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO d365_bom_entry 
+                (project_id, entry_date, is_completed)
+                VALUES (?, ?, ?)
+                """,
+                (project_id, entry_date, is_completed),
+            )
+        except Exception:
+            pass
+
+        # Peter Weck review
+        try:
+            fixed_date = self.peter_weck_date_entry.get() if hasattr(self, 'peter_weck_date_entry') else None
+            is_completed = self.peter_weck_var.get() if hasattr(self, 'peter_weck_var') else 0
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO peter_weck_review 
+                (project_id, fixed_errors_date, is_completed)
+                VALUES (?, ?, ?)
+                """,
+                (project_id, fixed_date, is_completed),
+            )
+        except Exception:
+            pass
+
+        # Release to Dee
+        try:
+            release_date = self.released_to_dee_entry.get() if hasattr(self, 'released_to_dee_entry') else None
+            missing = self.missing_prints_date_entry.get() if hasattr(self, 'missing_prints_date_entry') else None
+            updates = self.d365_updates_date_entry.get() if hasattr(self, 'd365_updates_date_entry') else None
+            notes = self.other_notes_var.get() if hasattr(self, 'other_notes_var') else None
+            other_date = self.other_date_entry.get() if hasattr(self, 'other_date_entry') else None
+            due = self.release_due_date_entry.get() if hasattr(self, 'release_due_date_entry') else None
+            is_completed = self.release_fixed_errors_var.get() if hasattr(self, 'release_fixed_errors_var') else 0
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO release_to_dee 
+                (project_id, release_date, missing_prints_date, d365_updates_date, 
+                 other_notes, other_date, due_date, is_completed)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (project_id, release_date, missing, updates, notes, other_date, due, is_completed),
+            )
+            cursor.execute("UPDATE projects SET released_to_dee = ? WHERE id = ?", (release_date, project_id))
+        except Exception:
+            pass
     
     def delete_project(self):
         """Delete selected project"""

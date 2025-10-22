@@ -259,6 +259,87 @@ class DatabaseManager:
                 FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
+
+        # --------------------------------------------
+        # Project Workflow Templates (versioned)
+        # --------------------------------------------
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS workflow_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                is_active INTEGER DEFAULT 0,
+                created_date TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(name, version)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS workflow_template_steps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                template_id INTEGER NOT NULL,
+                order_index INTEGER NOT NULL,
+                department TEXT NOT NULL,
+                group_name TEXT,
+                title TEXT NOT NULL,
+                planned_duration_days INTEGER NOT NULL DEFAULT 1,
+                FOREIGN KEY (template_id) REFERENCES workflow_templates(id) ON DELETE CASCADE
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS project_workflow_steps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id INTEGER NOT NULL,
+                template_id INTEGER,
+                template_step_id INTEGER,
+                order_index INTEGER NOT NULL,
+                department TEXT NOT NULL,
+                group_name TEXT,
+                title TEXT NOT NULL,
+                start_flag INTEGER DEFAULT 0,
+                start_ts TEXT,
+                completed_flag INTEGER DEFAULT 0,
+                completed_ts TEXT,
+                transfer_to_name TEXT,
+                transfer_to_ts TEXT,
+                received_from_name TEXT,
+                received_from_ts TEXT,
+                planned_due_date TEXT,
+                actual_completed_date TEXT,
+                actual_duration_days INTEGER,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                FOREIGN KEY (template_id) REFERENCES workflow_templates(id) ON DELETE SET NULL,
+                FOREIGN KEY (template_step_id) REFERENCES workflow_template_steps(id) ON DELETE SET NULL
+            )
+        ''')
+
+        # Add missing columns to project_workflow_steps for existing databases
+        try:
+            cursor.execute("ALTER TABLE project_workflow_steps ADD COLUMN transfer_to_ts TEXT")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE project_workflow_steps ADD COLUMN received_from_ts TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_wt_active ON workflow_templates(is_active)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_wts_template ON workflow_template_steps(template_id, order_index)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_pws_project ON project_workflow_steps(project_id, order_index)')
+        except Exception:
+            pass
+
+        # Seed a default "Standard" template if none exists
+        cursor.execute('SELECT COUNT(*) FROM workflow_templates')
+        cnt = cursor.fetchone()[0]
+        if cnt == 0:
+            cursor.execute('INSERT INTO workflow_templates (name, version, is_active) VALUES (?, ?, ?)',
+                           ('Standard', 1, 1))
+            # No default steps; user can define via settings
+
+        conn.commit()
         
         # Create D365 part numbers table
         cursor.execute('''

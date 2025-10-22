@@ -278,6 +278,10 @@ class PrintPackageApp:
         
         printer_setup_btn = ttk.Button(action_frame, text="Printer Setup", command=self.setup_printers)
         printer_setup_btn.pack(side=tk.LEFT, padx=(0, 5))
+
+        # Scan directory for Inventor .idw drawings (global index)
+        scan_btn = ttk.Button(action_frame, text="Scan .idw Directory", command=self.scan_idw_directory)
+        scan_btn.pack(side=tk.LEFT, padx=(0, 5))
         
     def init_database(self):
         """Initialize the database connection"""
@@ -312,6 +316,23 @@ class PrintPackageApp:
             if 'printed' not in cols:
                 cursor.execute("ALTER TABLE drawings ADD COLUMN printed INTEGER DEFAULT 0")
                 self.conn.commit()
+        except Exception:
+            pass
+
+        # Ensure a table for globally scanned drawings exists (unattached to a job)
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS global_drawings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    drawing_path TEXT NOT NULL UNIQUE,
+                    drawing_name TEXT NOT NULL,
+                    drawing_type TEXT,
+                    file_extension TEXT,
+                    added_date TEXT,
+                    added_by TEXT
+                )
+            ''')
+            self.conn.commit()
         except Exception:
             pass
         
@@ -530,43 +551,60 @@ class PrintPackageApp:
     def search_global_drawings(self, *args):
         """Search for drawings globally across all jobs"""
         search_term = self.global_search_var.get().lower()
-        
+
         if not search_term:
             # Clear global search results
             for item in self.global_drawings_tree.get_children():
                 self.global_drawings_tree.delete(item)
             return
-        
+
         try:
             cursor = self.conn.cursor()
-            
-            cursor.execute("""
+            # Get job-attached drawings matching search
+            cursor.execute(
+                """
                 SELECT job_number, drawing_name, drawing_type, drawing_path, file_extension
                 FROM drawings 
                 WHERE LOWER(drawing_name) LIKE ? OR LOWER(drawing_path) LIKE ?
                 ORDER BY job_number, drawing_name
-            """, (f'%{search_term}%', f'%{search_term}%'))
-            
-            drawings = cursor.fetchall()
-            
+                """,
+                (f'%{search_term}%', f'%{search_term}%')
+            )
+            job_drawings = cursor.fetchall()
+
+            # Get globally scanned drawings matching search
+            cursor.execute(
+                """
+                SELECT drawing_name, drawing_type, drawing_path, file_extension
+                FROM global_drawings
+                WHERE LOWER(drawing_name) LIKE ? OR LOWER(drawing_path) LIKE ?
+                ORDER BY drawing_name
+                """,
+                (f'%{search_term}%', f'%{search_term}%')
+            )
+            global_drawings = cursor.fetchall()
+
+            # Combine and de-duplicate by path; prefer job-specific entries
+            combined = {}
+            for name, dtype, path, ext in global_drawings:
+                combined[path] = ("GLOBAL", name, dtype, path, ext)
+            for job_number, name, dtype, path, ext in job_drawings:
+                combined[path] = (job_number, name, dtype, path, ext)
+
             # Clear existing items
             for item in self.global_drawings_tree.get_children():
                 self.global_drawings_tree.delete(item)
-            
-            # Add drawings to tree
-            for drawing in drawings:
-                job_number, drawing_name, drawing_type, drawing_path, file_extension = drawing
+
+            # Insert rows sorted by job_number then name
+            rows = list(combined.values())
+            rows.sort(key=lambda r: (str(r[0]), str(r[1]).lower()))
+            for job_number, drawing_name, drawing_type, drawing_path, file_extension in rows:
                 display_type = drawing_type or file_extension or "Unknown"
-                
-                # Add to tree
-                self.global_drawings_tree.insert('', 'end', values=(
-                    job_number,
-                    drawing_name,
-                    display_type,
-                    drawing_path,
-                    ""  # Actions column
-                ))
-            
+                self.global_drawings_tree.insert(
+                    '', 'end',
+                    values=(job_number, drawing_name, display_type, drawing_path, "")
+                )
+        
         except Exception as e:
             print(f"Error searching global drawings: {e}")
     
@@ -1713,20 +1751,42 @@ Y
         
         try:
             cursor = self.conn.cursor()
-            
-            # Get drawing info from source job
-            cursor.execute("""
-                SELECT drawing_name, drawing_type, file_extension
-                FROM drawings 
-                WHERE job_number = ? AND drawing_path = ?
-            """, (source_job_number, drawing_path))
-            
-            drawing_info = cursor.fetchone()
-            if not drawing_info:
-                messagebox.showerror("Error", "Drawing not found in source job")
-                return
-            
-            drawing_name, drawing_type, file_extension = drawing_info
+            drawing_name = None
+            drawing_type = None
+            file_extension = None
+
+            if str(source_job_number).upper() == 'GLOBAL':
+                # Lookup from global_drawings
+                cursor.execute(
+                    """
+                    SELECT drawing_name, drawing_type, file_extension
+                    FROM global_drawings
+                    WHERE drawing_path = ?
+                    """,
+                    (drawing_path,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    drawing_name, drawing_type, file_extension = row
+                else:
+                    messagebox.showerror("Error", "Drawing not found in global index")
+                    return
+            else:
+                # Get drawing info from source job
+                cursor.execute(
+                    """
+                    SELECT drawing_name, drawing_type, file_extension
+                    FROM drawings 
+                    WHERE job_number = ? AND drawing_path = ?
+                    """,
+                    (source_job_number, drawing_path)
+                )
+                row = cursor.fetchone()
+                if row:
+                    drawing_name, drawing_type, file_extension = row
+                else:
+                    messagebox.showerror("Error", "Drawing not found in source job")
+                    return
             
             # Add to current job
             cursor.execute("""
@@ -1746,6 +1806,75 @@ Y
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add drawing: {str(e)}")
+
+    def scan_idw_directory(self):
+        """Prompt for a directory and index all .idw drawings into the global index."""
+        try:
+            # Default initial directory per request
+            default_initialdir = os.path.expandvars(r"C:\$WorkingFolder\Jobs F\STANDARDS")
+            initialdir = default_initialdir if os.path.exists(default_initialdir) else None
+
+            start_dir = filedialog.askdirectory(
+                title="Select Directory to Scan for .idw Files",
+                initialdir=initialdir
+            )
+            if not start_dir:
+                return
+            if not os.path.exists(start_dir):
+                messagebox.showerror("Error", "Selected directory does not exist")
+                return
+
+            cursor = self.conn.cursor()
+            added = 0
+            skipped = 0
+            total = 0
+
+            # Wrap in a transaction for performance
+            cursor.execute("BEGIN")
+            for root, dirs, files in os.walk(start_dir):
+                for fname in files:
+                    if fname.lower().endswith('.idw'):
+                        total += 1
+                        fpath = os.path.normpath(os.path.join(root, fname))
+                        try:
+                            cursor.execute(
+                                """
+                                INSERT OR IGNORE INTO global_drawings 
+                                (drawing_path, drawing_name, drawing_type, file_extension, added_date, added_by)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                                """,
+                                (
+                                    fpath,
+                                    fname,
+                                    'Inventor',
+                                    '.idw',
+                                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                    'Scan'
+                                )
+                            )
+                            if cursor.rowcount:
+                                added += 1
+                            else:
+                                skipped += 1
+                        except Exception:
+                            skipped += 1
+                            continue
+            self.conn.commit()
+
+            # Refresh global search results if a filter is active
+            self.search_global_drawings()
+
+            messagebox.showinfo(
+                "Scan Complete",
+                f"Scanned: {total} .idw files\nAdded to global index: {added}\nAlready indexed/skipped: {skipped}"
+            )
+
+        except Exception as e:
+            try:
+                self.conn.rollback()
+            except Exception:
+                pass
+            messagebox.showerror("Error", f"Failed during scan: {str(e)}")
     
     def open_dashboard(self):
         """Open the dashboard application"""
