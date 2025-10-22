@@ -2,19 +2,33 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 from database_setup import DatabaseManager
+from ui_prefs import bind_tree_column_persistence
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 class AppOrderManager:
     def __init__(self, root):
         self.root = root
         self.root.title("App Order Manager - Drafting Tools")
         self.root.geometry("600x400")
+        try:
+            self.root.state('zoomed')
+        except Exception:
+            try:
+                self.root.attributes('-zoomed', True)
+            except Exception:
+                pass
         
         # Initialize database
         self.db_manager = DatabaseManager()
         
         # Create main frame
+        try:
+            add_app_bar(self.root, current_app='app_order')
+        except Exception:
+            pass
         self.main_frame = ttk.Frame(root, padding="10")
-        self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Configure grid weights
         root.columnconfigure(0, weight=1)
@@ -37,9 +51,11 @@ class AppOrderManager:
         
         # Apps list frame
         list_frame = ttk.LabelFrame(self.main_frame, text="Available Apps", padding="10")
-        list_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        list_frame.columnconfigure(0, weight=1)
-        list_frame.rowconfigure(0, weight=1)
+        list_frame.pack(fill=tk.BOTH, expand=True)
+        try:
+            add_help_button(list_frame, 'App Order', 'Reorder and toggle visibility of apps on the Dashboard.').grid(row=0, column=0, sticky='ne')
+        except Exception:
+            pass
         
         # Treeview for apps
         columns = ('App Name', 'Display Order', 'Active')
@@ -55,6 +71,10 @@ class AppOrderManager:
         
         self.tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+        try:
+            bind_tree_column_persistence(self.tree, 'app_order.tree', self.root)
+        except Exception:
+            pass
         
         # Control frame
         control_frame = ttk.Frame(self.main_frame)

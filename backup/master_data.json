@@ -3,19 +3,119 @@
   "sqlite_sequence": [
     {
       "name": "departments",
-      "seq": 5
+      "seq": 95
     },
     {
       "name": "designers",
-      "seq": 8
+      "seq": 72
     },
     {
       "name": "engineers",
-      "seq": 6
+      "seq": 54
     },
     {
       "name": "app_order",
-      "seq": 4
+      "seq": 36
+    },
+    {
+      "name": "heater_models",
+      "seq": 36
+    },
+    {
+      "name": "locations",
+      "seq": 18
+    },
+    {
+      "name": "heater_diameters",
+      "seq": 36
+    },
+    {
+      "name": "heater_heights",
+      "seq": 99
+    },
+    {
+      "name": "heater_stack_diameters",
+      "seq": 27
+    },
+    {
+      "name": "applications",
+      "seq": 18
+    },
+    {
+      "name": "materials",
+      "seq": 18
+    },
+    {
+      "name": "burner_models",
+      "seq": 54
+    },
+    {
+      "name": "gas_train_positions",
+      "seq": 18
+    },
+    {
+      "name": "heater_mounting_types",
+      "seq": 18
+    },
+    {
+      "name": "gauge_cocks_types",
+      "seq": 18
+    },
+    {
+      "name": "temperature_switch_types",
+      "seq": 18
+    },
+    {
+      "name": "packaging_types",
+      "seq": 18
+    },
+    {
+      "name": "mod_piping_transducer_materials",
+      "seq": 18
+    },
+    {
+      "name": "hose_materials",
+      "seq": 18
+    },
+    {
+      "name": "media_frame_heights",
+      "seq": 27
+    },
+    {
+      "name": "gas_types",
+      "seq": 18
+    },
+    {
+      "name": "projects",
+      "seq": 18
+    },
+    {
+      "name": "initial_redline",
+      "seq": 18
+    },
+    {
+      "name": "redline_updates",
+      "seq": 72
+    },
+    {
+      "name": "ops_review",
+      "seq": 18
+    },
+    {
+      "name": "d365_bom_entry",
+      "seq": 18
+    },
+    {
+      "name": "peter_weck_review",
+      "seq": 18
+    },
+    {
+      "name": "release_to_dee",
+      "seq": 18
+    },
+    {
+      "name": "project_scan_history",
+      "seq": 7
     }
   ],
   "departments": [
@@ -94,13 +194,1263 @@
       "name": "A. Rzonca"
     }
   ],
-  "projects": [],
-  "initial_redline": [],
-  "redline_updates": [],
-  "ops_review": [],
-  "d365_bom_entry": [],
-  "peter_weck_review": [],
-  "release_to_dee": [],
+  "projects": [
+    {
+      "id": 18,
+      "job_number": "11111",
+      "job_directory": "D:/Development",
+      "customer_name": "TEST CUSTOMER",
+      "customer_name_directory": null,
+      "customer_location": "D:",
+      "customer_location_directory": "D:/",
+      "assigned_to_id": null,
+      "assignment_date": "2025-10-22",
+      "start_date": null,
+      "completion_date": null,
+      "total_duration_days": null,
+      "released_to_dee": null,
+      "last_cover_sheet_date": null,
+      "due_date": null,
+      "project_engineer_id": null,
+      "project_status": "active"
+    }
+  ],
+  "initial_redline": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 2,
+      "project_id": 2,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 4,
+      "project_id": 4,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 5,
+      "project_id": 5,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 6,
+      "project_id": 6,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 7,
+      "project_id": 7,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 8,
+      "project_id": 8,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 9,
+      "project_id": 9,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 10,
+      "project_id": 10,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 11,
+      "project_id": 11,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 12,
+      "project_id": 12,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 13,
+      "project_id": 13,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 14,
+      "project_id": 14,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 15,
+      "project_id": 15,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 16,
+      "project_id": 16,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 17,
+      "project_id": 17,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 18,
+      "project_id": 18,
+      "engineer_id": null,
+      "redline_date": null,
+      "is_completed": 0
+    }
+  ],
+  "redline_updates": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 2,
+      "project_id": 1,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 3,
+      "project_id": 1,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 4,
+      "project_id": 1,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 5,
+      "project_id": 2,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 6,
+      "project_id": 2,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 7,
+      "project_id": 2,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 8,
+      "project_id": 2,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 9,
+      "project_id": 3,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 10,
+      "project_id": 3,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 11,
+      "project_id": 3,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 12,
+      "project_id": 3,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 13,
+      "project_id": 4,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 14,
+      "project_id": 4,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 15,
+      "project_id": 4,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 16,
+      "project_id": 4,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 17,
+      "project_id": 5,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 18,
+      "project_id": 5,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 19,
+      "project_id": 5,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 20,
+      "project_id": 5,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 21,
+      "project_id": 6,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 22,
+      "project_id": 6,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 23,
+      "project_id": 6,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 24,
+      "project_id": 6,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 25,
+      "project_id": 7,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 26,
+      "project_id": 7,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 27,
+      "project_id": 7,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 28,
+      "project_id": 7,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 29,
+      "project_id": 8,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 30,
+      "project_id": 8,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 31,
+      "project_id": 8,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 32,
+      "project_id": 8,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 33,
+      "project_id": 9,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 34,
+      "project_id": 9,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 35,
+      "project_id": 9,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 36,
+      "project_id": 9,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 37,
+      "project_id": 10,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 38,
+      "project_id": 10,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 39,
+      "project_id": 10,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 40,
+      "project_id": 10,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 41,
+      "project_id": 11,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 42,
+      "project_id": 11,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 43,
+      "project_id": 11,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 44,
+      "project_id": 11,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 45,
+      "project_id": 12,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 46,
+      "project_id": 12,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 47,
+      "project_id": 12,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 48,
+      "project_id": 12,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 49,
+      "project_id": 13,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 50,
+      "project_id": 13,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 51,
+      "project_id": 13,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 52,
+      "project_id": 13,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 53,
+      "project_id": 14,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 54,
+      "project_id": 14,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 55,
+      "project_id": 14,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 56,
+      "project_id": 14,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 57,
+      "project_id": 15,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 58,
+      "project_id": 15,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 59,
+      "project_id": 15,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 60,
+      "project_id": 15,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 61,
+      "project_id": 16,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 62,
+      "project_id": 16,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 63,
+      "project_id": 16,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 64,
+      "project_id": 16,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 65,
+      "project_id": 17,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 66,
+      "project_id": 17,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 67,
+      "project_id": 17,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 68,
+      "project_id": 17,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    },
+    {
+      "id": 69,
+      "project_id": 18,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 1,
+      "is_completed": 0
+    },
+    {
+      "id": 70,
+      "project_id": 18,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 2,
+      "is_completed": 0
+    },
+    {
+      "id": 71,
+      "project_id": 18,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 3,
+      "is_completed": 0
+    },
+    {
+      "id": 72,
+      "project_id": 18,
+      "engineer_id": null,
+      "update_date": "",
+      "update_cycle": 4,
+      "is_completed": 0
+    }
+  ],
+  "ops_review": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 2,
+      "project_id": 2,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 4,
+      "project_id": 4,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 5,
+      "project_id": 5,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 6,
+      "project_id": 6,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 7,
+      "project_id": 7,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 8,
+      "project_id": 8,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 9,
+      "project_id": 9,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 10,
+      "project_id": 10,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 11,
+      "project_id": 11,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 12,
+      "project_id": 12,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 13,
+      "project_id": 13,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 14,
+      "project_id": 14,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 15,
+      "project_id": 15,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 16,
+      "project_id": 16,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 17,
+      "project_id": 17,
+      "review_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 18,
+      "project_id": 18,
+      "review_date": null,
+      "is_completed": 0
+    }
+  ],
+  "d365_bom_entry": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 2,
+      "project_id": 2,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 4,
+      "project_id": 4,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 5,
+      "project_id": 5,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 6,
+      "project_id": 6,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 7,
+      "project_id": 7,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 8,
+      "project_id": 8,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 9,
+      "project_id": 9,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 10,
+      "project_id": 10,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 11,
+      "project_id": 11,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 12,
+      "project_id": 12,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 13,
+      "project_id": 13,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 14,
+      "project_id": 14,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 15,
+      "project_id": 15,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 16,
+      "project_id": 16,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 17,
+      "project_id": 17,
+      "entry_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 18,
+      "project_id": 18,
+      "entry_date": null,
+      "is_completed": 0
+    }
+  ],
+  "peter_weck_review": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 2,
+      "project_id": 2,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 4,
+      "project_id": 4,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 5,
+      "project_id": 5,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 6,
+      "project_id": 6,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 7,
+      "project_id": 7,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 8,
+      "project_id": 8,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 9,
+      "project_id": 9,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 10,
+      "project_id": 10,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 11,
+      "project_id": 11,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 12,
+      "project_id": 12,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 13,
+      "project_id": 13,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 14,
+      "project_id": 14,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 15,
+      "project_id": 15,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 16,
+      "project_id": 16,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 17,
+      "project_id": 17,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    },
+    {
+      "id": 18,
+      "project_id": 18,
+      "fixed_errors_date": null,
+      "is_completed": 0
+    }
+  ],
+  "release_to_dee": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 2,
+      "project_id": 2,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 4,
+      "project_id": 4,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 5,
+      "project_id": 5,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 6,
+      "project_id": 6,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 7,
+      "project_id": 7,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 8,
+      "project_id": 8,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 9,
+      "project_id": 9,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 10,
+      "project_id": 10,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 11,
+      "project_id": 11,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 12,
+      "project_id": 12,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 13,
+      "project_id": 13,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 14,
+      "project_id": 14,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 15,
+      "project_id": 15,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 16,
+      "project_id": 16,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 17,
+      "project_id": 17,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    },
+    {
+      "id": 18,
+      "project_id": 18,
+      "release_date": null,
+      "missing_prints_date": null,
+      "d365_updates_date": null,
+      "other_notes": null,
+      "other_date": null,
+      "is_completed": 0,
+      "due_date": null
+    }
+  ],
   "app_order": [
     {
       "id": 1,
@@ -123,5 +1473,331 @@
   "print_package_reviews": [],
   "print_package_files": [],
   "print_package_workflow": [],
-  "file_timestamps": []
+  "file_timestamps": [
+    {
+      "job_number": "11111",
+      "path": "D:/",
+      "last_mtime": 1761042325.0341716,
+      "acknowledged": 0
+    }
+  ],
+  "heater_configurations": [],
+  "heater_models": [
+    {
+      "id": 1,
+      "name": "GP"
+    },
+    {
+      "id": 2,
+      "name": "RM"
+    },
+    {
+      "id": 3,
+      "name": "TE-100"
+    },
+    {
+      "id": 4,
+      "name": "TE-NSF"
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "name": "CANADA"
+    },
+    {
+      "id": 2,
+      "name": "US"
+    }
+  ],
+  "heater_diameters": [
+    {
+      "id": 1,
+      "value": "30"
+    },
+    {
+      "id": 2,
+      "value": "42"
+    },
+    {
+      "id": 3,
+      "value": "54"
+    },
+    {
+      "id": 4,
+      "value": "60"
+    }
+  ],
+  "heater_heights": [
+    {
+      "id": 1,
+      "value": "8"
+    },
+    {
+      "id": 2,
+      "value": "9"
+    },
+    {
+      "id": 3,
+      "value": "10"
+    },
+    {
+      "id": 4,
+      "value": "11"
+    },
+    {
+      "id": 5,
+      "value": "12"
+    },
+    {
+      "id": 6,
+      "value": "13"
+    },
+    {
+      "id": 7,
+      "value": "14"
+    },
+    {
+      "id": 8,
+      "value": "15"
+    },
+    {
+      "id": 9,
+      "value": "16"
+    },
+    {
+      "id": 10,
+      "value": "17"
+    },
+    {
+      "id": 11,
+      "value": "18"
+    }
+  ],
+  "heater_stack_diameters": [
+    {
+      "id": 1,
+      "value": "18"
+    },
+    {
+      "id": 2,
+      "value": "24"
+    },
+    {
+      "id": 3,
+      "value": "36"
+    }
+  ],
+  "applications": [
+    {
+      "id": 1,
+      "name": "FOOD GRADE"
+    },
+    {
+      "id": 2,
+      "name": "STANDARD"
+    }
+  ],
+  "materials": [
+    {
+      "id": 1,
+      "name": "304"
+    },
+    {
+      "id": 2,
+      "name": "316"
+    }
+  ],
+  "burner_models": [
+    {
+      "id": 1,
+      "name": "MAXON # 415"
+    },
+    {
+      "id": 2,
+      "name": "MAXON # 425"
+    },
+    {
+      "id": 3,
+      "name": "MAXON # 442M"
+    },
+    {
+      "id": 4,
+      "name": "MAXON # 456M"
+    },
+    {
+      "id": 5,
+      "name": "MAXON # 487M"
+    },
+    {
+      "id": 6,
+      "name": "MAXON # EB-7"
+    }
+  ],
+  "gas_train_positions": [
+    {
+      "id": 1,
+      "name": "LEFT SIDE"
+    },
+    {
+      "id": 2,
+      "name": "RIGHT SIDE"
+    }
+  ],
+  "heater_mounting_types": [
+    {
+      "id": 1,
+      "name": "GRAVITY"
+    },
+    {
+      "id": 2,
+      "name": "PUMPED"
+    }
+  ],
+  "gauge_cocks_types": [
+    {
+      "id": 1,
+      "name": "NSF"
+    },
+    {
+      "id": 2,
+      "name": "STANDARD"
+    }
+  ],
+  "temperature_switch_types": [
+    {
+      "id": 1,
+      "name": "BRASS"
+    },
+    {
+      "id": 2,
+      "name": "STAINLESS"
+    }
+  ],
+  "packaging_types": [
+    {
+      "id": 1,
+      "name": "MODULAR PIPING"
+    },
+    {
+      "id": 2,
+      "name": "STANDARD"
+    }
+  ],
+  "mod_piping_transducer_materials": [
+    {
+      "id": 1,
+      "name": "NSF"
+    },
+    {
+      "id": 2,
+      "name": "316"
+    }
+  ],
+  "hose_materials": [
+    {
+      "id": 1,
+      "name": "BRASS ENDS"
+    },
+    {
+      "id": 2,
+      "name": "SS316 ENDS"
+    }
+  ],
+  "media_frame_heights": [
+    {
+      "id": 1,
+      "value": "42"
+    },
+    {
+      "id": 2,
+      "value": "48"
+    },
+    {
+      "id": 3,
+      "value": "54"
+    }
+  ],
+  "gas_types": [
+    {
+      "id": 1,
+      "name": "NATURAL GAS"
+    },
+    {
+      "id": 2,
+      "name": "PROPANE"
+    }
+  ],
+  "printer_config": [],
+  "drafting_checklist_items": [],
+  "project_checklist_status": [],
+  "manual_specs": [],
+  "job_notes": [
+    {
+      "job_number": "11111",
+      "notes": "=== 2025-10-22 07:15 ===\nThis is another test note.\n\n=== 2025-10-22 06:56 ===\nThis is a sample note that I am adding\n\n"
+    }
+  ],
+  "project_structure": [],
+  "file_changes": [],
+  "project_scan_history": [
+    {
+      "id": 1,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:00.493320",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.0007996559143066406
+    },
+    {
+      "id": 2,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:03.549850",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.0006899833679199219
+    },
+    {
+      "id": 3,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:05.499829",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.0006330013275146484
+    },
+    {
+      "id": 4,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:10.505532",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.0006620883941650391
+    },
+    {
+      "id": 5,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:15.205652",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.0007061958312988281
+    },
+    {
+      "id": 6,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:15.511803",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.0006425380706787109
+    },
+    {
+      "id": 7,
+      "job_number": "11111",
+      "scan_date": "2025-10-22T06:42:20.517877",
+      "files_scanned": 0,
+      "changes_detected": 0,
+      "scan_duration": 0.000675201416015625
+    }
+  ],
+  "drawing_reviews": [],
+  "review_workflow": []
 }

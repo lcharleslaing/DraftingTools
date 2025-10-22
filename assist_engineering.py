@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 import os
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 
 class AssistEngineeringApp:
@@ -16,11 +18,19 @@ class AssistEngineeringApp:
         self.build_ui()
 
     def build_ui(self):
+        try:
+            add_app_bar(self.root, current_app='assist_engineering')
+        except Exception:
+            pass
         container = ttk.Frame(self.root)
         container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
         header = ttk.Label(container, text="Assist Engineering", font=('Arial', 20, 'bold'))
         header.pack(pady=(0, 10))
+        try:
+            add_help_button(container, 'Assist Engineering', 'Placeholder app for engineering assistants. Future tools will be added here.').pack(anchor='ne')
+        except Exception:
+            pass
 
         sub = ttk.Label(
             container,

@@ -9,6 +9,10 @@ import shutil
 from database_setup import DatabaseManager
 from date_picker import DateEntry
 from directory_picker import DirectoryPicker, FilePicker
+from scroll_utils import bind_mousewheel_to_treeview
+from notes_utils import open_add_note_dialog
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 class CollapsibleFrame(ttk.Frame):
     """A collapsible frame widget"""
@@ -61,6 +65,12 @@ class ProjectsApp:
         
         # Set minimum size
         self.root.minsize(1200, 800)
+
+        # App bar
+        try:
+            add_app_bar(self.root, current_app='projects')
+        except Exception:
+            pass
         
         # Initialize database
         self.db_manager = DatabaseManager()
@@ -68,12 +78,15 @@ class ProjectsApp:
         # Initialize current project tracking
         self.current_project = None
         
-        # Configure root grid weights for full expansion
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=0)  # Title row (fixed)
-        root.rowconfigure(1, weight=100)  # Main content (expands)
-        root.rowconfigure(2, weight=0)  # Separator (fixed)
-        root.rowconfigure(3, weight=0)  # Footer (fixed)
+        # Create a content container so we don't mix pack/grid on root
+        self.content = ttk.Frame(self.root)
+        self.content.pack(fill=tk.BOTH, expand=True)
+        # Configure content grid weights for full expansion
+        self.content.columnconfigure(0, weight=1)
+        self.content.rowconfigure(0, weight=0)  # Title row (fixed)
+        self.content.rowconfigure(1, weight=100)  # Main content (expands)
+        self.content.rowconfigure(2, weight=0)  # Separator (fixed)
+        self.content.rowconfigure(3, weight=0)  # Footer (fixed)
         
         self.create_widgets()
         self.load_projects()
@@ -113,12 +126,12 @@ class ProjectsApp:
             setattr(self, f"redline_update_{cycle}_var", tk.BooleanVar())
         
         # Row 0: Title
-        title_label = ttk.Label(self.root, text="Project Management - Complete Workflow", 
+        title_label = ttk.Label(self.content, text="Project Management - Complete Workflow", 
                                font=('Arial', 18, 'bold'))
         title_label.grid(row=0, column=0, columnspan=2, pady=(10, 10), padx=20, sticky=(tk.W, tk.E))
         
         # Row 1: Main content area (expands to fill space)
-        main_paned = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
+        main_paned = ttk.PanedWindow(self.content, orient=tk.HORIZONTAL)
         main_paned.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=10, pady=(0, 10))
         
         # Container frames for each section
@@ -150,6 +163,12 @@ class ProjectsApp:
         list_frame = ttk.LabelFrame(self.project_list_container, text="Projects", padding="10")
         list_frame.pack(fill=tk.BOTH, expand=True, padx=(0, 5))
         list_frame.columnconfigure(0, weight=1)
+        list_frame.columnconfigure(1, weight=0)
+        # Place help via grid to avoid pack/grid conflicts
+        try:
+            add_help_button(list_frame, 'Projects Pane', 'Search/sort jobs, right‑click for actions (including Add Note).').grid(row=0, column=1, sticky='ne')
+        except Exception:
+            pass
         list_frame.rowconfigure(1, weight=1)
         
         # Search and sort frame - combined for compact layout
@@ -220,9 +239,13 @@ class ProjectsApp:
         # Scrollbar for treeview
         tree_scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=tree_scrollbar.set)
-        
+
         self.tree.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         tree_scrollbar.grid(row=1, column=1, sticky=(tk.N, tk.S))
+        try:
+            bind_mousewheel_to_treeview(self.tree)
+        except Exception:
+            pass
         
         # Bind selection event
         self.tree.bind('<<TreeviewSelect>>', self.on_project_select)
@@ -466,6 +489,10 @@ class ProjectsApp:
         details_frame.columnconfigure(1, weight=1)
         # Keep a durable reference for other methods
         self.project_details_frame = details_frame
+        try:
+            add_help_button(details_frame, 'Details Pane', 'Edit job directory, customer, dates and assignments. Values autosave.').grid(row=0, column=2, sticky='ne')
+        except Exception:
+            pass
         
         # Job Number
         ttk.Label(details_frame, text="Job Number:").grid(row=0, column=0, sticky=tk.W, pady=2)
@@ -2826,11 +2853,12 @@ class ProjectsApp:
     def create_action_buttons(self):
         """Create compact footer toolbar with uniform buttons"""
         # Separator line above footer
-        separator = ttk.Separator(self.root, orient='horizontal')
+        parent = getattr(self, 'content', self.root)
+        separator = ttk.Separator(parent, orient='horizontal')
         separator.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E))
         
         # Footer toolbar frame - pinned to bottom
-        footer_frame = tk.Frame(self.root, bg='#f5f5f5', relief='flat', bd=0, height=45)
+        footer_frame = tk.Frame(parent, bg='#f5f5f5', relief='flat', bd=0, height=45)
         footer_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E))
         footer_frame.grid_propagate(False)
         
@@ -4574,6 +4602,8 @@ class ProjectsApp:
         self.job_context_menu.add_command(label="Open in Resource Allocation", command=lambda: self.open_app_with_job("resource_allocation"))
         self.job_context_menu.add_command(label="Open in Workflow Manager", command=lambda: self.open_app_with_job("workflow_manager"))
         self.job_context_menu.add_command(label="Open in Coil Verification", command=lambda: self.open_app_with_job("coil_verification"))
+        self.job_context_menu.add_separator()
+        self.job_context_menu.add_command(label="Add New Note…", command=self._add_note_from_context)
         
         # Bind right-click event to treeview
         self.tree.bind("<Button-3>", self.show_job_context_menu)  # Button-3 is right-click on Windows
@@ -4639,6 +4669,16 @@ class ProjectsApp:
             print(f"Launched {app_name} with job number: {job_number}")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch {app_name}:\n{str(e)}")
+
+    def _add_note_from_context(self):
+        selection = self.tree.selection()
+        if not selection:
+            return
+        values = self.tree.item(selection[0], 'values')
+        if not values:
+            return
+        job_number = values[0]
+        open_add_note_dialog(self.root, str(job_number))
 
     def preload_job(self, job_number):
         """Preload a specific job number in the table"""

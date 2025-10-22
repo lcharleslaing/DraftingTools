@@ -9,6 +9,10 @@ from tkinter import ttk, messagebox
 import sqlite3
 from datetime import datetime
 from print_package_workflow import PrintPackageWorkflow
+from scroll_utils import bind_mousewheel_to_canvas
+from ui_prefs import bind_tree_column_persistence
+from notes_utils import open_add_note_dialog
+from app_nav import add_app_bar
 from settings import SettingsManager
 
 class WorkflowManagerApp:
@@ -22,7 +26,18 @@ class WorkflowManagerApp:
             self.root = tk.Tk()
             self.root.title("Print Package Workflow Manager")
             self.root.geometry("1200x800")
+            try:
+                self.root.state('zoomed')
+            except Exception:
+                try:
+                    self.root.attributes('-zoomed', True)
+                except Exception:
+                    pass
         
+        try:
+            add_app_bar(self.root, current_app='workflow_manager')
+        except Exception:
+            pass
         self.create_widgets()
         self.load_data()
     
@@ -105,6 +120,11 @@ class WorkflowManagerApp:
         self.reviews_tree.column("status", width=80)
         
         self.reviews_tree.pack(fill='both', expand=True)
+        bind_tree_column_persistence(self.reviews_tree, 'workflow_manager.reviews_tree', self.root)
+        # Right-click: add note for job
+        self.reviews_ctx = tk.Menu(list_frame, tearoff=0)
+        self.reviews_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.reviews_tree.bind('<Button-3>', self._on_reviews_tree_right_click)
         
         # Bind selection
         self.reviews_tree.bind('<<TreeviewSelect>>', self.on_review_selected)
@@ -166,6 +186,8 @@ class WorkflowManagerApp:
         workflow_scrollbar = ttk.Scrollbar(canvas_frame, orient="vertical", command=self.workflow_canvas.yview)
         self.workflow_canvas.configure(yscrollcommand=workflow_scrollbar.set)
         workflow_scrollbar.pack(side="right", fill="y")
+        # Enable mouse wheel
+        bind_mousewheel_to_canvas(self.workflow_canvas)
     
     def load_data(self):
         """Load initial data"""
@@ -224,6 +246,24 @@ class WorkflowManagerApp:
         job_number = item['values'][0]
         
         self.load_workflow_details(job_number)
+
+    def _on_reviews_tree_right_click(self, event):
+        iid = self.reviews_tree.identify_row(event.y)
+        if iid:
+            self.reviews_tree.selection_set(iid)
+            try:
+                self.reviews_ctx.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.reviews_ctx.grab_release()
+
+    def add_note_for_selected_job(self):
+        sel = self.reviews_tree.selection()
+        if not sel:
+            messagebox.showwarning("No Selection", "Please select a job first.")
+            return
+        vals = self.reviews_tree.item(sel[0], 'values')
+        job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number))
     
     def load_workflow_details(self, job_number):
         """Load workflow details for selected job"""

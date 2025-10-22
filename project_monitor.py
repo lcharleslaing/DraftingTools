@@ -11,6 +11,11 @@ import time
 import subprocess
 import platform
 from database_setup import DatabaseManager
+from scroll_utils import bind_mousewheel_to_treeview
+from ui_prefs import bind_tree_column_persistence
+from notes_utils import open_add_note_dialog
+from app_nav import add_app_bar
+from help_utils import add_help_button
 from directory_picker import DirectoryPicker
 
 class ProjectMonitor:
@@ -36,6 +41,10 @@ class ProjectMonitor:
         # Load existing project data
         self.load_project_data()
         
+        try:
+            add_app_bar(self.root, current_app='project_monitor')
+        except Exception:
+            pass
         self.create_widgets()
         self.refresh_projects()
         
@@ -349,6 +358,10 @@ class ProjectMonitor:
         """Create the left panel with projects list"""
         projects_frame = ttk.LabelFrame(parent, text="Projects (Sorted by Unread Changes)", padding=10)
         parent.add(projects_frame, weight=0)
+        try:
+            add_help_button(projects_frame, 'Projects Pane', 'Shows jobs with unread file changes first. Right‑click to add a note.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Projects treeview
         columns = ("file_count", "unread_changes", "job_number", "customer", "due_date")
@@ -371,8 +384,18 @@ class ProjectMonitor:
         self.projects_tree.tag_configure("has_unread", background="#FFF3CD", foreground="#856404")  # Light yellow background
         self.projects_tree.tag_configure("no_unread", background="white")
         
-        self.projects_tree.pack(fill="both", expand=True)
+        # Add vertical scrollbar for projects list
+        proj_scroll = ttk.Scrollbar(projects_frame, orient="vertical", command=self.projects_tree.yview)
+        self.projects_tree.configure(yscrollcommand=proj_scroll.set)
+        self.projects_tree.pack(side="left", fill="both", expand=True)
+        proj_scroll.pack(side="right", fill="y")
+        bind_mousewheel_to_treeview(self.projects_tree)
+        bind_tree_column_persistence(self.projects_tree, 'project_monitor.projects_tree', self.root)
         self.projects_tree.bind("<<TreeviewSelect>>", self.on_project_select)
+        # Right-click: add note
+        self.projects_ctx = tk.Menu(projects_frame, tearoff=0)
+        self.projects_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.projects_tree.bind('<Button-3>', self._on_projects_tree_right_click)
         
         # Buttons frame
         btn_frame = ttk.Frame(projects_frame)
@@ -391,6 +414,10 @@ class ProjectMonitor:
         """Create the right panel with file updates"""
         files_frame = ttk.LabelFrame(parent, text="File Updates", padding=10)
         parent.add(files_frame, weight=1)
+        try:
+            add_help_button(files_frame, 'Files Pane', 'Displays project files and detected changes. Double‑click to open; use actions for context.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Create frame for treeview and scrollbars
         tree_frame = ttk.Frame(files_frame)
@@ -432,6 +459,10 @@ class ProjectMonitor:
         
         # Pack treeview and scrollbars
         self.files_tree.pack(side="left", fill="both", expand=True)
+        v_scrollbar.pack(side="right", fill="y")
+        h_scrollbar.pack(side="bottom", fill="x")
+        bind_mousewheel_to_treeview(self.files_tree)
+        bind_tree_column_persistence(self.files_tree, 'project_monitor.files_tree', self.root)
         v_scrollbar.pack(side="right", fill="y")
         h_scrollbar.pack(side="bottom", fill="x")
         
@@ -590,6 +621,24 @@ class ProjectMonitor:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load projects: {str(e)}")
             self.status_var.set("Error loading projects")
+
+    def _on_projects_tree_right_click(self, event):
+        iid = self.projects_tree.identify_row(event.y)
+        if iid:
+            self.projects_tree.selection_set(iid)
+            try:
+                self.projects_ctx.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.projects_ctx.grab_release()
+
+    def add_note_for_selected_job(self):
+        sel = self.projects_tree.selection()
+        if not sel:
+            messagebox.showwarning("No Selection", "Please select a job first.")
+            return
+        vals = self.projects_tree.item(sel[0], 'values')
+        job_number = vals[2]  # third column is job_number
+        open_add_note_dialog(self.root, str(job_number))
     
     def sort_by_files(self):
         """Sort projects by number of files (descending)"""

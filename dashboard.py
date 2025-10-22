@@ -6,6 +6,7 @@ import sys
 import sqlite3
 from db_utils import get_connection
 from settings import SettingsManager
+from help_utils import show_help
 
 class DashboardApp:
     def __init__(self):
@@ -157,6 +158,8 @@ class DashboardApp:
         settings_btn.pack(side=tk.RIGHT)
         
         self.update_user_display()
+        # Help button
+        ttk.Button(header_frame, text='Help', command=lambda: show_help(self.root, 'Dashboard', 'Click tiles to open apps. Use the bottom controls to view running apps or exit. The app bar provides navigation across apps.')).pack(pady=(6,0))
         
         # Apps container
         apps_container = ttk.Frame(self.root)
@@ -606,8 +609,21 @@ Developed for CECO Environmental Corp
         try:
             # Simple confirmation dialog
             if messagebox.askyesno("Exit Application", "Are you sure you want to exit the Drafting Tools Suite?"):
-                # Close tracked child processes only (safe approach)
+                # Close tracked child processes first
                 self.close_tracked_processes()
+                # Also close any other related processes detected via psutil
+                try:
+                    for proc in self.get_running_related_processes():
+                        try:
+                            proc.terminate()
+                            proc.wait(timeout=2)
+                        except Exception:
+                            try:
+                                proc.kill()
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
                 
                 # Close the main window
                 self.root.quit()

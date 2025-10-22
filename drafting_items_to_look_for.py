@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+from ui_prefs import bind_tree_column_persistence
+from notes_utils import open_add_note_dialog
+from help_utils import add_help_button
 import sqlite3
 import os
 import sys
@@ -14,6 +17,11 @@ class DraftingChecklistApp:
         self.root.title("Drafting Drawing Checklist - Drafting Tools")
         self.root.state('zoomed')  # Maximized window
         self.root.minsize(1200, 800)
+        try:
+            from app_nav import add_app_bar
+            add_app_bar(self.root, current_app='drafting_checklist')
+        except Exception:
+            pass
         
         # Initialize database
         self.init_database()
@@ -137,6 +145,10 @@ class DraftingChecklistApp:
         # Project list treeview
         columns = ('Job Number', 'Customer', 'Items Checked')
         self.project_tree = ttk.Treeview(project_frame, columns=columns, show='headings', height=15)
+        try:
+            add_help_button(project_frame, 'Projects Pane', 'Pick a job to load checklist status for the project; right‑click to add a note.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Configure columns
         self.project_tree.heading('Job Number', text='Job Number')
@@ -154,6 +166,11 @@ class DraftingChecklistApp:
         # Pack treeview and scrollbar
         self.project_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         project_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        # Right-click add note
+        self.project_ctx = tk.Menu(project_frame, tearoff=0)
+        self.project_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
+        bind_tree_column_persistence(self.project_tree, 'drafting_checklist.project_tree', self.root)
         
         # Bind selection event
         self.project_tree.bind('<<TreeviewSelect>>', self.on_project_select)
@@ -282,6 +299,10 @@ class DraftingChecklistApp:
         # Create treeview for master items
         master_columns = ('ID', 'Tag', 'Title', 'Description', 'Has Image')
         self.master_tree = ttk.Treeview(list_frame, columns=master_columns, show='headings', height=10)
+        try:
+            add_help_button(list_frame, 'Master Items', 'Manage checklist items. Add, edit, delete items and use tags and images.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Configure columns
         self.master_tree.heading('ID', text='ID')
@@ -303,6 +324,7 @@ class DraftingChecklistApp:
         # Pack master treeview
         self.master_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         master_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        bind_tree_column_persistence(self.master_tree, 'drafting_checklist.master_tree', self.root)
         
         # Action buttons for master items
         action_frame = ttk.Frame(list_frame)
@@ -323,6 +345,24 @@ class DraftingChecklistApp:
         
         # Load master items
         self.load_master_items()
+
+    def _on_project_tree_right_click(self, event):
+        iid = self.project_tree.identify_row(event.y)
+        if iid:
+            self.project_tree.selection_set(iid)
+            try:
+                self.project_ctx.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.project_ctx.grab_release()
+
+    def add_note_for_selected_job(self):
+        sel = self.project_tree.selection()
+        if not sel:
+            messagebox.showwarning("No Selection", "Please select a job first.")
+            return
+        vals = self.project_tree.item(sel[0], 'values')
+        job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number))
         
     def load_projects(self):
         """Load all projects from the projects table"""

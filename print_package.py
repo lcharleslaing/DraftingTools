@@ -12,6 +12,11 @@ import subprocess
 import sys
 from datetime import datetime
 from db_utils import get_connection
+from ui_prefs import bind_tree_column_persistence
+from scroll_utils import bind_mousewheel_to_treeview
+from notes_utils import open_add_note_dialog
+from app_nav import add_app_bar
+from help_utils import add_help_button
 import json
 
 class PrintPackageApp:
@@ -28,6 +33,10 @@ class PrintPackageApp:
         self.init_database()
         
         # Create main interface
+        try:
+            add_app_bar(self.root, current_app='print_package')
+        except Exception:
+            pass
         self.create_widgets()
         
         # Add keyboard shortcuts for fullscreen toggle
@@ -65,7 +74,7 @@ class PrintPackageApp:
         
         # Left side - Project list
         self.create_project_list_panel(project_list_container)
-        
+
         # Right side - Drawings management
         self.create_drawings_panel(drawings_container)
         
@@ -74,6 +83,11 @@ class PrintPackageApp:
         # Project list frame
         project_frame = ttk.LabelFrame(parent, text="Projects", padding=10)
         project_frame.pack(fill=tk.BOTH, expand=True)
+        # Help
+        try:
+            add_help_button(project_frame, 'Projects Pane', 'Select a job, filter by search, and right‑click to add a note.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Search frame
         search_frame = ttk.Frame(project_frame)
@@ -117,12 +131,22 @@ class PrintPackageApp:
         
         # Bind selection event
         self.project_tree.bind('<<TreeviewSelect>>', self.on_project_select)
+        # Right-click context menu for notes
+        self.project_context = tk.Menu(project_frame, tearoff=0)
+        self.project_context.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
+        # Persist column widths
+        bind_tree_column_persistence(self.project_tree, 'print_package.project_tree', self.root)
         
     def create_drawings_panel(self, parent):
         """Create the drawings management panel on the right side"""
         # Drawings frame
         drawings_frame = ttk.LabelFrame(parent, text="Drawings Management", padding=10)
         drawings_frame.pack(fill=tk.BOTH, expand=True)
+        try:
+            add_help_button(drawings_frame, 'Drawings Pane', 'Add, search, open and print drawings. Use the action column or right‑click menus.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Current job display
         job_frame = ttk.Frame(drawings_frame)
@@ -185,15 +209,17 @@ class PrintPackageApp:
         # Scrollbar for current drawings
         current_scrollbar = ttk.Scrollbar(current_drawings_frame, orient=tk.VERTICAL, command=self.current_drawings_tree.yview)
         self.current_drawings_tree.configure(yscrollcommand=current_scrollbar.set)
-        
+
         # Pack current drawings treeview
         self.current_drawings_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         current_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        bind_mousewheel_to_treeview(self.current_drawings_tree)
         
         # Bind clicks (toggle printed), double-click and right-click events for current drawings
         self.current_drawings_tree.bind('<Button-1>', self.on_current_drawing_click)
         self.current_drawings_tree.bind('<Double-1>', self.on_current_drawing_double_click)
         self.current_drawings_tree.bind('<Button-3>', self.on_current_drawing_right_click)
+        bind_tree_column_persistence(self.current_drawings_tree, 'print_package.current_drawings', self.root)
         
         # Global search results
         global_drawings_frame = ttk.LabelFrame(drawings_list_frame, text="Global Search Results", padding=5)
@@ -219,14 +245,16 @@ class PrintPackageApp:
         # Scrollbar for global drawings
         global_scrollbar = ttk.Scrollbar(global_drawings_frame, orient=tk.VERTICAL, command=self.global_drawings_tree.yview)
         self.global_drawings_tree.configure(yscrollcommand=global_scrollbar.set)
-        
+
         # Pack global drawings treeview
         self.global_drawings_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         global_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        bind_mousewheel_to_treeview(self.global_drawings_tree)
         
         # Bind double-click and right-click events for global drawings
         self.global_drawings_tree.bind('<Double-1>', self.on_global_drawing_double_click)
         self.global_drawings_tree.bind('<Button-3>', self.on_global_drawing_right_click)
+        bind_tree_column_persistence(self.global_drawings_tree, 'print_package.global_drawings', self.root)
         
         # Action buttons
         action_frame = ttk.Frame(drawings_frame)
@@ -439,6 +467,24 @@ class PrintPackageApp:
             
             # Load drawings for this project
             self.load_current_drawings()
+
+    def _on_project_tree_right_click(self, event):
+        iid = self.project_tree.identify_row(event.y)
+        if iid:
+            self.project_tree.selection_set(iid)
+            try:
+                self.project_context.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.project_context.grab_release()
+
+    def add_note_for_selected_job(self):
+        sel = self.project_tree.selection()
+        if not sel:
+            messagebox.showwarning("No Selection", "Please select a job first.")
+            return
+        vals = self.project_tree.item(sel[0], 'values')
+        job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number))
     
     def load_current_drawings(self):
         """Load drawings for the current project"""

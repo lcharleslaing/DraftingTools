@@ -5,6 +5,11 @@ import os
 import subprocess
 import sys
 from datetime import datetime
+from scroll_utils import bind_mousewheel_to_treeview
+from ui_prefs import bind_tree_column_persistence
+from notes_utils import open_add_note_dialog
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 class ProductConfigurationsApp:
     def __init__(self, job_number=None):
@@ -20,6 +25,11 @@ class ProductConfigurationsApp:
         self.init_database()
         
         # Create main interface
+        # App bar
+        try:
+            add_app_bar(self.root, current_app='product_configurations')
+        except Exception:
+            pass
         self.create_widgets()
         
         # Add keyboard shortcuts for fullscreen toggle
@@ -44,6 +54,10 @@ class ProductConfigurationsApp:
         # Project list frame
         project_frame = ttk.LabelFrame(parent, text="Projects", padding=10)
         project_frame.pack(fill=tk.BOTH, expand=True)
+        try:
+            add_help_button(project_frame, 'Projects Pane', 'Pick a job to load configuration. Use search, toggle completed, and right‑click to add a note.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Search frame
         search_frame = ttk.Frame(project_frame)
@@ -84,15 +98,32 @@ class ProductConfigurationsApp:
         # Pack treeview and scrollbar
         self.project_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         project_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        bind_mousewheel_to_treeview(self.project_tree)
         
         # Bind selection event
         self.project_tree.bind('<<TreeviewSelect>>', self.on_project_select)
+        # Right-click: add note
+        self.project_ctx = ttk.Menu(project_frame, tearoff=0)
+        try:
+            # ttk.Menu may not exist on some themes; fallback to tk.Menu
+            pass
+        except Exception:
+            pass
+        self.project_ctx = tk.Menu(project_frame, tearoff=0)
+        self.project_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
+        # Persist column widths
+        bind_tree_column_persistence(self.project_tree, 'product_configurations.project_tree', self.root)
         
     def create_configuration_panel(self, parent):
         """Create the configuration panel on the right side"""
         # Configuration frame
         config_frame = ttk.LabelFrame(parent, text="Product Configuration", padding=10)
         config_frame.pack(fill=tk.BOTH, expand=True)
+        try:
+            add_help_button(config_frame, 'Configuration Pane', 'Fill out heater/tank/pump parameters. Changes autosave. Use dropdowns and tabs.').pack(anchor='ne')
+        except Exception:
+            pass
         
         # Product selection and job number area
         self.create_product_selection_area(config_frame)
@@ -246,6 +277,24 @@ class ProductConfigurationsApp:
             
             # Load configuration for this project
             self.load_configuration(job_number)
+
+    def _on_project_tree_right_click(self, event):
+        iid = self.project_tree.identify_row(event.y)
+        if iid:
+            self.project_tree.selection_set(iid)
+            try:
+                self.project_ctx.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.project_ctx.grab_release()
+
+    def add_note_for_selected_job(self):
+        sel = self.project_tree.selection()
+        if not sel:
+            messagebox.showwarning("No Selection", "Please select a job first.")
+            return
+        vals = self.project_tree.item(sel[0], 'values')
+        job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number))
     
     def setup_autosave(self):
         """Setup auto-save for all configuration fields"""

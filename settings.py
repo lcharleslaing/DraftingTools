@@ -6,6 +6,7 @@ Manages users, departments, and application settings
 
 import tkinter as tk
 from tkinter import ttk, messagebox
+from ui_prefs import bind_tree_column_persistence
 import sqlite3
 import json
 import os
@@ -420,6 +421,10 @@ class SettingsApp:
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.users_tree.yview)
         self.users_tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
+        try:
+            bind_tree_column_persistence(self.users_tree, 'settings.users_tree', self.root)
+        except Exception:
+            pass
     
     def create_departments_tab(self):
         """Create departments management tab"""
@@ -473,6 +478,10 @@ class SettingsApp:
         self.dept_tree.column("color_code", width=100)
         
         self.dept_tree.pack(fill="both", expand=True)
+        try:
+            bind_tree_column_persistence(self.dept_tree, 'settings.dept_tree', self.root)
+        except Exception:
+            pass
     
     def create_current_user_tab(self):
         """Create current user selection tab"""

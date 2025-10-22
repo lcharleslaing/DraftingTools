@@ -5,6 +5,10 @@ from datetime import datetime
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, messagebox
+from ui_prefs import bind_tree_column_persistence
+from notes_utils import open_add_note_dialog
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 DB_PATH = "d365_builder.db"
 DASHBOARD_DB = "drafting_tools.db"  # tie into existing Project Management DB
@@ -346,6 +350,11 @@ class App(tk.Tk):
         except Exception:
             pass
 
+        # App bar
+        try:
+            add_app_bar(self, current_app='d365_builder')
+        except Exception:
+            pass
         # Left: Active Projects list
         self.build_projects_list(self.left_projects)
 
@@ -375,7 +384,16 @@ class App(tk.Tk):
         self.projects_tree.heading("id", text="id")
         self.projects_tree.column("id", width=0, stretch=False)
         self.projects_tree.pack(fill="y", expand=False)
+        bind_tree_column_persistence(self.projects_tree, 'd365.projects_tree', self)
         self.projects_tree.bind("<<TreeviewSelect>>", self.on_select_project)
+        # Right-click: add note
+        self.projects_ctx = tk.Menu(parent, tearoff=0)
+        self.projects_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.projects_tree.bind('<Button-3>', self._on_projects_tree_right_click)
+        try:
+            add_help_button(parent, 'Projects Pane', 'Select a job on the left to prefill report context.').pack(anchor='ne')
+        except Exception:
+            pass
 
         btns = ttk.Frame(parent); btns.pack(fill="x", pady=(6,0))
         ttk.Button(btns, text="Refresh", command=self.refresh_projects).pack(side="left")
@@ -415,6 +433,24 @@ class App(tk.Tk):
         self.lbl_job_pump.configure(text=f"Job #{self.current_job['job_no']}")
         self.lbl_job_report.configure(text=f"Job #{self.current_job['job_no']}")
         self.refresh_report()
+
+    def _on_projects_tree_right_click(self, event):
+        iid = self.projects_tree.identify_row(event.y)
+        if iid:
+            self.projects_tree.selection_set(iid)
+            try:
+                self.projects_ctx.tk_popup(event.x_root, event.y_root)
+            finally:
+                self.projects_ctx.grab_release()
+
+    def add_note_for_selected_job(self):
+        sel = self.projects_tree.selection()
+        if not sel:
+            messagebox.showwarning("No Selection", "Please select a job first.")
+            return
+        vals = self.projects_tree.item(sel[0], 'values')
+        job_number = vals[1]  # second column is job_no
+        open_add_note_dialog(self, str(job_number))
 
     # (Removed internal Jobs tab; using Active Projects from drafting_tools.db)
 
@@ -623,12 +659,17 @@ class App(tk.Tk):
         top = ttk.Frame(f); top.pack(fill="x")
         self.lbl_job_report = ttk.Label(top, text="Job # (select a job)", font=("Segoe UI", 10, "bold"))
         self.lbl_job_report.pack(side="left")
+        try:
+            add_help_button(top, 'Report Tab', 'Shows generated item lines for the selected job. Use Copy buttons or export JSON.').pack(side='right')
+        except Exception:
+            pass
 
         self.report_tree = ttk.Treeview(f, columns=("id","kind","pn","desc","bom","template","ptype","created"),
                                         show="headings", height=18)
         for col,w in [("id",50),("kind",90),("pn",150),("desc",520),("bom",170),("template",100),("ptype",120),("created",200)]:
             self.report_tree.heading(col, text=col); self.report_tree.column(col, width=w, stretch=(col=="desc"))
         self.report_tree.pack(fill="both", expand=True, pady=(8,8))
+        bind_tree_column_persistence(self.report_tree, 'd365.report_tree', self)
 
         btns=ttk.Frame(f); btns.pack(fill="x")
         ttk.Button(btns, text="Copy PN", command=lambda:self.copy_col("pn")).pack(side="left", padx=4)
@@ -1120,6 +1161,7 @@ class ResultTable:
         self.tree.heading("template", text="Template"); self.tree.column("template", width=110)
         self.tree.heading("ptype", text="Product Type"); self.tree.column("ptype", width=120)
         self.tree.pack(fill="both", expand=True)
+        bind_tree_column_persistence(self.tree, 'd365.settings_tree', self)
         btns = ttk.Frame(self.frame); btns.pack(fill="x", pady=(6,0))
         ttk.Button(btns, text="Copy PN", command=lambda:self.copy_col("pn")).pack(side="left", padx=4)
         ttk.Button(btns, text="Copy Desc", command=lambda:self.copy_col("desc")).pack(side="left", padx=4)

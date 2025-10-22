@@ -6,6 +6,7 @@ Digital drawing review and markup with tablet support and audit trail
 
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+from ui_prefs import bind_tree_column_persistence
 import sqlite3
 import os
 import json
@@ -13,6 +14,8 @@ from datetime import datetime
 import subprocess
 import sys
 from settings import SettingsManager
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 class DrawingReviewsApp:
     def __init__(self):
@@ -34,6 +37,10 @@ class DrawingReviewsApp:
         self.init_database()
         
         # Create interface
+        try:
+            add_app_bar(self.root, current_app='drawing_reviews')
+        except Exception:
+            pass
         self.create_widgets()
         
         # Load initial data
@@ -209,6 +216,7 @@ class DrawingReviewsApp:
         self.drawings_tree.column("department", width=100)
         
         self.drawings_tree.pack(fill='both', expand=True)
+        bind_tree_column_persistence(self.drawings_tree, 'drawing_reviews.drawings_tree', self.root)
         
         # Bind double-click to open drawing
         self.drawings_tree.bind('<Double-1>', self.open_drawing_for_review)
@@ -264,6 +272,11 @@ class DrawingReviewsApp:
         self.reviewed_tree.column("date", width=100)
         
         self.reviewed_tree.pack(fill='both', expand=True)
+        try:
+            add_help_button(list_frame, 'Reviewed Drawings', 'This list shows completed or in‑progress reviews. Double‑click to open.').pack(anchor='ne')
+        except Exception:
+            pass
+        bind_tree_column_persistence(self.reviewed_tree, 'drawing_reviews.reviewed_tree', self.root)
         
         # Bind double-click to open reviewed drawing
         self.reviewed_tree.bind('<Double-1>', self.open_reviewed_drawing)

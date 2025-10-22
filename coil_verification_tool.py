@@ -1,10 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from ui_prefs import bind_tree_column_persistence
 import sqlite3
 import re
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import getpass
+from app_nav import add_app_bar
+from help_utils import add_help_button
 
 class CoilVerificationTool:
     def __init__(self, root):
@@ -12,6 +15,13 @@ class CoilVerificationTool:
         self.root.title("Coil Verification Tool - Drafting Tools")
         self.root.geometry("1000x700")
         self.root.minsize(800, 600)
+        try:
+            self.root.state('zoomed')
+        except Exception:
+            try:
+                self.root.attributes('-zoomed', True)
+            except Exception:
+                pass
         
         # Database connection
         self.db_path = "coil_verification.db"
@@ -21,6 +31,10 @@ class CoilVerificationTool:
         self.connect_database()
         
         # Create main interface
+        try:
+            add_app_bar(self.root, current_app='coil_verification')
+        except Exception:
+            pass
         self.create_widgets()
         
         # Bind window close event
@@ -266,6 +280,11 @@ class CoilVerificationTool:
         # Results frame
         results_frame = ttk.LabelFrame(main_frame, text="Search Results", padding="10")
         results_frame.pack(fill=tk.BOTH, expand=True)
+        try:
+            # Place help using grid to avoid mixing managers within results_frame
+            add_help_button(results_frame, 'Search Results', 'Use filters above to search; results show part numbers and details. Double‑click rows for actions.').grid(row=0, column=2, sticky='ne')
+        except Exception:
+            pass
         
         # Results treeview
         columns = ('Part Number', 'Description', 'Material', 'Diameter', 'Component', 'Length (in)', 'Square Feet', 'Gauge')
@@ -284,7 +303,8 @@ class CoilVerificationTool:
         # Grid layout for treeview and scrollbars
         self.results_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         v_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
-        h_scrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
+        h_scrollbar.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E))
+        bind_tree_column_persistence(self.results_tree, 'coil_verification.results_tree', self.root)
         
         # Configure grid weights
         results_frame.columnconfigure(0, weight=1)
