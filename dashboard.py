@@ -5,6 +5,7 @@ import os
 import sys
 import sqlite3
 from db_utils import get_connection
+from database_setup import DatabaseManager
 from settings import SettingsManager
 from help_utils import show_help
 
@@ -20,6 +21,8 @@ class DashboardApp:
         
         # Initialize settings manager
         self.settings_manager = SettingsManager()
+        # Ensure people tables are present and seeded if empty
+        self.ensure_people_seeded()
         
         # Configure style
         self.setup_styles()
@@ -38,6 +41,32 @@ class DashboardApp:
         
         # Center the window
         self.center_window()
+
+    def ensure_people_seeded(self):
+        """Ensure designers/engineers exist; if tables missing or empty, initialize DB defaults."""
+        try:
+            conn = get_connection('drafting_tools.db')
+            cur = conn.cursor()
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='designers'")
+            designers_exists = cur.fetchone() is not None
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='engineers'")
+            engineers_exists = cur.fetchone() is not None
+            count_des = count_eng = None
+            if designers_exists:
+                cur.execute("SELECT COUNT(*) FROM designers")
+                count_des = cur.fetchone()[0]
+            if engineers_exists:
+                cur.execute("SELECT COUNT(*) FROM engineers")
+                count_eng = cur.fetchone()[0]
+            conn.close()
+            if (not designers_exists or not engineers_exists) or ((count_des or 0) == 0 and (count_eng or 0) == 0):
+                # Initialize DB to create tables and seed default people
+                DatabaseManager()
+        except Exception:
+            try:
+                DatabaseManager()
+            except Exception:
+                pass
     
     def create_buttons_immediately(self):
         """Create buttons immediately on root window - GUARANTEED TO WORK"""
@@ -234,13 +263,16 @@ class DashboardApp:
         self.create_app_tile(parent, 3, 1, "🗂️", "Project Workflow", 
                               "Define Standard workflow and\nupdate per‑project step states", 
                               self.launch_project_workflow)
-        
+
         # Coil Verification Tool
         self.create_app_tile(parent, 3, 0, "🔍", "Coil Verification Tool", 
                                "Search and verify coil part numbers\nby Heater/Tank, Material & Diameter", 
                                self.launch_coil_verification)
-        
-        # Reserved placeholder for future app
+
+        # Settings (People, Users, Departments)
+        self.create_app_tile(parent, 3, 2, "⚙️", "Settings", 
+                              "Manage users, departments, and\npeople lists for pickers", 
+                              self.open_settings)
     
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a simple button with formatted title"""

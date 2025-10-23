@@ -7,6 +7,8 @@ Manages users, departments, and application settings
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ui_prefs import bind_tree_column_persistence
+from database_setup import DatabaseManager
+from database_setup import DatabaseManager
 import sqlite3
 import json
 import os
@@ -316,9 +318,246 @@ class SettingsManager:
             conn.close()
             return False
 
+    # ------------------------ People (Designers/Engineers) ------------------------
+    def get_departments_map(self):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT id, name FROM departments WHERE is_active = 1 ORDER BY name")
+        rows = cur.fetchall(); conn.close()
+        return {name: did for did, name in rows}
+
+    def get_designers(self):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM designers ORDER BY name")
+        rows = [r[0] for r in cur.fetchall()]
+        conn.close()
+        return rows
+
+    def get_designers_with_dept(self):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                """
+                SELECT d.name, COALESCE(dep.name, '') as department
+                FROM designers d
+                LEFT JOIN departments dep ON dep.id = d.department_id
+                ORDER BY d.name
+                """
+            )
+            rows = cur.fetchall()
+        except sqlite3.OperationalError:
+            cur.execute("SELECT name, '' as department FROM designers ORDER BY name")
+            rows = cur.fetchall()
+        conn.close(); return rows
+
+    def add_designer(self, name, department: str = ""):
+        if not name:
+            return False
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            dep_id = None
+            if department:
+                cur.execute("SELECT id FROM departments WHERE name = ?", (department,))
+                row = cur.fetchone(); dep_id = row[0] if row else None
+            if dep_id is not None:
+                cur.execute("INSERT OR IGNORE INTO designers(name, department_id) VALUES (?, ?)", (name.strip(), dep_id))
+            else:
+                cur.execute("INSERT OR IGNORE INTO designers(name) VALUES (?)", (name.strip(),))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def delete_designer(self, name):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute("DELETE FROM designers WHERE name = ?", (name,))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def rename_designer(self, old_name, new_name):
+        if not new_name:
+            return False
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute("UPDATE designers SET name = ? WHERE name = ?", (new_name.strip(), old_name))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def set_designer_department(self, name, department: str):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            dep_id = None
+            if department:
+                cur.execute("SELECT id FROM departments WHERE name = ?", (department,))
+                row = cur.fetchone(); dep_id = row[0] if row else None
+            cur.execute("UPDATE designers SET department_id = ? WHERE name = ?", (dep_id, name))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def get_engineers(self):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM engineers ORDER BY name")
+        rows = [r[0] for r in cur.fetchall()]
+        conn.close()
+        return rows
+
+    def get_engineers_with_dept(self):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                """
+                SELECT e.name, COALESCE(dep.name, '') as department
+                FROM engineers e
+                LEFT JOIN departments dep ON dep.id = e.department_id
+                ORDER BY e.name
+                """
+            )
+            rows = cur.fetchall()
+        except sqlite3.OperationalError:
+            cur.execute("SELECT name, '' as department FROM engineers ORDER BY name")
+            rows = cur.fetchall()
+        conn.close(); return rows
+
+    def add_engineer(self, name, department: str = ""):
+        if not name:
+            return False
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            dep_id = None
+            if department:
+                cur.execute("SELECT id FROM departments WHERE name = ?", (department,))
+                row = cur.fetchone(); dep_id = row[0] if row else None
+            if dep_id is not None:
+                cur.execute("INSERT OR IGNORE INTO engineers(name, department_id) VALUES (?, ?)", (name.strip(), dep_id))
+            else:
+                cur.execute("INSERT OR IGNORE INTO engineers(name) VALUES (?)", (name.strip(),))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def delete_engineer(self, name):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute("DELETE FROM engineers WHERE name = ?", (name,))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def rename_engineer(self, old_name, new_name):
+        if not new_name:
+            return False
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute("UPDATE engineers SET name = ? WHERE name = ?", (new_name.strip(), old_name))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    def set_engineer_department(self, name, department: str):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            dep_id = None
+            if department:
+                cur.execute("SELECT id FROM departments WHERE name = ?", (department,))
+                row = cur.fetchone(); dep_id = row[0] if row else None
+            cur.execute("UPDATE engineers SET department_id = ? WHERE name = ?", (dep_id, name))
+            conn.commit(); conn.close(); return True
+        except Exception:
+            conn.close(); return False
+
+    # ---------------- Consolidated People helpers ----------------
+    def get_all_people_with_dept(self):
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                """
+                SELECT d.name AS name, COALESCE(dep.name,'') AS department, 'Designer' AS type
+                FROM designers d
+                LEFT JOIN departments dep ON dep.id = d.department_id
+                UNION ALL
+                SELECT e.name AS name, COALESCE(dep.name,'') AS department, 'Engineer' AS type
+                FROM engineers e
+                LEFT JOIN departments dep ON dep.id = e.department_id
+                ORDER BY name
+                """
+            )
+            rows = cur.fetchall()
+        except sqlite3.OperationalError:
+            cur.execute("SELECT name, '' as department, 'Designer' as type FROM designers")
+            drows = cur.fetchall()
+            cur.execute("SELECT name, '' as department, 'Engineer' as type FROM engineers")
+            erows = cur.fetchall(); rows = sorted(drows + erows, key=lambda r: r[0])
+        conn.close(); return rows
+
+    def get_all_people_with_dept_filtered(self, department: str|None):
+        if not department or department in ('<All>', 'All Departments'):
+            return self.get_all_people_with_dept()
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute(
+                """
+                SELECT d.name, COALESCE(dep.name,''), 'Designer'
+                FROM designers d
+                LEFT JOIN departments dep ON dep.id = d.department_id
+                WHERE dep.name = ?
+                UNION ALL
+                SELECT e.name, COALESCE(dep.name,''), 'Engineer'
+                FROM engineers e
+                LEFT JOIN departments dep ON dep.id = e.department_id
+                WHERE dep.name = ?
+                ORDER BY 1
+                """,
+                (department, department)
+            )
+            rows = cur.fetchall()
+        except sqlite3.OperationalError:
+            rows = []
+        conn.close(); return rows
+
+    def add_person(self, name: str, person_type: str, department: str = ""):
+        if (person_type or '').lower().startswith('des'):
+            return self.add_designer(name, department)
+        return self.add_engineer(name, department)
+
+    def delete_person(self, name: str, person_type: str):
+        if (person_type or '').lower().startswith('des'):
+            return self.delete_designer(name)
+        return self.delete_engineer(name)
+
+    def rename_person(self, old_name: str, new_name: str, person_type: str):
+        if (person_type or '').lower().startswith('des'):
+            return self.rename_designer(old_name, new_name)
+        return self.rename_engineer(old_name, new_name)
+
+    def set_person_department(self, name: str, person_type: str, department: str):
+        if (person_type or '').lower().startswith('des'):
+            return self.set_designer_department(name, department)
+        return self.set_engineer_department(name, department)
+
 class SettingsApp:
     def __init__(self, parent=None):
         self.settings_manager = SettingsManager()
+        try:
+            DatabaseManager(self.settings_manager.db_path)
+        except Exception:
+            pass
         self.admin_session_id = None  # Track admin session
         
         if parent:
@@ -326,7 +565,18 @@ class SettingsApp:
         else:
             self.root = tk.Tk()
             self.root.title("Settings - Drafting Tools")
-            self.root.geometry("800x600")
+        # Start maximized/fullscreen like other apps
+        try:
+            self.root.state('zoomed')
+        except Exception:
+            try:
+                self.root.attributes('-zoomed', True)
+            except Exception:
+                pass
+        try:
+            self.root.minsize(1000, 700)
+        except Exception:
+            pass
         
         self.create_widgets()
         self.load_data()
@@ -351,11 +601,16 @@ class SettingsApp:
         self.current_frame = ttk.Frame(self.notebook)
         self.notebook.add(self.current_frame, text="Current User")
         self.create_current_user_tab()
-        
+
         # Admin tab
         self.admin_frame = ttk.Frame(self.notebook)
         self.notebook.add(self.admin_frame, text="🔐 Admin")
         self.create_admin_tab()
+
+        # People tab (Unified)
+        self.people_frame = ttk.Frame(self.notebook)
+        self.notebook.add(self.people_frame, text="People")
+        self.create_people_tab()
     
     def create_users_tab(self):
         """Create users management tab"""
@@ -542,9 +797,297 @@ class SettingsApp:
         
         # Update user department combo
         self.user_dept_combo['values'] = dept_list
+        # Update add-person department combos to include all created departments
+        if hasattr(self, 'designers_dep_combo_add'):
+            self.designers_dep_combo_add['values'] = dept_list
+        if hasattr(self, 'engineers_dep_combo_add'):
+            self.engineers_dep_combo_add['values'] = dept_list
         
         # Update status
         self.update_status()
+
+        # Load unified people list
+        if hasattr(self, 'people_tree'):
+            self._reload_people_tree()
+
+    # ---------------- People Tab ----------------
+    def create_people_tab(self):
+        container = ttk.Frame(self.people_frame, padding=10)
+        container.pack(fill=tk.BOTH, expand=True)
+        container.columnconfigure(0, weight=1)
+
+        # Filter row
+        filt = ttk.Frame(container)
+        filt.pack(fill=tk.X)
+        ttk.Label(filt, text="Filter by Department:").pack(side=tk.LEFT)
+        self.people_filter_var = tk.StringVar(value='All Departments')
+        self.people_filter_combo = ttk.Combobox(filt, textvariable=self.people_filter_var, width=24, state='readonly')
+        dept_names = ['All Departments'] + [d[0] for d in self.settings_manager.get_departments()]
+        self.people_filter_combo['values'] = dept_names
+        self.people_filter_combo.pack(side=tk.LEFT, padx=(6,0))
+        self.people_filter_combo.bind('<<ComboboxSelected>>', lambda _e: self._reload_people_tree())
+
+        # Add row
+        add = ttk.Frame(container)
+        add.pack(fill=tk.X, pady=(6,6))
+        ttk.Label(add, text="Name:").pack(side=tk.LEFT)
+        self.person_name_var = tk.StringVar()
+        ttk.Entry(add, textvariable=self.person_name_var, width=22).pack(side=tk.LEFT, padx=(4,8))
+        ttk.Label(add, text="Type:").pack(side=tk.LEFT)
+        self.person_type_var = tk.StringVar(value='Designer')
+        self.person_type_combo = ttk.Combobox(add, textvariable=self.person_type_var, values=['Designer','Engineer'], width=12, state='readonly')
+        self.person_type_combo.pack(side=tk.LEFT, padx=(4,8))
+        ttk.Label(add, text="Department:").pack(side=tk.LEFT)
+        self.person_dep_var = tk.StringVar()
+        self.person_dep_combo = ttk.Combobox(add, textvariable=self.person_dep_var, width=18, state='readonly')
+        self.person_dep_combo['values'] = [d[0] for d in self.settings_manager.get_departments()]
+        self.person_dep_combo.pack(side=tk.LEFT, padx=(4,8))
+        ttk.Button(add, text="Add", command=self._on_add_person).pack(side=tk.LEFT)
+
+        # Tree
+        cols = ('name','type','department')
+        self.people_tree = ttk.Treeview(container, columns=cols, show='headings', height=16)
+        for c in cols:
+            self.people_tree.heading(c, text=c.capitalize())
+        self.people_tree.pack(fill=tk.BOTH, expand=True, pady=(6,6))
+
+        # Inline edits: name and department
+        def on_double_click(event):
+            item = self.people_tree.selection()
+            if not item:
+                return
+            col = self.people_tree.identify_column(event.x)
+            if col == '#1':
+                # edit name
+                x,y,w,h = self.people_tree.bbox(item[0], '#1')
+                current = self.people_tree.set(item[0], 'name'); ptype = self.people_tree.set(item[0], 'type')
+                e = ttk.Entry(self.people_tree); e.place(x=x,y=y,width=w,height=h); e.insert(0,current); e.focus_set()
+                def commit(_e=None):
+                    new_val = e.get().strip(); e.destroy()
+                    if new_val and new_val != current:
+                        self.settings_manager.rename_person(current, new_val, ptype); self._reload_people_tree()
+                e.bind('<Return>', commit); e.bind('<FocusOut>', lambda _e: e.destroy())
+            elif col == '#3':
+                # change department
+                x,y,w,h = self.people_tree.bbox(item[0], '#3')
+                current = self.people_tree.set(item[0], 'department'); name = self.people_tree.set(item[0], 'name'); ptype = self.people_tree.set(item[0], 'type')
+                cb = ttk.Combobox(self.people_tree, values=[d[0] for d in self.settings_manager.get_departments()], state='readonly')
+                cb.place(x=x,y=y,width=w,height=h)
+                if current:
+                    cb.set(current)
+                cb.focus_set()
+                def commit_dep(_e=None):
+                    val = cb.get().strip(); cb.destroy();
+                    if val:
+                        self.settings_manager.set_person_department(name, ptype, val); self._reload_people_tree()
+                cb.bind('<<ComboboxSelected>>', commit_dep); cb.bind('<FocusOut>', lambda _e: cb.destroy())
+        self.people_tree.bind('<Double-1>', on_double_click)
+
+        # Actions
+        actions = ttk.Frame(container)
+        actions.pack(fill=tk.X)
+        ttk.Button(actions, text='Delete Selected', command=self._on_delete_person).pack(side=tk.LEFT)
+
+    def _reload_people_tree(self):
+        dept = self.people_filter_var.get() if hasattr(self, 'people_filter_var') else 'All Departments'
+        rows = self.settings_manager.get_all_people_with_dept_filtered(dept)
+        for iid in self.people_tree.get_children():
+            self.people_tree.delete(iid)
+        for name, dep, ptype in rows:
+            self.people_tree.insert('', 'end', values=(name, ptype, dep))
+
+    def _on_add_person(self):
+        name = (self.person_name_var.get() or '').strip()
+        ptype = (self.person_type_var.get() or 'Designer').strip()
+        dep = (self.person_dep_var.get() or '').strip()
+        if not name:
+            messagebox.showerror('Error', 'Enter a name'); return
+        if not dep:
+            messagebox.showerror('Error', 'Choose a department'); return
+        if self.settings_manager.add_person(name, ptype, dep):
+            self.person_name_var.set(''); self.person_dep_var.set(''); self._reload_people_tree()
+        else:
+            messagebox.showerror('Error', 'Failed to add person (duplicate or DB error)')
+
+    def _on_delete_person(self):
+        sel = self.people_tree.selection()
+        if not sel:
+            return
+        name = self.people_tree.set(sel[0], 'name'); ptype = self.people_tree.set(sel[0], 'type')
+        if messagebox.askyesno('Delete', f"Delete {ptype.lower()} '{name}'?"):
+            if self.settings_manager.delete_person(name, ptype):
+                self._reload_people_tree()
+            else:
+                messagebox.showerror('Error', 'Failed to delete person')
+
+    def _build_people_panel(self, parent, kind='designer'):
+        add_frame = ttk.Frame(parent)
+        add_frame.pack(fill=tk.X)
+        ttk.Label(add_frame, text="Name:").pack(side=tk.LEFT)
+        var = tk.StringVar()
+        entry = ttk.Entry(add_frame, textvariable=var, width=24)
+        entry.pack(side=tk.LEFT, padx=(4,6))
+        # Department selector for add
+        ttk.Label(add_frame, text="Department:").pack(side=tk.LEFT, padx=(8,2))
+        dep_var = tk.StringVar()
+        dep_combo = ttk.Combobox(add_frame, textvariable=dep_var, width=18, state='readonly')
+        dep_names = [d[0] for d in self.settings_manager.get_departments()]
+        dep_combo['values'] = dep_names
+        dep_combo.pack(side=tk.LEFT)
+        if kind == 'designer':
+            ttk.Button(add_frame, text="Add", command=lambda: self._on_add_designer(var, dep_var)).pack(side=tk.LEFT, padx=(6,0))
+            self.designers_dep_combo_add = dep_combo
+        else:
+            ttk.Button(add_frame, text="Add", command=lambda: self._on_add_engineer(var, dep_var)).pack(side=tk.LEFT, padx=(6,0))
+            self.engineers_dep_combo_add = dep_combo
+
+        cols = ("name", "department")
+        tree = ttk.Treeview(parent, columns=cols, show='headings', height=12)
+        tree.heading('name', text='Name')
+        tree.heading('department', text='Department')
+        tree.pack(fill=tk.BOTH, expand=True, pady=(6,6))
+
+        # Assign Department controls
+        assign_frame = ttk.Frame(parent)
+        assign_frame.pack(fill=tk.X, pady=(0,6))
+        ttk.Label(assign_frame, text="Set Department for Selected:").pack(side=tk.LEFT)
+        set_dep_var = tk.StringVar()
+        set_dep_combo = ttk.Combobox(assign_frame, textvariable=set_dep_var, width=18, state='readonly')
+        set_dep_combo['values'] = [d[0] for d in self.settings_manager.get_departments()]
+        set_dep_combo.pack(side=tk.LEFT, padx=(4,6))
+        if kind == 'designer':
+            ttk.Button(assign_frame, text="Assign", command=lambda: self._on_assign_designer_department(tree, set_dep_var)).pack(side=tk.LEFT)
+            self.designers_dep_combo_assign = set_dep_combo
+        else:
+            ttk.Button(assign_frame, text="Assign", command=lambda: self._on_assign_engineer_department(tree, set_dep_var)).pack(side=tk.LEFT)
+            self.engineers_dep_combo_assign = set_dep_combo
+
+        btns = ttk.Frame(parent)
+        btns.pack(fill=tk.X)
+        if kind == 'designer':
+            self.designers_tree = tree
+            ttk.Button(btns, text="Delete Selected", command=self._on_delete_designer).pack(side=tk.LEFT)
+        else:
+            self.engineers_tree = tree
+            ttk.Button(btns, text="Delete Selected", command=self._on_delete_engineer).pack(side=tk.LEFT)
+
+        # Inline edit on double-click
+        def on_double_click(event):
+            item = tree.selection()
+            if not item:
+                return
+            col_idx = tree.identify_column(event.x)
+            if col_idx == '#1':
+                # Edit name
+                x, y, w, h = tree.bbox(item[0], '#1')
+                current = tree.set(item[0], 'name')
+                e = ttk.Entry(tree)
+                e.place(x=x, y=y, width=w, height=h)
+                e.insert(0, current)
+                e.focus_set()
+                def commit(_ev=None):
+                    new_val = e.get().strip(); e.destroy()
+                    if not new_val or new_val == current:
+                        return
+                    if kind == 'designer':
+                        self.settings_manager.rename_designer(current, new_val)
+                    else:
+                        self.settings_manager.rename_engineer(current, new_val)
+                    self.load_data()
+                e.bind('<Return>', commit)
+                e.bind('<FocusOut>', lambda _e: e.destroy())
+            elif col_idx == '#2':
+                # Change department via combobox overlay
+                x, y, w, h = tree.bbox(item[0], '#2')
+                current_name = tree.set(item[0], 'name')
+                current_dep = tree.set(item[0], 'department')
+                cb = ttk.Combobox(tree, values=[d[0] for d in self.settings_manager.get_departments()], state='readonly')
+                cb.place(x=x, y=y, width=w, height=h)
+                if current_dep:
+                    cb.set(current_dep)
+                cb.focus_set()
+                def commit_dep(_ev=None):
+                    val = cb.get().strip(); cb.destroy()
+                    if kind == 'designer':
+                        self.settings_manager.set_designer_department(current_name, val)
+                    else:
+                        self.settings_manager.set_engineer_department(current_name, val)
+                    self.load_data()
+                cb.bind('<<ComboboxSelected>>', commit_dep)
+                cb.bind('<FocusOut>', lambda _e: cb.destroy())
+        tree.bind('<Double-1>', on_double_click)
+
+    def _on_add_designer(self, var, dep_var):
+        name = (var.get() or '').strip()
+        if not name:
+            return
+        dep = (dep_var.get() or '').strip()
+        if self.settings_manager.add_designer(name, dep):
+            var.set(''); dep_var.set(''); self.load_data()
+        else:
+            messagebox.showerror("Error", "Failed to add designer (duplicate or DB error)")
+
+    def _on_delete_designer(self):
+        sel = self.designers_tree.selection()
+        if not sel:
+            return
+        name = self.designers_tree.set(sel[0], 'name')
+        if messagebox.askyesno("Delete", f"Delete designer '{name}'?"):
+            if self.settings_manager.delete_designer(name):
+                self.load_data()
+            else:
+                messagebox.showerror("Error", "Failed to delete designer")
+
+    def _on_add_engineer(self, var, dep_var):
+        name = (var.get() or '').strip()
+        if not name:
+            return
+        dep = (dep_var.get() or '').strip()
+        if self.settings_manager.add_engineer(name, dep):
+            var.set(''); dep_var.set(''); self.load_data()
+        else:
+            messagebox.showerror("Error", "Failed to add engineer (duplicate or DB error)")
+
+    def _on_delete_engineer(self):
+        sel = self.engineers_tree.selection()
+        if not sel:
+            return
+        name = self.engineers_tree.set(sel[0], 'name')
+        if messagebox.askyesno("Delete", f"Delete engineer '{name}'?"):
+            if self.settings_manager.delete_engineer(name):
+                self.load_data()
+            else:
+                messagebox.showerror("Error", "Failed to delete engineer")
+
+    def _on_assign_designer_department(self, tree, dep_var):
+        sel = tree.selection()
+        if not sel:
+            messagebox.showinfo("Select", "Select a designer first.")
+            return
+        name = tree.set(sel[0], 'name')
+        dep = (dep_var.get() or '').strip()
+        if not dep:
+            messagebox.showerror("Department", "Choose a department.")
+            return
+        if self.settings_manager.set_designer_department(name, dep):
+            self.load_data()
+        else:
+            messagebox.showerror("Error", "Failed to assign department")
+
+    def _on_assign_engineer_department(self, tree, dep_var):
+        sel = tree.selection()
+        if not sel:
+            messagebox.showinfo("Select", "Select an engineer first.")
+            return
+        name = tree.set(sel[0], 'name')
+        dep = (dep_var.get() or '').strip()
+        if not dep:
+            messagebox.showerror("Department", "Choose a department.")
+            return
+        if self.settings_manager.set_engineer_department(name, dep):
+            self.load_data()
+        else:
+            messagebox.showerror("Error", "Failed to assign department")
     
     def add_user(self):
         """Add a new user"""

@@ -14,6 +14,11 @@ from datetime import datetime, timedelta
 import os
 
 from database_setup import DatabaseManager
+from duration_utils import (
+    parse_duration_to_minutes,
+    format_minutes_compact,
+    ceil_minutes_to_business_days,
+)
 from db_utils import get_connection
 try:
     from app_nav import add_app_bar
@@ -90,6 +95,7 @@ class ProjectWorkflowApp:
         ttk.Button(toolbar, text="Apply Standard to Project", command=self._apply_template_to_current).pack(side=tk.LEFT)
         ttk.Button(toolbar, text="Sync Template Tasks", command=self._sync_template_tasks_to_current).pack(side=tk.LEFT, padx=(6, 0))
         ttk.Button(toolbar, text="Recompute Due Dates", command=self._recompute_due_dates_for_current).pack(side=tk.LEFT, padx=(6, 0))
+        ttk.Button(toolbar, text="Refresh People", command=self._render_project_steps).pack(side=tk.LEFT, padx=(6, 0))
         self.current_lbl = ttk.Label(toolbar, text="No project selected", font=('Arial', 10, 'italic'))
         self.current_lbl.pack(side=tk.LEFT, padx=(12, 0))
 
@@ -121,7 +127,7 @@ class ProjectWorkflowApp:
         pw.add(right, weight=2)
 
         # Steps tree
-        cols = ("Order", "Department", "Group", "Title", "Duration (days)")
+        cols = ("Order", "Department", "Group", "Title", "Duration (m/h/d/w)")
         self.template_tree = ttk.Treeview(left, columns=cols, show='headings', height=18)
         for c in cols:
             self.template_tree.heading(c, text=c)
@@ -231,7 +237,7 @@ class ProjectWorkflowApp:
                        COALESCE(start_flag,0), COALESCE(start_ts,''),
                        COALESCE(completed_flag,0), COALESCE(completed_ts,''),
                        COALESCE(transfer_to_name,''), COALESCE(received_from_name,''),
-                       COALESCE(planned_due_date,''), COALESCE(actual_duration_days, NULL)
+                       COALESCE(planned_due_date,''), COALESCE(actual_duration_minutes, NULL)
                 FROM project_workflow_steps
                 WHERE project_id = ?
                 ORDER BY order_index
@@ -291,7 +297,7 @@ class ProjectWorkflowApp:
             from_cb.bind('<<ComboboxSelected>>', lambda _e, _sid=sid, _v=from_var: self._on_step_received(_sid, _v))
 
             ttk.Label(box, text=f"Due: {due}").grid(row=8, column=0, columnspan=2, sticky='w')
-            ttk.Label(box, text=f"Duration (days): {adur if adur is not None else ''}").grid(row=9, column=0, columnspan=2, sticky='w')
+            ttk.Label(box, text=f"Duration: {format_minutes_compact(adur) if adur is not None else ''}").grid(row=9, column=0, columnspan=2, sticky='w')
 
             # Tasks (per-project checklist for this step)
             tasks = self._load_step_tasks(sid)
@@ -341,23 +347,27 @@ class ProjectWorkflowApp:
             start_ts = row[1]
             if var.get():
                 now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                actual_dur = None
+                actual_dur_min = None
                 try:
                     if start_ts:
                         sdt = datetime.strptime(start_ts, "%Y-%m-%d %H:%M:%S")
-                        actual_dur = (datetime.now() - sdt).days
+                        delta = (datetime.now() - sdt)
+                        actual_dur_min = int(delta.total_seconds() // 60)
                 except Exception:
-                    actual_dur = None
+                    actual_dur_min = None
+                # Keep day-level for legacy column; round to nearest day
+                actual_dur_days = int(round((actual_dur_min or 0) / (24 * 60))) if actual_dur_min is not None else None
                 c.execute(
                     """
                     UPDATE project_workflow_steps
                     SET completed_flag = 1,
                         completed_ts = COALESCE(completed_ts, ?),
                         actual_completed_date = COALESCE(actual_completed_date, DATE(?)),
-                        actual_duration_days = COALESCE(actual_duration_days, ?)
+                        actual_duration_days = COALESCE(actual_duration_days, ?),
+                        actual_duration_minutes = COALESCE(actual_duration_minutes, ?)
                     WHERE id = ? AND project_id = ?
                     """,
-                    (now, now, actual_dur, step_id, self.current_project_id),
+                    (now, now, actual_dur_days, actual_dur_min, step_id, self.current_project_id),
                 )
             else:
                 c.execute("UPDATE project_workflow_steps SET completed_flag = 0 WHERE id = ? AND project_id = ?", (step_id, self.current_project_id))
@@ -445,7 +455,7 @@ class ProjectWorkflowApp:
             c.execute(
                 """
                 SELECT id, order_index, start_ts,
-                       (SELECT planned_duration_days FROM workflow_template_steps w WHERE w.id = pws.template_step_id)
+                       (SELECT planned_duration_minutes FROM workflow_template_steps w WHERE w.id = pws.template_step_id)
                 FROM project_workflow_steps pws
                 WHERE project_id = ?
                 ORDER BY order_index
@@ -467,9 +477,10 @@ class ProjectWorkflowApp:
 
             next_start = datetime.strptime(proj_due, "%Y-%m-%d").date()
             updates = []
-            for sid, order_i, start_ts, dur in reversed(steps):
+            for sid, order_i, start_ts, dur_minutes in reversed(steps):
                 planned_due = next_start
-                planned_start = subtract_business_days(planned_due, dur or 0)
+                days_to_subtract = ceil_minutes_to_business_days(dur_minutes or 0)
+                planned_start = subtract_business_days(planned_due, days_to_subtract)
                 if start_ts:
                     try:
                         next_start = datetime.strptime(start_ts, "%Y-%m-%d %H:%M:%S").date()
@@ -498,10 +509,14 @@ class ProjectWorkflowApp:
             return
         tid = t[0]
         c = self.conn.cursor()
-        c.execute("SELECT order_index, department, COALESCE(group_name,''), title, COALESCE(planned_duration_days,1) FROM workflow_template_steps WHERE template_id = ? ORDER BY order_index", (tid,))
+        c.execute(
+            "SELECT order_index, department, COALESCE(group_name,''), title, planned_duration_minutes, planned_duration_days FROM workflow_template_steps WHERE template_id = ? ORDER BY order_index",
+            (tid,),
+        )
         rows = c.fetchall()
-        for i, (order_i, dept, group, title, dur) in enumerate(rows, start=1):
-            self.template_tree.insert('', 'end', values=(order_i, dept, group, title, dur))
+        for i, (order_i, dept, group, title, dur_min, dur_days) in enumerate(rows, start=1):
+            minutes = dur_min if dur_min is not None else (int(dur_days or 1) * 1440)
+            self.template_tree.insert('', 'end', values=(order_i, dept, group, title, format_minutes_compact(minutes)))
 
     def _tpl_add(self, before=True):
         sel = self.template_tree.selection()
@@ -567,13 +582,19 @@ class ProjectWorkflowApp:
             # Insert steps for new template
             for i, iid in enumerate(self.template_tree.get_children(), start=1):
                 v = self.template_tree.item(iid, 'values')
-                order_i = int(v[0]); dept = str(v[1]); group = str(v[2]); title = str(v[3]); dur = int(v[4]) if str(v[4]).isdigit() else 1
+                order_i = int(v[0]); dept = str(v[1]); group = str(v[2]); title = str(v[3]); raw = str(v[4])
+                try:
+                    dur_min = parse_duration_to_minutes(raw)
+                except Exception:
+                    dur_min = 1440  # default 1 day
+                # Keep legacy days column roughly in-sync (ceil to at least 1)
+                dur_days = max(1, int((dur_min + 1440 - 1) // 1440))
                 c.execute(
                     """
-                    INSERT INTO workflow_template_steps (template_id, order_index, department, group_name, title, planned_duration_days)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO workflow_template_steps (template_id, order_index, department, group_name, title, planned_duration_days, planned_duration_minutes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """,
-                    (new_tid, order_i, dept, group, title, dur),
+                    (new_tid, order_i, dept, group, title, dur_days, dur_min),
                 )
             # Copy tasks by matching order_index between old and new templates
             if old_tid:

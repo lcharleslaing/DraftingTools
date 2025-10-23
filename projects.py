@@ -13,6 +13,11 @@ from scroll_utils import bind_mousewheel_to_treeview
 from notes_utils import open_add_note_dialog
 from app_nav import add_app_bar
 from help_utils import add_help_button
+from duration_utils import (
+    parse_duration_to_minutes,
+    format_minutes_compact,
+    ceil_minutes_to_business_days,
+)
 
 class CollapsibleFrame(ttk.Frame):
     """A collapsible frame widget"""
@@ -1494,8 +1499,10 @@ class ProjectsApp:
             due_lbl.grid(row=r, column=1, sticky=tk.W)
             r += 1
 
-            ttk.Label(step_frame, text="Duration (days):").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
-            dur_lbl = ttk.Label(step_frame, text=(str(step.get('actual_duration_days') or step.get('planned_duration_days') or '') ))
+            ttk.Label(step_frame, text="Duration:").grid(row=r, column=0, sticky=tk.W, padx=(2, 6))
+            _adur_min = step.get('actual_duration_minutes')
+            _pdur_min = step.get('planned_duration_minutes') or (int(step.get('planned_duration_days') or 0) * 1440)
+            dur_lbl = ttk.Label(step_frame, text=format_minutes_compact(_adur_min if _adur_min is not None else _pdur_min))
             dur_lbl.grid(row=r, column=1, sticky=tk.W)
 
             self.workflow_row_widgets[sid] = {
@@ -1546,8 +1553,8 @@ class ProjectsApp:
                     SELECT pws.id, pws.order_index, pws.department, pws.group_name, pws.title,
                            pws.start_flag, pws.start_ts, pws.completed_flag, pws.completed_ts,
                            pws.transfer_to_name, pws.received_from_name, pws.transfer_to_ts, pws.received_from_ts,
-                           pws.planned_due_date, pws.actual_completed_date, pws.actual_duration_days,
-                           wts.planned_duration_days
+                           pws.planned_due_date, pws.actual_completed_date, pws.actual_duration_days, pws.actual_duration_minutes,
+                           wts.planned_duration_days, wts.planned_duration_minutes
                     FROM project_workflow_steps pws
                     LEFT JOIN workflow_template_steps wts ON pws.template_step_id = wts.id
                     WHERE pws.project_id = ?
@@ -1577,13 +1584,13 @@ class ProjectsApp:
             steps = []
             for r in rows:
                 # Support both shapes depending on DB schema
-                if len(r) >= 17:
+                if len(r) >= 19:
                     steps.append({
                         'id': r[0], 'order_index': r[1], 'department': r[2], 'group_name': r[3], 'title': r[4],
                         'start_flag': r[5], 'start_ts': r[6], 'completed_flag': r[7], 'completed_ts': r[8],
                         'transfer_to_name': r[9], 'received_from_name': r[10], 'transfer_to_ts': r[11], 'received_from_ts': r[12],
-                        'planned_due_date': r[13], 'actual_completed_date': r[14], 'actual_duration_days': r[15],
-                        'planned_duration_days': r[16]
+                        'planned_due_date': r[13], 'actual_completed_date': r[14], 'actual_duration_days': r[15], 'actual_duration_minutes': r[16],
+                        'planned_duration_days': r[17], 'planned_duration_minutes': r[18]
                     })
                 else:
                     steps.append({
@@ -1647,23 +1654,26 @@ class ProjectsApp:
                 # Compute actual duration if start exists
                 cur.execute("SELECT start_ts FROM project_workflow_steps WHERE id = ? AND project_id = ?", (step_id, step_pid))
                 row = cur.fetchone()
-                actual_dur = None
+                actual_dur_min = None
                 try:
                     if row and row[0]:
                         sdt = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
-                        actual_dur = (datetime.now() - sdt).days
+                        delta = (datetime.now() - sdt)
+                        actual_dur_min = int(delta.total_seconds() // 60)
                 except Exception:
-                    actual_dur = None
+                    actual_dur_min = None
+                actual_dur_days = int(round((actual_dur_min or 0) / (24 * 60))) if actual_dur_min is not None else None
                 cur.execute(
                     """
                     UPDATE project_workflow_steps
                     SET completed_flag = 1,
                         completed_ts = COALESCE(completed_ts, ?),
                         actual_completed_date = COALESCE(actual_completed_date, DATE(?)),
-                        actual_duration_days = COALESCE(actual_duration_days, ?)
+                        actual_duration_days = COALESCE(actual_duration_days, ?),
+                        actual_duration_minutes = COALESCE(actual_duration_minutes, ?)
                     WHERE id = ? AND project_id = ?
                     """,
-                    (now, now, actual_dur, step_id, step_pid)
+                    (now, now, actual_dur_days, actual_dur_min, step_id, step_pid)
                 )
             else:
                 cur.execute("UPDATE project_workflow_steps SET completed_flag = 0 WHERE id = ? AND project_id = ?", (step_id, step_pid))
@@ -1740,12 +1750,13 @@ class ProjectsApp:
             cur.execute(
                 """
                 SELECT pws.id, pws.order_index, pws.start_ts,
-                       wts.planned_duration_days
+                       wts.planned_duration_minutes
                 FROM project_workflow_steps pws
                 LEFT JOIN workflow_template_steps wts ON pws.template_step_id = wts.id
                 WHERE pws.project_id = ?
                 ORDER BY pws.order_index
-                """, (project_id,)
+                """,
+                (project_id,),
             )
             steps = cur.fetchall()
             if not steps:
@@ -1768,11 +1779,12 @@ class ProjectsApp:
             # Build list for reverse calc
             steps_rev = list(reversed(steps))
             updates = []
-            for sid, order_i, start_ts, dur_days in steps_rev:
+            for sid, order_i, start_ts, dur_min in steps_rev:
                 # If next step has actual start, use that as this due
                 planned_due = next_start_planned
                 # planned start based on duration
-                planned_start = subtract_business_days(planned_due, dur_days or 0)
+                days_to_subtract = ceil_minutes_to_business_days(dur_min or 0)
+                planned_start = subtract_business_days(planned_due, days_to_subtract)
                 # For the next iteration, determine next_start_planned:
                 # If this step has actual start, that's the next planned for previous step; else planned_start
                 if start_ts:
@@ -1807,7 +1819,7 @@ class ProjectsApp:
         ttk.Label(main, text="Standard Workflow (Active Template)", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky=tk.W)
 
         # Steps tree
-        cols = ("Order", "Department", "Group", "Title", "Duration (days)")
+        cols = ("Order", "Department", "Group", "Title", "Duration (m/h/d/w)")
         tree = ttk.Treeview(main, columns=cols, show='headings', height=16)
         for c in cols:
             tree.heading(c, text=c)
@@ -1830,7 +1842,10 @@ class ProjectsApp:
         # Load active template steps
         steps = self._wf_load_active_template_steps()
         for i, s in enumerate(steps):
-            tree.insert('', 'end', values=(i+1, s['department'], s['group_name'] or '', s['title'], s['planned_duration_days']))
+            minutes = s.get('planned_duration_minutes')
+            if minutes is None:
+                minutes = int(s.get('planned_duration_days') or 1) * 1440
+            tree.insert('', 'end', values=(i+1, s['department'], s['group_name'] or '', s['title'], format_minutes_compact(minutes)))
 
         # Enable in-place edit on double-click
         def on_double_click(event):
@@ -1851,14 +1866,17 @@ class ProjectsApp:
             if not t:
                 conn.close(); return []
             tid = t[0]
-            cur.execute("""
-                SELECT id, order_index, department, group_name, title, planned_duration_days
+            cur.execute(
+                """
+                SELECT id, order_index, department, group_name, title, planned_duration_days, planned_duration_minutes
                 FROM workflow_template_steps WHERE template_id = ? ORDER BY order_index
-            """, (tid,))
+                """,
+                (tid,),
+            )
             rows = cur.fetchall(); conn.close()
             return [
                 {
-                    'id': r[0], 'order_index': r[1], 'department': r[2], 'group_name': r[3], 'title': r[4], 'planned_duration_days': r[5]
+                    'id': r[0], 'order_index': r[1], 'department': r[2], 'group_name': r[3], 'title': r[4], 'planned_duration_days': r[5], 'planned_duration_minutes': r[6]
                 } for r in rows
             ]
         except Exception as e:
@@ -1871,7 +1889,7 @@ class ProjectsApp:
         if sel:
             idx = tree.index(sel[0])
             insert_index = idx if before else idx + 1
-        vals = (insert_index+1, "Drafting", "", "New Step", 1)
+        vals = (insert_index+1, "Drafting", "", "New Step", "1d")
         tree.insert('', insert_index, values=vals)
         # Re-number
         for i, iid in enumerate(tree.get_children()):
@@ -1930,14 +1948,19 @@ class ProjectsApp:
             # Insert steps
             for i, iid in enumerate(tree.get_children()):
                 v = tree.item(iid, 'values')
-                order_i = int(v[0]); dept = str(v[1]); group = str(v[2]); title = str(v[3]); dur = int(v[4]) if str(v[4]).isdigit() else 1
+                order_i = int(v[0]); dept = str(v[1]); group = str(v[2]); title = str(v[3]); raw = str(v[4])
+                try:
+                    dur_min = parse_duration_to_minutes(raw)
+                except Exception:
+                    dur_min = 1440  # default 1d
+                dur_days = max(1, int((dur_min + 1440 - 1) // 1440))
                 cur.execute(
                     """
                     INSERT INTO workflow_template_steps
-                    (template_id, order_index, department, group_name, title, planned_duration_days)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    (template_id, order_index, department, group_name, title, planned_duration_days, planned_duration_minutes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                     """,
-                    (new_tid, order_i, dept, group, title, dur)
+                    (new_tid, order_i, dept, group, title, dur_days, dur_min)
                 )
             conn.commit(); conn.close()
             messagebox.showinfo("Saved", f"Activated Standard v{next_ver}.")
@@ -3464,6 +3487,7 @@ class ProjectsApp:
             ("Clean & Fix Data", self.clean_duplicates),
             ("Reset Database", self.reset_database),
             ("Refresh", self.load_projects),
+            ("Refresh People", self.load_dropdown_data),
             ("Export JSON", self.export_data),
             ("Import JSON", self.import_data)
         ]

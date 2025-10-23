@@ -151,6 +151,17 @@ class DatabaseManager:
         self.insert_default_data(cursor)
         
         # Add missing columns if they don't exist (for existing databases)
+        # People department links (nullable)
+        try:
+            cursor.execute("ALTER TABLE designers ADD COLUMN department_id INTEGER")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE engineers ADD COLUMN department_id INTEGER")
+        except sqlite3.OperationalError:
+            pass
+        
+        
         try:
             cursor.execute("ALTER TABLE redline_updates ADD COLUMN update_cycle INTEGER DEFAULT 1")
         except sqlite3.OperationalError:
@@ -283,6 +294,7 @@ class DatabaseManager:
                 group_name TEXT,
                 title TEXT NOT NULL,
                 planned_duration_days INTEGER NOT NULL DEFAULT 1,
+                planned_duration_minutes INTEGER,
                 FOREIGN KEY (template_id) REFERENCES workflow_templates(id) ON DELETE CASCADE
             )
         ''')
@@ -308,6 +320,7 @@ class DatabaseManager:
                 planned_due_date TEXT,
                 actual_completed_date TEXT,
                 actual_duration_days INTEGER,
+                actual_duration_minutes INTEGER,
                 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
                 FOREIGN KEY (template_id) REFERENCES workflow_templates(id) ON DELETE SET NULL,
                 FOREIGN KEY (template_step_id) REFERENCES workflow_template_steps(id) ON DELETE SET NULL
@@ -322,6 +335,23 @@ class DatabaseManager:
         try:
             cursor.execute("ALTER TABLE project_workflow_steps ADD COLUMN received_from_ts TEXT")
         except sqlite3.OperationalError:
+            pass
+        # Add new duration columns if they don't exist
+        try:
+            cursor.execute("ALTER TABLE workflow_template_steps ADD COLUMN planned_duration_minutes INTEGER")
+        except sqlite3.OperationalError:
+            pass
+        try:
+            cursor.execute("ALTER TABLE project_workflow_steps ADD COLUMN actual_duration_minutes INTEGER")
+        except sqlite3.OperationalError:
+            pass
+
+        # Backfill planned_duration_minutes from days when NULL
+        try:
+            cursor.execute(
+                "UPDATE workflow_template_steps SET planned_duration_minutes = planned_duration_days * 1440 WHERE planned_duration_minutes IS NULL"
+            )
+        except Exception:
             pass
 
         try:
