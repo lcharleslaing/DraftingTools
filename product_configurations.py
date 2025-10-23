@@ -105,6 +105,7 @@ class ProductConfigurationsApp:
         # Right-click: add note
         self.project_ctx = tk.Menu(project_frame, tearoff=0)
         self.project_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.project_ctx.add_command(label="Open in Job Notes", command=self.open_job_in_job_notes)
         self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
         # Persist column widths
         bind_tree_column_persistence(self.project_tree, 'product_configurations.project_tree', self.root)
@@ -245,12 +246,21 @@ class ProductConfigurationsApp:
             cursor.execute("""
                 SELECT 
                     CASE 
-                        WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
-                             OR rd.is_completed = 1
-                             OR (p.completion_date IS NOT NULL AND p.completion_date != '')
-                        THEN 1 ELSE 0 END
+                        WHEN (
+                            COALESCE(
+                                p.released_to_dee,
+                                (SELECT release_date FROM release_to_dee rd WHERE rd.project_id = p.id ORDER BY rd.id DESC LIMIT 1)
+                            ) IS NOT NULL
+                            AND COALESCE(
+                                p.released_to_dee,
+                                (SELECT release_date FROM release_to_dee rd2 WHERE rd2.project_id = p.id ORDER BY rd2.id DESC LIMIT 1)
+                            ) != ''
+                        )
+                        OR ((SELECT is_completed FROM release_to_dee rd3 WHERE rd3.project_id = p.id ORDER BY rd3.id DESC LIMIT 1) = 1)
+                        OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                        THEN 1 ELSE 0 
+                    END
                 FROM projects p
-                LEFT JOIN release_to_dee rd ON rd.project_id = p.id
                 WHERE p.job_number = ?
             """, (job_number,))
             row = cursor.fetchone()
@@ -283,12 +293,28 @@ class ProductConfigurationsApp:
 
     def add_note_for_selected_job(self):
         sel = self.project_tree.selection()
-        if not sel:
-            messagebox.showwarning("No Selection", "Please select a job first.")
-            return
-        vals = self.project_tree.item(sel[0], 'values')
-        job_number = vals[0]
-        open_add_note_dialog(self.root, str(job_number))
+        job_number = None
+        if sel:
+            vals = self.project_tree.item(sel[0], 'values')
+            if vals:
+                job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number) if job_number else None)
+
+    def open_job_in_job_notes(self):
+        try:
+            import sys, os, subprocess
+            sel = self.project_tree.selection()
+            job_arg = []
+            if sel:
+                vals = self.project_tree.item(sel[0], 'values')
+                if vals:
+                    job_arg = ["--job", str(vals[0])]
+            if os.path.exists('job_notes.py'):
+                subprocess.Popen([sys.executable, 'job_notes.py'] + job_arg)
+            else:
+                messagebox.showerror("Error", "job_notes.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open Job Notes: {e}")
     
     def setup_autosave(self):
         """Setup auto-save for all configuration fields"""

@@ -279,6 +279,11 @@ class DashboardApp:
                               "Capture, triage, and track software\nimprovement actions with screenshots",
                               self.launch_suggestions)
 
+        # Job Notes
+        self.create_app_tile(parent, 4, 1, "🗒️", "Job Notes",
+                              "Browse all jobs and edit notes\nwith full CRUD",
+                              self.launch_job_notes)
+
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a simple button with formatted title"""
         # Create a frame to hold the button content
@@ -474,6 +479,18 @@ class DashboardApp:
                 messagebox.showerror("Error", "d365_import_formatter.py not found in current directory")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch D365 Import Formatter:\n{str(e)}")
+
+    def launch_job_notes(self):
+        """Launch the Job Notes application"""
+        try:
+            if os.path.exists('job_notes.py'):
+                process = subprocess.Popen([sys.executable, 'job_notes.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "job_notes.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to launch Job Notes:\n{str(e)}")
     
     def launch_drafting_checklist(self):
         """Launch the Drafting Drawing Checklist application"""

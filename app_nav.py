@@ -14,6 +14,7 @@ def add_app_bar(root, current_app: str = None) -> tk.Frame:
     apps = [
         ('Dashboard', 'dashboard'),
         ('Projects', 'projects'),
+        ('Job Notes', 'job_notes'),
         ('Configurations', 'product_configurations'),
         ('Print Package', 'print_package'),
         ('D365 Builder', 'd365_builder'),

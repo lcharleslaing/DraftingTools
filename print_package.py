@@ -134,6 +134,7 @@ class PrintPackageApp:
         # Right-click context menu for notes
         self.project_context = tk.Menu(project_frame, tearoff=0)
         self.project_context.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.project_context.add_command(label="Open in Job Notes", command=self.open_job_in_job_notes)
         self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
         # Persist column widths
         bind_tree_column_persistence(self.project_tree, 'print_package.project_tree', self.root)
@@ -349,19 +350,30 @@ class PrintPackageApp:
             drawings_table_exists = cursor.fetchone() is not None
             
             if drawings_table_exists:
-                # Get all projects with drawing counts and completion state
+                # Get all projects with drawing counts and completion state (robust against duplicate joins)
                 cursor.execute("""
-                    SELECT p.job_number, p.customer_name, 
-                           COALESCE(COUNT(d.id), 0) as drawing_count,
-                           CASE 
-                               WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
-                                    OR rd.is_completed = 1
-                                    OR (p.completion_date IS NOT NULL AND p.completion_date != '')
-                               THEN 1 ELSE 0 END AS is_completed
+                    SELECT 
+                        p.job_number,
+                        p.customer_name,
+                        COALESCE((SELECT COUNT(*) FROM drawings d WHERE d.job_number = p.job_number), 0) AS drawing_count,
+                        CASE 
+                            WHEN (
+                                COALESCE(
+                                    p.released_to_dee,
+                                    (SELECT release_date FROM release_to_dee rd WHERE rd.project_id = p.id ORDER BY rd.id DESC LIMIT 1)
+                                ) IS NOT NULL
+                                AND COALESCE(
+                                    p.released_to_dee,
+                                    (SELECT release_date FROM release_to_dee rd2 WHERE rd2.project_id = p.id ORDER BY rd2.id DESC LIMIT 1)
+                                ) != ''
+                            )
+                            OR (
+                                (SELECT is_completed FROM release_to_dee rd3 WHERE rd3.project_id = p.id ORDER BY rd3.id DESC LIMIT 1) = 1
+                            )
+                            OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                            THEN 1 ELSE 0 
+                        END AS is_completed
                     FROM projects p
-                    LEFT JOIN drawings d ON p.job_number = d.job_number
-                    LEFT JOIN release_to_dee rd ON rd.project_id = p.id
-                    GROUP BY p.job_number, p.customer_name
                     ORDER BY p.job_number
                 """)
             else:
@@ -420,17 +432,26 @@ class PrintPackageApp:
             
             if drawings_table_exists:
                 cursor.execute("""
-                    SELECT p.job_number, p.customer_name, 
-                           COALESCE(COUNT(d.id), 0) as drawing_count,
-                           CASE 
-                               WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
-                                    OR rd.is_completed = 1
-                                    OR (p.completion_date IS NOT NULL AND p.completion_date != '')
-                               THEN 1 ELSE 0 END AS is_completed
+                    SELECT 
+                        p.job_number,
+                        p.customer_name,
+                        COALESCE((SELECT COUNT(*) FROM drawings d WHERE d.job_number = p.job_number), 0) AS drawing_count,
+                        CASE 
+                            WHEN (
+                                COALESCE(
+                                    p.released_to_dee,
+                                    (SELECT release_date FROM release_to_dee rd WHERE rd.project_id = p.id ORDER BY rd.id DESC LIMIT 1)
+                                ) IS NOT NULL
+                                AND COALESCE(
+                                    p.released_to_dee,
+                                    (SELECT release_date FROM release_to_dee rd2 WHERE rd2.project_id = p.id ORDER BY rd2.id DESC LIMIT 1)
+                                ) != ''
+                            )
+                            OR ((SELECT is_completed FROM release_to_dee rd3 WHERE rd3.project_id = p.id ORDER BY rd3.id DESC LIMIT 1) = 1)
+                            OR (p.completion_date IS NOT NULL AND p.completion_date != '')
+                            THEN 1 ELSE 0 
+                        END AS is_completed
                     FROM projects p
-                    LEFT JOIN drawings d ON p.job_number = d.job_number
-                    LEFT JOIN release_to_dee rd ON rd.project_id = p.id
-                    GROUP BY p.job_number, p.customer_name
                     ORDER BY p.job_number
                 """)
             else:
@@ -500,12 +521,27 @@ class PrintPackageApp:
 
     def add_note_for_selected_job(self):
         sel = self.project_tree.selection()
-        if not sel:
-            messagebox.showwarning("No Selection", "Please select a job first.")
-            return
-        vals = self.project_tree.item(sel[0], 'values')
-        job_number = vals[0]
-        open_add_note_dialog(self.root, str(job_number))
+        job_number = None
+        if sel:
+            vals = self.project_tree.item(sel[0], 'values')
+            if vals:
+                job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number) if job_number else None)
+
+    def open_job_in_job_notes(self):
+        try:
+            sel = self.project_tree.selection()
+            job_arg = []
+            if sel:
+                vals = self.project_tree.item(sel[0], 'values')
+                if vals:
+                    job_arg = ["--job", str(vals[0])]
+            if os.path.exists('job_notes.py'):
+                subprocess.Popen([sys.executable, 'job_notes.py'] + job_arg)
+            else:
+                messagebox.showerror("Error", "job_notes.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open Job Notes: {e}")
     
     def load_current_drawings(self):
         """Load drawings for the current project"""

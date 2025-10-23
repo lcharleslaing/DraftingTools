@@ -7,6 +7,7 @@ APP_MAP = {
     'dashboard': {'script': 'dashboard.py', 'title': 'Drafting Tools Dashboard'},
     # Title must match the actual window title set in the app
     'projects': {'script': 'projects.py', 'title': 'Project Management - Drafting Tools'},
+    'job_notes': {'script': 'job_notes.py', 'title': 'Job Notes - Drafting Tools'},
     'product_configurations': {'script': 'product_configurations.py', 'title': 'Product Configurations - Heater, Tank & Pump'},
     'print_package': {'script': 'print_package.py', 'title': 'Print Package Management - Drafting Tools'},
     'd365_builder': {'script': 'd365_import_formatter.py', 'title': 'D365 Builder'},

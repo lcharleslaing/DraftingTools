@@ -386,9 +386,10 @@ class App(tk.Tk):
         self.projects_tree.pack(fill="y", expand=False)
         bind_tree_column_persistence(self.projects_tree, 'd365.projects_tree', self)
         self.projects_tree.bind("<<TreeviewSelect>>", self.on_select_project)
-        # Right-click: add note
+        # Right-click: add note and open in Job Notes
         self.projects_ctx = tk.Menu(parent, tearoff=0)
         self.projects_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.projects_ctx.add_command(label="Open in Job Notes", command=self.open_job_in_job_notes)
         self.projects_tree.bind('<Button-3>', self._on_projects_tree_right_click)
         try:
             add_help_button(parent, 'Projects Pane', 'Select a job on the left to prefill report context.').pack(anchor='ne')
@@ -445,12 +446,28 @@ class App(tk.Tk):
 
     def add_note_for_selected_job(self):
         sel = self.projects_tree.selection()
-        if not sel:
-            messagebox.showwarning("No Selection", "Please select a job first.")
-            return
-        vals = self.projects_tree.item(sel[0], 'values')
-        job_number = vals[1]  # second column is job_no
-        open_add_note_dialog(self, str(job_number))
+        job_number = None
+        if sel:
+            vals = self.projects_tree.item(sel[0], 'values')
+            job_number = vals[1]  # second column is job_no
+        # If no selection, dialog will prompt to create Documentation Only job
+        open_add_note_dialog(self, str(job_number) if job_number else None)
+
+    def open_job_in_job_notes(self):
+        try:
+            import sys, os, subprocess
+            sel = self.projects_tree.selection()
+            job_arg = []
+            if sel:
+                vals = self.projects_tree.item(sel[0], 'values')
+                if vals:
+                    job_arg = ["--job", str(vals[1])]
+            if os.path.exists('job_notes.py'):
+                subprocess.Popen([sys.executable, 'job_notes.py'] + job_arg)
+            else:
+                messagebox.showerror("Error", "job_notes.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open Job Notes: {e}")
 
     # (Removed internal Jobs tab; using Active Projects from drafting_tools.db)
 

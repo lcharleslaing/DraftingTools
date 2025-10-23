@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
 import sqlite3
+import re
 import os
 import subprocess
 import sys
@@ -10,7 +11,7 @@ from database_setup import DatabaseManager
 from date_picker import DateEntry
 from directory_picker import DirectoryPicker, FilePicker
 from scroll_utils import bind_mousewheel_to_treeview
-from notes_utils import open_add_note_dialog
+from notes_utils import open_add_note_dialog, append_job_note
 from app_nav import add_app_bar
 from help_utils import add_help_button
 from duration_utils import (
@@ -3483,6 +3484,7 @@ class ProjectsApp:
         buttons = [
             ("New Project", self.new_project),
             ("Save Project", self.save_project),
+            ("Duplicate", self.duplicate_project),
             ("Delete Project", self.delete_project),
             ("Clean & Fix Data", self.clean_duplicates),
             ("Reset Database", self.reset_database),
@@ -3654,15 +3656,15 @@ class ProjectsApp:
                 original = str(job_number)
                 print(f"DEBUG: Processing project {project_id}: '{original}'")
                 
-                # Clean the job number
+                # Clean the job number, preserving suffixed copies like '12345 (1)'
                 clean_job_number = str(job_number).strip()
-                if ' ' in clean_job_number:
-                    # Extract just the numeric part
-                    parts = clean_job_number.split()
-                    for part in parts:
-                        if part.isdigit() and len(part) == 5:
-                            clean_job_number = part
-                            break
+                if re.match(r"^\d{5}( \(\d+\))?$", clean_job_number):
+                    pass  # already normalized format
+                else:
+                    # Extract just the first 5-digit sequence as a fallback
+                    m = re.search(r"\d{5}", clean_job_number)
+                    if m:
+                        clean_job_number = m.group(0)
                 
                 print(f"DEBUG: Cleaned '{original}' to '{clean_job_number}'")
                 
@@ -4162,13 +4164,37 @@ class ProjectsApp:
         """Validate that job number is exactly 5 digits"""
         if not job_number:
             return False
-        # Remove any whitespace and check if it's exactly 5 digits
+        # Allow base 5-digit (e.g., 12345) or suffixed copy (e.g., 12345 (1))
         clean_number = job_number.strip()
-        return clean_number.isdigit() and len(clean_number) == 5
+        if re.match(r"^\d{5}$", clean_number):
+            return True
+        if re.match(r"^\d{5} \(\d+\)$", clean_number):
+            return True
+        return False
+
+    def normalize_job_number(self, job_number: str) -> str:
+        """Normalize job number to '12345' or '12345 (n)' format, trimming stray spaces.
+
+        Falls back to the first 5-digit sequence if non-standard input is provided.
+        """
+        if not job_number:
+            return ""
+        s = str(job_number).strip()
+        m = re.match(r"^(\d{5})(?:\s*\(\s*(\d+)\s*\))?$", s)
+        if m:
+            base = m.group(1)
+            suf = m.group(2)
+            return f"{base} ({suf})" if suf else base
+        # Fallback: extract first 5-digit sequence
+        m2 = re.search(r"\d{5}", s)
+        return m2.group(0) if m2 else s
     
     def save_project_silent(self):
         """Save project without showing success message"""
-        job_number = self.job_number_var.get().strip()
+        job_number = self.normalize_job_number(self.job_number_var.get())
+        # reflect normalized value in UI
+        if job_number and job_number != self.job_number_var.get().strip():
+            self.job_number_var.set(job_number)
         if not self.is_valid_job_number(job_number):
             return
 
@@ -4350,17 +4376,30 @@ class ProjectsApp:
             p.customer_name,
             p.due_date,
             p.completion_date,
-            COALESCE(p.released_to_dee, rd.release_date) AS release_date,
+            COALESCE(
+                p.released_to_dee,
+                (SELECT release_date FROM release_to_dee rd WHERE rd.project_id = p.id ORDER BY rd.id DESC LIMIT 1)
+            ) AS release_date,
             CASE 
-                WHEN (COALESCE(p.released_to_dee, rd.release_date) IS NOT NULL AND COALESCE(p.released_to_dee, rd.release_date) != '')
-                     OR (rd.is_completed = 1)
-                     OR (p.completion_date IS NOT NULL AND p.completion_date != '') THEN 'Completed'
+                WHEN (
+                    COALESCE(
+                        p.released_to_dee,
+                        (SELECT release_date FROM release_to_dee rd2 WHERE rd2.project_id = p.id ORDER BY rd2.id DESC LIMIT 1)
+                    ) IS NOT NULL
+                    AND COALESCE(
+                        p.released_to_dee,
+                        (SELECT release_date FROM release_to_dee rd3 WHERE rd3.project_id = p.id ORDER BY rd3.id DESC LIMIT 1)
+                    ) != ''
+                )
+                OR (
+                    (SELECT is_completed FROM release_to_dee rd4 WHERE rd4.project_id = p.id ORDER BY rd4.id DESC LIMIT 1) = 1
+                )
+                OR (p.completion_date IS NOT NULL AND p.completion_date != '') THEN 'Completed'
                 WHEN p.start_date IS NOT NULL AND p.start_date != '' THEN 'In Progress'
                 WHEN p.assignment_date IS NOT NULL AND p.assignment_date != '' THEN 'Assigned'
                 ELSE 'Not Assigned'
             END as status
         FROM projects p
-        LEFT JOIN release_to_dee rd ON rd.project_id = p.id
         ORDER BY 
             CASE WHEN p.due_date IS NULL OR p.due_date = '' THEN 1 ELSE 0 END,
             p.due_date ASC
@@ -4588,6 +4627,13 @@ class ProjectsApp:
         job_number = item['values'][0]
         print(f"DEBUG: Selected project: {job_number}")
         
+        # Clear notes area immediately to avoid showing stale notes while loading
+        try:
+            if hasattr(self, 'notes_text'):
+                self.notes_text.delete('1.0', tk.END)
+        except Exception:
+            pass
+
         # Set current project before loading details
         self.current_project = job_number
         
@@ -4653,15 +4699,14 @@ class ProjectsApp:
         """Load details for selected project"""
         print(f"DEBUG: Loading project details for: {job_number}")
         
-        # Clean the job number (remove any extra text)
-        clean_job_number = str(job_number).strip()
-        if ' ' in clean_job_number:
-            # Extract just the numeric part
-            parts = clean_job_number.split()
-            for part in parts:
-                if part.isdigit() and len(part) == 5:
-                    clean_job_number = part
-                    break
+        # Normalize job number for lookup: accept '12345' or '12345 (n)' as-is
+        raw_job = str(job_number).strip()
+        if re.match(r"^\d{5}( \(\d+\))?$", raw_job):
+            clean_job_number = raw_job
+        else:
+            # Fallback: extract first 5-digit sequence
+            m = re.search(r"\d{5}", raw_job)
+            clean_job_number = m.group(0) if m else raw_job
         
         print(f"DEBUG: Cleaned job number: {clean_job_number}")
         
@@ -4707,21 +4752,36 @@ class ProjectsApp:
             self.released_to_dee_entry.set(project[12] or "")
             self.due_date_entry.set(project[13] or "")
         
-        # Load workflow data
-        self.load_workflow_data(clean_job_number, cursor)
+        # Load workflow data (guard errors so notes still load)
+        try:
+            self.load_workflow_data(clean_job_number, cursor)
+        except Exception as e:
+            print(f"Error loading workflow data: {e}")
         
         # Update quick access panel
-        self.update_quick_access()
+        try:
+            self.update_quick_access()
+        except Exception as e:
+            print(f"Error updating quick access: {e}")
         
         # Update specifications panel
-        if hasattr(self, 'project_details_frame'):
-            self.update_specifications(self.project_details_frame)
+        try:
+            if hasattr(self, 'project_details_frame'):
+                self.update_specifications(self.project_details_frame)
+        except Exception as e:
+            print(f"Error updating specifications: {e}")
         
         # Update cover sheet button
-        self.update_cover_sheet_button()
+        try:
+            self.update_cover_sheet_button()
+        except Exception as e:
+            print(f"Error updating cover sheet button: {e}")
         
-        # Load job notes
-        self.load_job_notes(clean_job_number)
+        # Load job notes last to ensure the UI shows correct per-job notes
+        try:
+            self.load_job_notes(clean_job_number)
+        except Exception as e:
+            print(f"Error loading notes: {e}")
 
         # Re-enable auto-save
         self._loading_project = False
@@ -4964,7 +5024,9 @@ class ProjectsApp:
     
     def save_project(self):
         """Save project to database"""
-        job_number = self.job_number_var.get().strip()
+        job_number = self.normalize_job_number(self.job_number_var.get())
+        if job_number and job_number != self.job_number_var.get().strip():
+            self.job_number_var.set(job_number)
         if not job_number:
             messagebox.showerror("Error", "Job number is required!")
             return
@@ -5194,15 +5256,14 @@ class ProjectsApp:
             item = self.tree.item(selection[0])
             job_number = item['values'][0]
             
-            # Clean the job number (remove any extra text)
-            clean_job_number = str(job_number).strip()
-            if ' ' in clean_job_number:
-                # Extract just the numeric part
-                parts = clean_job_number.split()
-                for part in parts:
-                    if part.isdigit() and len(part) == 5:
-                        clean_job_number = part
-                        break
+            # Clean the job number for lookup: accept '12345' or '12345 (n)' as-is
+            raw_job = str(job_number).strip()
+            if re.match(r"^\d{5}( \(\d+\))?$", raw_job):
+                clean_job_number = raw_job
+            else:
+                # Fallback: extract first 5-digit sequence
+                m = re.search(r"\d{5}", raw_job)
+                clean_job_number = m.group(0) if m else raw_job
             
             print(f"DEBUG: Deleting project - Original: {job_number}, Cleaned: {clean_job_number}")
             
@@ -5254,6 +5315,175 @@ class ProjectsApp:
                 messagebox.showerror("Error", f"Failed to delete project: {str(e)}")
             finally:
                 conn.close()
+
+    def duplicate_project(self):
+        """Duplicate the selected project, creating a suffixed job number and adding a timestamped note."""
+        selection = self.tree.selection()
+        if not selection:
+            messagebox.showwarning("Warning", "Please select a project to duplicate!")
+            return
+
+        values = self.tree.item(selection[0], 'values')
+        if not values:
+            messagebox.showwarning("Warning", "No job data found!")
+            return
+
+        original_display = str(values[0]).strip()
+
+        # Determine base 5-digit job number
+        base_match = re.match(r"^(\d{5})(?: \((\d+)\))?$", original_display)
+        if base_match:
+            base_job = base_match.group(1)
+        else:
+            m = re.search(r"\d{5}", original_display)
+            if not m:
+                messagebox.showerror("Error", "Selected job number is not in a recognized format.")
+                return
+            base_job = m.group(0)
+
+        try:
+            conn = sqlite3.connect(self.db_manager.db_path)
+            cur = conn.cursor()
+
+            # Find a unique next suffix like "12345 (1)", "12345 (2)", ...
+            suffix = 1
+            while True:
+                candidate = f"{base_job} ({suffix})"
+                cur.execute("SELECT 1 FROM projects WHERE job_number = ?", (candidate,))
+                if not cur.fetchone():
+                    new_job_number = candidate
+                    break
+                suffix += 1
+
+            # Prefer copying from the exact selected job if it exists; else from the base
+            src_job = original_display
+            cur.execute("SELECT 1 FROM projects WHERE job_number = ?", (src_job,))
+            if not cur.fetchone():
+                src_job = base_job
+
+            cur.execute(
+                """
+                SELECT job_directory, customer_name, customer_name_directory,
+                       customer_location, customer_location_directory, assigned_to_id,
+                       project_engineer_id, assignment_date, start_date, completion_date,
+                       total_duration_days, released_to_dee, due_date
+                FROM projects WHERE job_number = ?
+                """,
+                (src_job,)
+            )
+            row = cur.fetchone()
+            if not row:
+                conn.close()
+                messagebox.showerror("Error", f"Source job '{src_job}' not found in database.")
+                return
+
+            # Insert the duplicated project
+            cur.execute(
+                """
+                INSERT INTO projects (
+                    job_number, job_directory, customer_name, customer_name_directory,
+                    customer_location, customer_location_directory, assigned_to_id, project_engineer_id,
+                    assignment_date, start_date, completion_date, total_duration_days, released_to_dee, due_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (new_job_number,) + tuple(row)
+            )
+
+            # Copy workflow rows and checklist tasks from source project if present
+            # Resolve project ids
+            cur.execute("SELECT id FROM projects WHERE job_number = ?", (src_job,))
+            src_pid_row = cur.fetchone()
+            cur.execute("SELECT id FROM projects WHERE job_number = ?", (new_job_number,))
+            new_pid_row = cur.fetchone()
+            if src_pid_row and new_pid_row:
+                src_pid = src_pid_row[0]
+                new_pid = new_pid_row[0]
+
+                # Fetch source steps
+                cur.execute(
+                    """
+                    SELECT id, template_id, template_step_id, order_index, department, group_name, title
+                    FROM project_workflow_steps
+                    WHERE project_id = ?
+                    ORDER BY order_index
+                    """,
+                    (src_pid,)
+                )
+                steps = cur.fetchall() or []
+
+                step_id_map = {}
+                for (old_step_id, template_id, template_step_id, order_index, department, group_name, title) in steps:
+                    # Insert a fresh step row with cleared state; planned due recomputed later
+                    cur.execute(
+                        """
+                        INSERT INTO project_workflow_steps (
+                            project_id, template_id, template_step_id, order_index, department, group_name, title,
+                            start_flag, start_ts, completed_flag, completed_ts,
+                            transfer_to_name, transfer_to_ts, received_from_name, received_from_ts,
+                            planned_due_date, actual_completed_date, actual_duration_days, actual_duration_minutes
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+                        """,
+                        (new_pid, template_id, template_step_id, order_index, department, group_name, title)
+                    )
+                    new_step_id = cur.lastrowid
+                    step_id_map[old_step_id] = new_step_id
+
+                # Copy any checklist tasks, reset checked state
+                if step_id_map:
+                    for old_sid, new_sid in step_id_map.items():
+                        cur.execute(
+                            """
+                            SELECT template_task_id, order_index, title
+                            FROM project_step_tasks
+                            WHERE project_step_id = ?
+                            ORDER BY order_index
+                            """,
+                            (old_sid,)
+                        )
+                        tasks = cur.fetchall() or []
+                        for template_task_id, order_index, title in tasks:
+                            cur.execute(
+                                """
+                                INSERT INTO project_step_tasks (
+                                    project_step_id, template_task_id, order_index, title, is_checked, checked_ts
+                                ) VALUES (?, ?, ?, ?, 0, NULL)
+                                """,
+                                (new_sid, template_task_id, order_index, title)
+                            )
+
+            conn.commit()
+            conn.close()
+
+            # Add a stamped note to the new job
+            ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            note = f"Duplicated from {src_job} on {ts}"
+            try:
+                append_job_note(new_job_number, note)
+            except Exception:
+                # Silently ignore note failure; duplication already succeeded
+                pass
+
+            messagebox.showinfo("Duplicated", f"Created {new_job_number} from {src_job}.")
+            # Refresh list and select the new job
+            self.load_projects()
+            try:
+                self.preload_job(new_job_number)
+                # Recompute planned due dates for the duplicated workflow
+                try:
+                    prev = getattr(self, 'current_project', None)
+                    self.current_project = new_job_number
+                    self._recompute_workflow_due_dates_for_current_project()
+                    self.current_project = prev
+                except Exception:
+                    pass
+            except Exception:
+                pass
+        except Exception as e:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            messagebox.showerror("Error", f"Failed to duplicate project: {str(e)}")
     
     def calculate_duration(self, *args):
         """Calculate project duration"""
@@ -5411,6 +5641,10 @@ class ProjectsApp:
         self.job_context_menu.add_command(label="Open in Resource Allocation", command=lambda: self.open_app_with_job("resource_allocation"))
         self.job_context_menu.add_command(label="Open in Workflow Manager", command=lambda: self.open_app_with_job("workflow_manager"))
         self.job_context_menu.add_command(label="Open in Coil Verification", command=lambda: self.open_app_with_job("coil_verification"))
+        self.job_context_menu.add_command(label="Open in Job Notes", command=lambda: self.open_app_with_job("job_notes"))
+        self.job_context_menu.add_separator()
+        # Common actions
+        self.job_context_menu.add_command(label="Duplicate", command=self.duplicate_project)
         self.job_context_menu.add_separator()
         self.job_context_menu.add_command(label="Add New Note…", command=self._add_note_from_context)
         
@@ -5459,7 +5693,8 @@ class ProjectsApp:
             "drafting_checklist": "drafting_items_to_look_for.py",
             "resource_allocation": "resource_allocation.py",
             "workflow_manager": "workflow_manager.py",
-            "coil_verification": "coil_verification_tool.py"
+            "coil_verification": "coil_verification_tool.py",
+            "job_notes": "job_notes.py"
         }
         
         app_file = app_files.get(app_name)
@@ -5481,13 +5716,13 @@ class ProjectsApp:
 
     def _add_note_from_context(self):
         selection = self.tree.selection()
-        if not selection:
-            return
-        values = self.tree.item(selection[0], 'values')
-        if not values:
-            return
-        job_number = values[0]
-        open_add_note_dialog(self.root, str(job_number))
+        job_number = None
+        if selection:
+            values = self.tree.item(selection[0], 'values')
+            if values:
+                job_number = values[0]
+        # If job_number is None, dialog will prompt to create a Documentation Only job
+        open_add_note_dialog(self.root, str(job_number) if job_number else None)
 
     def preload_job(self, job_number):
         """Preload a specific job number in the table"""

@@ -169,6 +169,7 @@ class DraftingChecklistApp:
         # Right-click add note
         self.project_ctx = tk.Menu(project_frame, tearoff=0)
         self.project_ctx.add_command(label="Add New Note…", command=self.add_note_for_selected_job)
+        self.project_ctx.add_command(label="Open in Job Notes", command=self.open_job_in_job_notes)
         self.project_tree.bind('<Button-3>', self._on_project_tree_right_click)
         bind_tree_column_persistence(self.project_tree, 'drafting_checklist.project_tree', self.root)
         
@@ -357,12 +358,28 @@ class DraftingChecklistApp:
 
     def add_note_for_selected_job(self):
         sel = self.project_tree.selection()
-        if not sel:
-            messagebox.showwarning("No Selection", "Please select a job first.")
-            return
-        vals = self.project_tree.item(sel[0], 'values')
-        job_number = vals[0]
-        open_add_note_dialog(self.root, str(job_number))
+        job_number = None
+        if sel:
+            vals = self.project_tree.item(sel[0], 'values')
+            if vals:
+                job_number = vals[0]
+        open_add_note_dialog(self.root, str(job_number) if job_number else None)
+
+    def open_job_in_job_notes(self):
+        try:
+            import sys, os, subprocess
+            sel = self.project_tree.selection()
+            job_arg = []
+            if sel:
+                vals = self.project_tree.item(sel[0], 'values')
+                if vals:
+                    job_arg = ["--job", str(vals[0])]
+            if os.path.exists('job_notes.py'):
+                subprocess.Popen([sys.executable, 'job_notes.py'] + job_arg)
+            else:
+                messagebox.showerror("Error", "job_notes.py not found in current directory")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open Job Notes: {e}")
         
     def load_projects(self):
         """Load all projects from the projects table"""

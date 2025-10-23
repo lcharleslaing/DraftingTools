@@ -555,6 +555,75 @@ class DatabaseManager:
             conn.commit()
         except Exception:
             pass
+        
+        # Enforce uniqueness and fix data issues that can cause duplicates in UI
+        try:
+            # 1) De-duplicate singleton tables by project_id, keep latest row
+            singleton_tables = [
+                'initial_redline',
+                'redline_updates',  # note: redline_updates is per update_cycle; don't enforce unique here
+                'ops_review',
+                'd365_bom_entry',
+                'peter_weck_review',
+                'release_to_dee',
+            ]
+            # For redline_updates, do not dedup by project_id only; it's multi-row by design. Skip unique index.
+            dedup_only = ['initial_redline', 'ops_review', 'd365_bom_entry', 'peter_weck_review', 'release_to_dee']
+            for tbl in dedup_only:
+                try:
+                    cursor.execute(f"""
+                        DELETE FROM {tbl}
+                        WHERE id NOT IN (
+                            SELECT MAX(id) FROM {tbl}
+                            WHERE project_id IS NOT NULL
+                            GROUP BY project_id
+                        )
+                    """)
+                except Exception:
+                    pass
+
+            # 2) Create unique indexes to make future UPSERTs effective
+            try:
+                cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_job_unique ON projects(job_number)")
+            except Exception:
+                # If this fails due to duplicates, clean and retry
+                try:
+                    cursor.execute(
+                        "DELETE FROM projects WHERE id NOT IN (SELECT MAX(id) FROM projects GROUP BY job_number)"
+                    )
+                    cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_job_unique ON projects(job_number)")
+                except Exception:
+                    pass
+
+            # Unique per-project singleton rows
+            unique_per_project = [
+                ('initial_redline', 'idx_initial_redline_project_unique'),
+                ('ops_review', 'idx_ops_review_project_unique'),
+                ('d365_bom_entry', 'idx_d365_bom_entry_project_unique'),
+                ('peter_weck_review', 'idx_peter_weck_review_project_unique'),
+                ('release_to_dee', 'idx_release_to_dee_project_unique'),
+            ]
+            for tbl, idx in unique_per_project:
+                try:
+                    cursor.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS {idx} ON {tbl}(project_id)")
+                except Exception:
+                    # Attempt clean + retry once
+                    try:
+                        cursor.execute(f"""
+                            DELETE FROM {tbl}
+                            WHERE id NOT IN (
+                                SELECT MAX(id) FROM {tbl}
+                                WHERE project_id IS NOT NULL
+                                GROUP BY project_id
+                            )
+                        """)
+                        cursor.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS {idx} ON {tbl}(project_id)")
+                    except Exception:
+                        pass
+
+            conn.commit()
+        except Exception:
+            pass
         finally:
             conn.close()
     
