@@ -490,6 +490,32 @@ class DatabaseManager:
                 FOREIGN KEY (job_number) REFERENCES projects (job_number) ON DELETE CASCADE
             )
         ''')
+
+        # Software Improvement Suggestions
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS software_improvement_suggestions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                app_name TEXT NOT NULL,
+                description TEXT,
+                screenshot_path TEXT,
+                suggested_by TEXT,
+                created_ts TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_ts TEXT,
+                completed_flag INTEGER DEFAULT 0,
+                completed_ts TEXT,
+                action_taken TEXT,
+                not_approved_flag INTEGER DEFAULT 0,
+                not_approved_ts TEXT,
+                not_approved_reason TEXT,
+                closed_flag INTEGER DEFAULT 0,
+                closed_ts TEXT
+            )
+        ''')
+        try:
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_sis_created ON software_improvement_suggestions(created_ts DESC)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_sis_flags ON software_improvement_suggestions(completed_flag, closed_flag, not_approved_flag)')
+        except Exception:
+            pass
         
         conn.commit()
         

@@ -201,7 +201,7 @@ class DashboardApp:
         # Configure grid
         for i in range(3):
             apps_frame.columnconfigure(i, weight=1)
-        for i in range(4):
+        for i in range(5):
             apps_frame.rowconfigure(i, weight=1)
         
         self.create_app_buttons(apps_frame)
@@ -271,9 +271,14 @@ class DashboardApp:
 
         # Settings (People, Users, Departments)
         self.create_app_tile(parent, 3, 2, "⚙️", "Settings", 
-                              "Manage users, departments, and\npeople lists for pickers", 
-                              self.open_settings)
-    
+                               "Manage users, departments, and\npeople lists for pickers", 
+                               self.open_settings)
+
+        # Software Improvement Suggestions
+        self.create_app_tile(parent, 4, 0, "💡", "Software Improvement Suggestions",
+                              "Capture, triage, and track software\nimprovement actions with screenshots",
+                              self.launch_suggestions)
+
     def create_app_tile(self, parent, row, col, icon, title, description, command):
         """Create a simple button with formatted title"""
         # Create a frame to hold the button content
@@ -553,7 +558,18 @@ class DashboardApp:
                 messagebox.showerror("Error", "coil_verification_tool.py not found in current directory")
         except Exception as e:
                 messagebox.showerror("Error", f"Failed to launch Coil Verification Tool:\n{str(e)}")
-    
+
+    def launch_suggestions(self):
+        """Launch the Software Improvement Suggestions app"""
+        try:
+            if os.path.exists('software_improvement_suggestions.py'):
+                process = subprocess.Popen([sys.executable, 'software_improvement_suggestions.py'])
+                self.child_processes.append(process)
+                self.cleanup_finished_processes()
+            else:
+                messagebox.showerror("Error", "software_improvement_suggestions.py not found in current directory")
+        except Exception as e:
+                messagebox.showerror("Error", f"Failed to launch Suggestions app:\n{str(e)}")
     def cleanup_finished_processes(self):
         """Remove finished processes from the tracking list"""
         self.child_processes = [p for p in self.child_processes if p.poll() is None]
