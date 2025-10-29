@@ -1,0 +1,11 @@
+# Exclude .git folder from OneDrive sync to prevent Git permission errors
+.git/
+.git/**
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.db-wal
+.db-shm
+db_exports/
+
