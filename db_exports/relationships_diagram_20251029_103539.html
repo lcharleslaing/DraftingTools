@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Relationship Diagram - 20251029_103539</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .metadata {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-section {
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .columns {
+            margin-bottom: 20px;
+        }
+        .column {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #3498db;
+            background: #ecf0f1;
+        }
+        .column.pk {
+            border-left-color: #e74c3c;
+            font-weight: bold;
+        }
+        .column.fk {
+            border-left-color: #f39c12;
+        }
+        .relationships {
+            margin-top: 15px;
+        }
+        .relationship {
+            padding: 10px;
+            margin: 10px 0;
+            background: #fff3cd;
+            border-left: 4px solid #f39c12;
+            border-radius: 4px;
+        }
+        .relationship-detail {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+        }
+        .stats {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: #3498db;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .no-data {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Database Relationship Diagram</h1>
+        <p>Database: drafting_tools.db | Exported: 20251029_103539</p>
+    </div>
+    
+    <div class="metadata">
+        <h3>Export Information</h3>
+        <p><strong>Database File:</strong> drafting_tools.db</p>
+        <p><strong>Export Timestamp:</strong> 20251029_103539</p>
+        <p><strong>Total Tables:</strong> 52</p>
+        <p><strong>Total Relationships:</strong> 22</p>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            admin_sessions
+            <span class="stats">1 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                session_id (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+            <div class="column ">
+                expires_date (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                is_active (BOOLEAN)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            app_order
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                app_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                display_order (INTEGER)
+            </div>
+
+            <div class="column ">
+                is_active (BOOLEAN)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            app_settings
+            <span class="stats">3 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                setting_key (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                setting_value (TEXT)
+            </div>
+
+            <div class="column ">
+                description (TEXT)
+            </div>
+
+            <div class="column ">
+                updated_date (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            applications
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            burner_models
+            <span class="stats">6 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            d365_bom_entry
+            <span class="stats">258 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                project_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                entry_date (TEXT)
+            </div>
+
+            <div class="column ">
+                is_completed (BOOLEAN)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>d365_bom_entry.projects</strong> → 
+                <strong>project_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            d365_import_configs
+            <span class="stats">0 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                config_type (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                config_data (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>d365_import_configs.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            d365_import_params
+            <span class="stats">0 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                param_type (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                param_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                param_value (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>d365_import_params.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            d365_part_numbers
+            <span class="stats">0 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                part_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                description (TEXT)
+            </div>
+
+            <div class="column ">
+                bom_number (TEXT)
+            </div>
+
+            <div class="column ">
+                template (TEXT)
+            </div>
+
+            <div class="column ">
+                product_type (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>d365_part_numbers.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            departments
+            <span class="stats">7 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                description (TEXT)
+            </div>
+
+            <div class="column ">
+                color_code (TEXT)
+            </div>
+
+            <div class="column ">
+                is_active (BOOLEAN)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            designers
+            <span class="stats">4 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            drafting_checklist_items
+            <span class="stats">8 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                title (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                description (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                image_path (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+            <div class="column ">
+                updated_date (TEXT)
+            </div>
+
+            <div class="column ">
+                tag (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            drawing_reviews
+            <span class="stats">44 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                drawing_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                original_path (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                review_path (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                department (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                reviewer (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                review_type (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                status (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+            <div class="column ">
+                completed_date (TEXT)
+            </div>
+
+            <div class="column ">
+                notes (TEXT)
+            </div>
+
+            <div class="column ">
+                file_size (INTEGER)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>drawing_reviews.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            drawings
+            <span class="stats">52 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                drawing_path (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                drawing_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                drawing_type (TEXT)
+            </div>
+
+            <div class="column ">
+                file_extension (TEXT)
+            </div>
+
+            <div class="column ">
+                added_date (TEXT)
+            </div>
+
+            <div class="column ">
+                added_by (TEXT)
+            </div>
+
+            <div class="column ">
+                printed (INTEGER)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>drawings.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            engineers
+            <span class="stats">3 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            file_changes
+            <span class="stats">2641 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                file_path (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                change_type (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                old_hash (TEXT)
+            </div>
+
+            <div class="column ">
+                new_hash (TEXT)
+            </div>
+
+            <div class="column ">
+                change_date (TEXT)
+            </div>
+
+            <div class="column ">
+                acknowledged (BOOLEAN)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            file_timestamps
+            <span class="stats">30 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                job_number (TEXT) NOT NULL [PRIMARY KEY]
+            </div>
+
+            <div class="column pk">
+                path (TEXT) NOT NULL [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                last_mtime (REAL) NOT NULL
+            </div>
+
+            <div class="column ">
+                acknowledged (INTEGER) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            gas_train_positions
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            gas_types
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            gauge_cocks_types
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            heater_configurations
+            <span class="stats">20 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT)
+            </div>
+
+            <div class="column ">
+                heater_model (TEXT)
+            </div>
+
+            <div class="column ">
+                location (TEXT)
+            </div>
+
+            <div class="column ">
+                heater_diameter (TEXT)
+            </div>
+
+            <div class="column ">
+                heater_height (TEXT)
+            </div>
+
+            <div class="column ">
+                heater_stack_diameter (TEXT)
+            </div>
+
+            <div class="column ">
+                application (TEXT)
+            </div>
+
+            <div class="column ">
+                material (TEXT)
+            </div>
+
+            <div class="column ">
+                flanges_316 (TEXT)
+            </div>
+
+            <div class="column ">
+                burner_model (TEXT)
+            </div>
+
+            <div class="column ">
+                gas_train_position (TEXT)
+            </div>
+
+            <div class="column ">
+                heater_mounting (TEXT)
+            </div>
+
+            <div class="column ">
+                gauge_cocks (TEXT)
+            </div>
+
+            <div class="column ">
+                temperature_switch (TEXT)
+            </div>
+
+            <div class="column ">
+                packaging_type (TEXT)
+            </div>
+
+            <div class="column ">
+                mod_piping_transducer_material (TEXT)
+            </div>
+
+            <div class="column ">
+                hose_material (TEXT)
+            </div>
+
+            <div class="column ">
+                modulating_valve (TEXT)
+            </div>
+
+            <div class="column ">
+                media_frame_height (TEXT)
+            </div>
+
+            <div class="column ">
+                gas_type (TEXT)
+            </div>
+
+            <div class="column ">
+                side_manway_option (TEXT)
+            </div>
+
+            <div class="column ">
+                side_manway_angle (TEXT)
+            </div>
+
+            <div class="column ">
+                water_inlet_size (TEXT)
+            </div>
+
+            <div class="column ">
+                water_inlet_angles (TEXT)
+            </div>
+
+            <div class="column ">
+                suction_fitting_size (TEXT)
+            </div>
+
+            <div class="column ">
+                suction_fitting_height (TEXT)
+            </div>
+
+            <div class="column ">
+                suction_fitting_angle (TEXT)
+            </div>
+
+            <div class="column ">
+                ballast_packing_rings (TEXT)
+            </div>
+
+            <div class="column ">
+                ballast_packing_rings_height (TEXT)
+            </div>
+
+            <div class="column ">
+                float_chamber_angle (TEXT)
+            </div>
+
+            <div class="column ">
+                heater_final_assembly_part_number (TEXT)
+            </div>
+
+            <div class="column ">
+                hose_length (TEXT)
+            </div>
+
+            <div class="column ">
+                hose_part_number (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+            <div class="column ">
+                updated_date (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            heater_diameters
+            <span class="stats">4 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                value (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            heater_heights
+            <span class="stats">11 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                value (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            heater_models
+            <span class="stats">4 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            heater_mounting_types
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            heater_stack_diameters
+            <span class="stats">3 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                value (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            hose_materials
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            initial_redline
+            <span class="stats">404 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                project_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                engineer_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                redline_date (TEXT)
+            </div>
+
+            <div class="column ">
+                is_completed (BOOLEAN)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>initial_redline.engineers</strong> → 
+                <strong>engineer_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+            <div class="relationship">
+                <strong>initial_redline.projects</strong> → 
+                <strong>project_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            job_notes
+            <span class="stats">9 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                job_number (TEXT) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                notes (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            locations
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            manual_specs
+            <span class="stats">12 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                job_number (TEXT) NOT NULL [PRIMARY KEY]
+            </div>
+
+            <div class="column pk">
+                spec_name (TEXT) NOT NULL [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                value (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            materials
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            media_frame_heights
+            <span class="stats">3 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                value (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            mod_piping_transducer_materials
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            ops_review
+            <span class="stats">404 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                project_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                review_date (TEXT)
+            </div>
+
+            <div class="column ">
+                is_completed (BOOLEAN)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>ops_review.projects</strong> → 
+                <strong>project_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            packaging_types
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            peter_weck_review
+            <span class="stats">404 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                project_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                fixed_errors_date (TEXT)
+            </div>
+
+            <div class="column ">
+                is_completed (BOOLEAN)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>peter_weck_review.projects</strong> → 
+                <strong>project_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            print_package_files
+            <span class="stats">1 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                review_id (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                file_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                original_path (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                stage_0_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_1_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_2_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_3_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_4_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_5_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_6_path (TEXT)
+            </div>
+
+            <div class="column ">
+                stage_7_path (TEXT)
+            </div>
+
+            <div class="column ">
+                file_size (INTEGER)
+            </div>
+
+            <div class="column ">
+                file_type (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>print_package_files.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+            <div class="relationship">
+                <strong>print_package_files.print_package_reviews</strong> → 
+                <strong>review_id.review_id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            print_package_reviews
+            <span class="stats">1 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                review_id (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                status (TEXT)
+            </div>
+
+            <div class="column ">
+                current_stage (INTEGER)
+            </div>
+
+            <div class="column ">
+                initialized_by (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                initialized_date (TEXT)
+            </div>
+
+            <div class="column ">
+                completed_date (TEXT)
+            </div>
+
+            <div class="column ">
+                notes (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>print_package_reviews.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            print_package_workflow
+            <span class="stats">8 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                review_id (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                stage (INTEGER) NOT NULL
+            </div>
+
+            <div class="column ">
+                stage_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                reviewer (TEXT)
+            </div>
+
+            <div class="column ">
+                department (TEXT)
+            </div>
+
+            <div class="column ">
+                status (TEXT)
+            </div>
+
+            <div class="column ">
+                started_date (TEXT)
+            </div>
+
+            <div class="column ">
+                completed_date (TEXT)
+            </div>
+
+            <div class="column ">
+                notes (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>print_package_workflow.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+            <div class="relationship">
+                <strong>print_package_workflow.print_package_reviews</strong> → 
+                <strong>review_id.review_id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            print_packages
+            <span class="stats">0 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                package_name (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>print_packages.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            printer_config
+            <span class="stats">4 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                paper_size (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                printer_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                paper_type (TEXT)
+            </div>
+
+            <div class="column ">
+                orientation (TEXT)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+            <div class="column ">
+                updated_date (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            project_checklist_status
+            <span class="stats">72 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                checklist_item_id (INTEGER) NOT NULL
+            </div>
+
+            <div class="column ">
+                is_checked (INTEGER)
+            </div>
+
+            <div class="column ">
+                checked_date (TEXT)
+            </div>
+
+            <div class="column ">
+                does_not_apply (INTEGER)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>project_checklist_status.drafting_checklist_items</strong> → 
+                <strong>checklist_item_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            project_scan_history
+            <span class="stats">308 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                scan_date (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                files_scanned (INTEGER)
+            </div>
+
+            <div class="column ">
+                changes_detected (INTEGER)
+            </div>
+
+            <div class="column ">
+                scan_duration (REAL)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            project_structure
+            <span class="stats">1265 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                file_path (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                file_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                file_type (TEXT)
+            </div>
+
+            <div class="column ">
+                file_size (INTEGER)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+            <div class="column ">
+                modified_date (TEXT)
+            </div>
+
+            <div class="column ">
+                file_hash (TEXT)
+            </div>
+
+            <div class="column ">
+                is_directory (BOOLEAN)
+            </div>
+
+            <div class="column ">
+                parent_path (TEXT)
+            </div>
+
+            <div class="column ">
+                scan_date (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            projects
+            <span class="stats">14 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                assigned_to_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                assignment_date (TEXT)
+            </div>
+
+            <div class="column ">
+                start_date (TEXT)
+            </div>
+
+            <div class="column ">
+                completion_date (TEXT)
+            </div>
+
+            <div class="column ">
+                total_duration_days (INTEGER)
+            </div>
+
+            <div class="column ">
+                released_to_dee (TEXT)
+            </div>
+
+            <div class="column ">
+                job_directory (TEXT)
+            </div>
+
+            <div class="column ">
+                customer_name (TEXT)
+            </div>
+
+            <div class="column ">
+                customer_location (TEXT)
+            </div>
+
+            <div class="column ">
+                customer_name_directory (TEXT)
+            </div>
+
+            <div class="column ">
+                customer_location_directory (TEXT)
+            </div>
+
+            <div class="column ">
+                last_cover_sheet_date (TEXT)
+            </div>
+
+            <div class="column ">
+                due_date (TEXT)
+            </div>
+
+            <div class="column ">
+                project_engineer_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                project_status (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>projects.designers</strong> → 
+                <strong>assigned_to_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            redline_updates
+            <span class="stats">1616 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                project_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                engineer_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                update_date (TEXT)
+            </div>
+
+            <div class="column ">
+                update_type (TEXT)
+            </div>
+
+            <div class="column ">
+                update_cycle (INTEGER)
+            </div>
+
+            <div class="column ">
+                is_completed (BOOLEAN)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>redline_updates.engineers</strong> → 
+                <strong>engineer_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+            <div class="relationship">
+                <strong>redline_updates.projects</strong> → 
+                <strong>project_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            release_to_dee
+            <span class="stats">404 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                project_id (INTEGER)
+            </div>
+
+            <div class="column ">
+                release_date (TEXT)
+            </div>
+
+            <div class="column ">
+                missing_prints_date (TEXT)
+            </div>
+
+            <div class="column ">
+                d365_updates_date (TEXT)
+            </div>
+
+            <div class="column ">
+                other_notes (TEXT)
+            </div>
+
+            <div class="column ">
+                other_date (TEXT)
+            </div>
+
+            <div class="column ">
+                is_completed (BOOLEAN)
+            </div>
+
+            <div class="column ">
+                due_date (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>release_to_dee.projects</strong> → 
+                <strong>project_id.id</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            review_workflow
+            <span class="stats">0 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                job_number (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                drawing_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                workflow_step (INTEGER) NOT NULL
+            </div>
+
+            <div class="column ">
+                department (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                reviewer (TEXT)
+            </div>
+
+            <div class="column ">
+                status (TEXT)
+            </div>
+
+            <div class="column ">
+                assigned_date (TEXT)
+            </div>
+
+            <div class="column ">
+                completed_date (TEXT)
+            </div>
+
+            <div class="column ">
+                notes (TEXT)
+            </div>
+
+        <div class="relationships">
+            <h3>Foreign Key Relationships:</h3>
+
+            <div class="relationship">
+                <strong>review_workflow.projects</strong> → 
+                <strong>job_number.job_number</strong>
+                <div class="relationship-detail">
+                    On Delete: NO ACTION
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            sqlite_sequence
+            <span class="stats">43 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column ">
+                name ()
+            </div>
+
+            <div class="column ">
+                seq ()
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            temperature_switch_types
+            <span class="stats">2 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                name (TEXT) NOT NULL
+            </div>
+
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-name">
+            users
+            <span class="stats">4 rows</span>
+        </div>
+        
+        <div class="columns">
+            <h3>Columns:</h3>
+
+            <div class="column pk">
+                id (INTEGER) [PRIMARY KEY]
+            </div>
+
+            <div class="column ">
+                username (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                full_name (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                department (TEXT) NOT NULL
+            </div>
+
+            <div class="column ">
+                email (TEXT)
+            </div>
+
+            <div class="column ">
+                is_active (BOOLEAN)
+            </div>
+
+            <div class="column ">
+                created_date (TEXT)
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

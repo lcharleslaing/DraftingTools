@@ -1,0 +1,5 @@
+id,username,full_name,department,email,is_active,created_date
+1,bpender,Bernie Pender,Engineering,bpender@kemcosystems.com,1,2025-10-17 18:45:28
+2,llaing,Lee Laing,Drafting,llaing@onececo.com,1,2025-10-17 18:46:11
+3,tstevenson,Tyler Stevenson,Engineering,tstevenson@onececo.com,1,2025-10-17 18:47:01
+4,pweck,Pete Weck,Drafting,pweck@kemcosystems.com,1,2025-10-17 18:47:58

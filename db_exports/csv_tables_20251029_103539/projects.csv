@@ -1,0 +1,15 @@
+id,job_number,assigned_to_id,assignment_date,start_date,completion_date,total_duration_days,released_to_dee,job_directory,customer_name,customer_location,customer_name_directory,customer_location_directory,last_cover_sheet_date,due_date,project_engineer_id,project_status
+587,35140,1,2025-10-09,,,,,"F:/Geneva Rock/Logan, UT/35140",GENEVA ROCK,"LOGAN, UT",F:/Geneva Rock,"F:/Geneva Rock/Logan, UT",,2025-11-11,,active
+589,35154,1,2025-10-09,,,,,"F:/Sunroc/St George, UT/35154",SUNROC,"ST GEORGE, UT",F:/Sunroc,"F:/Sunroc/St George, UT",,2025-11-19,,active
+599,35354,1,2025-10-09,2025-10-07,,,,"F:/Ozinga Concrete Products, Inc/Plymouth, IN/35354","OZINGA CONCRETE PRODUCTS, INC","PLYMOUTH, IN","F:/Ozinga Concrete Products, Inc","F:/Ozinga Concrete Products, Inc/Plymouth, IN",2025-10-15 12:07:26,2025-10-07,1,active
+655,34489,1,2025-10-17,,,,,"F:/Valoris/Sherbrooke, QC/34489",VALORIS,"SHERBROOKE, QC",F:/Valoris,"F:/Valoris/Sherbrooke, QC",,,2,active
+656,35351,1,2025-10-16,,,,,"F:/Morgan Foods/Austin, IN/35351",MORGAN FOODS,"AUSTIN, IN",F:/Morgan Foods,"F:/Morgan Foods/Austin, IN",,2025-12-02,2,active
+658,35359,1,2025-10-09,2025-10-14,,,,"F:/Pinty's Delicious Foods/Oakville, ON/35359",PINTY'S DELICIOUS FOODS,"OAKVILLE, ON",F:/Pinty's Delicious Foods,"F:/Pinty's Delicious Foods/Oakville, ON",,2025-11-07,2,active
+669,35371,1,2025-10-09,2025-10-15,,,,"F:/Brakebush Brothers/Hartwell, GA/35371",BRAKEBUSH BROTHERS,"HARTWELL, GA",F:/Brakebush Brothers,"F:/Brakebush Brothers/Hartwell, GA",2025-10-28 12:21:41,2025-10-24,2,active
+688,35394,1,2025-10-14,10/8/2025,2025-10-28,,2025-10-28,"F:\Mary Ann's Specialty Foods\Webster City, IA\35394",MARY ANN'S SPECIALTY FOODS,"WEBSTER CITY, IA",F:\Mary Ann's Specialty Foods,"F:\Mary Ann's Specialty Foods\Webster City, IA",2025-10-28 12:23:10,2025-10-08,2,active
+694,35332,1,2025-10-09,2025-10-09,2025-10-27,18,2025-10-27,"F:/McCurdy's Laundry/Red Wing, MN/35332",MCCURDY'S LAUNDRY,"RED WING, MN",F:/McCurdy's Laundry,"F:/McCurdy's Laundry/Red Wing, MN",2025-10-28 12:24:12,2025-10-09,1,active
+701,35042,1,2025-10-09,2025-10-14,,,,"F:/Whitewater Processing/West Harrison, IN/35042",WHITEWATER PROCESSING,"WEST HARRISON, IN",F:/Whitewater Processing,"F:/Whitewater Processing/West Harrison, IN",,2025-10-30,2,active
+705,35167,1,2025-10-15,2025-10-24,,,,"F:/Jennie-O Turkey Store/Willmar, MN/35167",JENNIE-O TURKEY STORE,"WILLMAR, MN",F:/Jennie-O Turkey Store,"F:/Jennie-O Turkey Store/Willmar, MN",2025-10-28 12:27:44,2025-11-04,2,active
+706,35397,1,2025-10-16,,,,,"F:/Mar-Jac/Hattiesburg, MS/35397",MAR-JAC,"HATTIESBURG, MS",F:/Mar-Jac,"F:/Mar-Jac/Hattiesburg, MS",,2025-11-07,2,active
+707,35411,1,2025-10-21,2025-10-24,,,,"F:/Domino's/Edison, NJ/35411",DOMINO'S,"EDISON, NJ",F:/Domino's,"F:/Domino's/Edison, NJ",,2025-10-30,1,active
+724,35256,1,2025-10-09,2025-10-28,,,,"F:/Plymate Uniform/Shelbyville, IN/35256",PLYMATE UNIFORM,"SHELBYVILLE, IN",F:/Plymate Uniform,"F:/Plymate Uniform/Shelbyville, IN",,2025-10-29,1,active

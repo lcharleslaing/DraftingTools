@@ -1,0 +1,21 @@
+id,job_number,heater_model,location,heater_diameter,heater_height,heater_stack_diameter,application,material,flanges_316,burner_model,gas_train_position,heater_mounting,gauge_cocks,temperature_switch,packaging_type,mod_piping_transducer_material,hose_material,modulating_valve,media_frame_height,gas_type,side_manway_option,side_manway_angle,water_inlet_size,water_inlet_angles,suction_fitting_size,suction_fitting_height,suction_fitting_angle,ballast_packing_rings,ballast_packing_rings_height,float_chamber_angle,heater_final_assembly_part_number,hose_length,hose_part_number,created_date,updated_date
+1,35359,RM,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2025-10-09 16:21:59,2025-10-09 16:21:59
+2,35359,TE-100,US,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2025-10-09 16:47:57,2025-10-09 16:47:57
+3,35359,TE-100,US,54,15,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2025-10-09 16:49:08,2025-10-09 16:49:08
+4,35359,TE-NSF,US,54,15,18,FOOD GRADE,316,NO,,LEFT SIDE,PUMPED,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 16:51:46,2025-10-09 16:51:46
+5,35359,TE-NSF,US,54,15,18,FOOD GRADE,316,NO,,LEFT SIDE,PUMPED,,,,,,,54,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 16:51:55,2025-10-09 16:51:55
+6,35359,TE-NSF,US,54,15,18,FOOD GRADE,316,NO,,LEFT SIDE,PUMPED,NSF,STAINLESS,MODULAR PIPING,316,SS316 ENDS,,54,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 16:52:22,2025-10-09 16:52:22
+7,35359,TE-NSF,US,54,15,18,FOOD GRADE,316,NO,MAXON # 487M,LEFT SIDE,PUMPED,NSF,STAINLESS,MODULAR PIPING,316,SS316 ENDS,,54,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 16:52:33,2025-10-09 16:52:33
+8,35042,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2025-10-09 16:59:32,2025-10-09 16:59:32
+9,35042,,,,,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 16:59:52,2025-10-09 16:59:52
+10,35256,,,,,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 17:05:03,2025-10-09 17:05:03
+11,35154,GP,,,,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 17:05:19,2025-10-09 17:05:19
+12,35154,GP,,,,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 17:05:22,2025-10-09 17:05:22
+13,35140,GP,,,,,,,,,,PUMPED,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 17:05:32,2025-10-09 17:05:32
+14,35140,GP,,,,,,,,,,PUMPED,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-09 17:05:34,2025-10-09 17:05:34
+15,35042,,,42,,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-14 09:07:55,2025-10-14 09:07:55
+16,35042,,,42,10,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-14 09:07:57,2025-10-14 09:07:57
+17,35042,,US,42,10,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-14 09:08:07,2025-10-14 09:08:07
+18,35042,TE-100,US,42,10,,,,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-14 09:08:20,2025-10-14 09:08:20
+19,35042,TE-100,US,42,10,,,316,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-14 09:08:27,2025-10-14 09:08:27
+20,35042,TE-100,US,42,10,18,,316,,,,,,,,,,,,NATURAL GAS,,,,,,,,,,,,,,2025-10-14 09:10:40,2025-10-14 09:10:40

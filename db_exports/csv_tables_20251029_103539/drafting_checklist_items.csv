@@ -1,0 +1,9 @@
+id,title,description,image_path,created_date,updated_date,tag
+2,Approvals,"Engineer Review, QC Engineer Review, OPS Review",checklist_images\item_20251015_161521_temp_screenshot_20251015_161519.png,2025-10-15 16:15:21,2025-10-15 16:15:21,title block
+3,TitleBlock,"Titleblock completely filled out (Job#, DR, date created, Engineeer)",checklist_images\item_20251015_163449_temp_screenshot_20251015_163447.png,2025-10-15 16:34:49,2025-10-15 16:34:49,titleblock
+4,Assembly Model,Update the Assembly Form Part Number so titleblock updates,checklist_images\item_20251015_163802_temp_screenshot_20251015_163800.png,2025-10-15 16:38:02,2025-10-15 16:38:02,AssyForm
+5,Balloons,All parts ballooned (none missing) in the best visible view,checklist_images\item_20251015_164046_temp_screenshot_20251015_164044.png,2025-10-15 16:40:46,2025-10-15 16:40:46,"drawing, balloons"
+6,Balloons,No Duplicate Balloons,checklist_images\item_20251015_164302_temp_screenshot_20251015_164258.png,2025-10-15 16:43:02,2025-10-15 16:43:02,"drawings, balloons"
+7,Notes,Make sure WELD SEAM notes are added,checklist_images\item_20251015_164619_temp_screenshot_20251015_164617.png,2025-10-15 16:46:19,2025-10-15 16:50:48,"welds, notes, shell,"
+8,STACK,Make sure ALL dimensions are fixed after model configuration updates,checklist_images\item_20251015_165454_temp_screenshot_20251015_165452.png,2025-10-15 16:54:54,2025-10-15 16:54:54,"stack, dimensions"
+9,BOM,Ensure all sheets of Drawing packages have been Sorted and Re-numbered,checklist_images\item_20251015_165649_temp_screenshot_20251015_165646.png,2025-10-15 16:56:49,2025-10-15 16:56:49,"bom, sorted"

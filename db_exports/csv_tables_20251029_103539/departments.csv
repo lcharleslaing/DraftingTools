@@ -1,0 +1,8 @@
+id,name,description,color_code,is_active,created_date
+1,Drafting,Drawing creation and updates,#0000FF,1,2025-10-17 18:26:32
+2,Engineering,Engineering review and approval,#FF0000,1,2025-10-17 18:26:32
+3,Production,Production operations review,#00FF00,1,2025-10-17 18:26:32
+4,Quality,Quality control and inspection,#FFA500,1,2025-10-17 18:26:32
+36,Planning,Project Plannning Department,#be95be,1,2025-10-17 18:42:52
+37,Parts & Service,Parts & Service Department,#b3be62,1,2025-10-17 18:43:48
+42,Management,Management oversight,#800080,1,2025-10-17 18:48:59
